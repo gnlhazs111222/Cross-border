@@ -5,27 +5,28 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>棱镜上新 PrismLaunch｜业务流程图</title>
 <style>
-:root{--navy:#102a43;--blue:#1677ff;--violet:#7c3aed;--green:#059669;--amber:#d97706;--ink:#1f2937;--muted:#667085;--line:#d9e6f2}*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#edf5ff,#fbfdff 58%,#f1fbf7);font:15px/1.6 "Microsoft YaHei","PingFang SC",Arial,sans-serif;color:var(--ink)}.wrap{max-width:1240px;margin:auto;padding:28px 20px 48px}.hero{padding:27px 30px;border-radius:21px;background:linear-gradient(125deg,#102a43,#174b88 58%,#1677ff);color:#fff;box-shadow:0 17px 42px #163a6735}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.11em;color:#c5e1ff}.hero h1{margin:4px 0 7px;font-size:30px}.hero p{margin:0;max-width:900px;color:#e2efff}.tip{margin:18px 0;padding:12px 15px;border:1px solid #cfe4fd;border-radius:12px;background:#fff;color:#315a83}.board{position:relative;padding:24px;border:1px solid var(--line);border-radius:20px;background:#fff;box-shadow:0 12px 31px #163a6714}.board-title{display:flex;justify-content:space-between;align-items:end;gap:14px;margin:0 0 18px}.board-title h2{margin:0;color:var(--navy);font-size:20px}.board-title p{margin:0;color:var(--muted);font-size:13px}.lanes{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:108px;align-items:start}.lane{position:relative;padding:18px 17px 13px;border-radius:17px;border:1px solid #dce9f6;background:linear-gradient(180deg,#f9fcff,#fff)}.lane.import{background:linear-gradient(180deg,#f4faff,#fff)}.lane.main{background:linear-gradient(180deg,#f8f7ff,#fff)}.lane-head{position:relative;z-index:2;min-height:58px;margin:0 0 16px;padding:10px 12px;border-radius:12px;background:#fff;box-shadow:0 6px 16px #163a6710}.lane.import .lane-head{border-left:4px solid var(--blue)}.lane.main .lane-head{border-left:4px solid var(--violet)}.lane-head .kicker{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted)}.lane-head h3{margin:2px 0 0;color:var(--navy);font-size:17px}.lane-head p{margin:2px 0 0;font-size:12px;color:var(--muted)}.steps{position:relative;padding-left:5px}.steps:before{content:"";position:absolute;z-index:0;left:34px;top:40px;bottom:39px;width:2px;background:linear-gradient(var(--blue),#9bc9fb 70%,#6baaf0)}.main .steps{padding-right:212px}.main .steps:before{background:linear-gradient(var(--violet),#c4b5fd 58%,var(--green))}.node{position:relative;z-index:1;display:flex;gap:13px;align-items:flex-start;width:100%;min-height:82px;margin:0 0 13px;padding:14px;border:1px solid #d9e5f1;border-radius:15px;background:#fff;color:var(--ink);text-align:left;cursor:pointer;transition:.18s}.node:hover{border-color:var(--blue);transform:translateX(3px);box-shadow:0 9px 22px #1677ff20}.node:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}.main .node:hover{border-color:var(--violet);box-shadow:0 9px 22px #7c3aed20}.dot{display:grid;place-items:center;flex:0 0 31px;height:31px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:800;box-shadow:0 0 0 5px #fff}.main .dot{background:var(--violet)}.n-green .dot{background:var(--green)}.n-amber .dot{background:var(--amber)}.node h4{margin:0;font-size:15px;line-height:1.35}.node p{margin:3px 0 0;font-size:12px;line-height:1.45;color:var(--muted)}.node .open{display:inline-block;margin-top:6px;color:#1762ae;font-size:11px;font-weight:800}.main .node .open{color:#6d28d9}.side-snapshot{position:absolute;z-index:3;right:0;top:108px;width:198px;min-height:128px;margin:0;padding:13px 12px;border-color:#f7cf93;background:#fffaf1;box-shadow:0 7px 18px #d9770614}.side-snapshot:before{content:"";position:absolute;left:-29px;top:44px;width:29px;height:2px;background:#d97706}.side-snapshot:after{content:"";position:absolute;left:-6px;top:40px;width:8px;height:8px;border-top:2px solid #d97706;border-right:2px solid #d97706;transform:rotate(45deg)}.side-snapshot .dot{background:var(--amber)}.side-snapshot h4{font-size:13px}.side-snapshot p{font-size:11px}.bridge{position:absolute;z-index:5;top:306px;left:calc(50% - 54px);width:108px;height:42px;pointer-events:none;overflow:visible}.bridge path{fill:none;stroke:#1681e8;stroke-width:2.3;stroke-linecap:round}.bridge-label{position:absolute;z-index:6;top:281px;left:50%;transform:translateX(-50%);padding:3px 7px;border:1px solid #b9d9fa;border-radius:12px;background:#fff;color:#1762ae;font-size:11px;font-weight:800;white-space:nowrap}.legend{display:flex;flex-wrap:wrap;gap:11px;margin:18px 0 0;color:var(--muted);font-size:12px}.legend i{display:inline-block;width:9px;height:9px;margin-right:5px;border-radius:50%;background:var(--blue)}.legend .m{background:var(--violet)}.legend .a{background:var(--amber)}.legend .g{background:var(--green)}.foot{margin:17px 3px 0;color:#667085;font-size:12px}@media(max-width:900px){.lanes{grid-template-columns:1fr;gap:20px}.main .steps{padding-right:0}.side-snapshot{position:relative;top:auto;right:auto;width:100%;margin:0 0 13px}.side-snapshot:before,.side-snapshot:after,.bridge,.bridge-label{display:none}.main .steps:before{bottom:180px}}@media(max-width:620px){.wrap{padding:16px 12px 32px}.hero{padding:22px 20px}.hero h1{font-size:25px}.board{padding:14px}.board-title{display:block}.board-title p{margin-top:4px}}
-</style>
+:root{--navy:#102a43;--blue:#1677ff;--violet:#7c3aed;--green:#059669;--amber:#d97706;--ink:#1f2937;--muted:#667085;--line:#d9e6f2}*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#edf5ff,#fbfdff 58%,#f1fbf7);font:15px/1.6 "Microsoft YaHei","PingFang SC",Arial,sans-serif;color:var(--ink)}.wrap{max-width:1240px;margin:auto;padding:28px 20px 48px}.hero{padding:27px 30px;border-radius:21px;background:linear-gradient(125deg,#102a43,#174b88 58%,#1677ff);color:#fff;box-shadow:0 17px 42px #163a6735}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.11em;color:#c5e1ff}.hero h1{margin:4px 0 7px;font-size:30px}.hero p{margin:0;max-width:900px;color:#e2efff}.tip{margin:18px 0;padding:12px 15px;border:1px solid #cfe4fd;border-radius:12px;background:#fff;color:#315a83}.board{position:relative;padding:24px;border:1px solid var(--line);border-radius:20px;background:#fff;box-shadow:0 12px 31px #163a6714}.board-title{display:flex;justify-content:space-between;align-items:end;gap:14px;margin:0 0 18px}.board-title h2{margin:0;color:var(--navy);font-size:20px}.board-title p{margin:0;color:var(--muted);font-size:13px}.lanes{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:108px;align-items:start}.lane{position:relative;padding:18px 17px 13px;border-radius:17px;border:1px solid #dce9f6;background:linear-gradient(180deg,#f9fcff,#fff)}.lane.import{background:linear-gradient(180deg,#f4faff,#fff)}.lane.main{background:linear-gradient(180deg,#f8f7ff,#fff)}.lane-head{position:relative;z-index:2;min-height:58px;margin:0 0 16px;padding:10px 12px;border-radius:12px;background:#fff;box-shadow:0 6px 16px #163a6710}.lane.import .lane-head{border-left:4px solid var(--blue)}.lane.main .lane-head{border-left:4px solid var(--violet)}.lane-head .kicker{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted)}.lane-head h3{margin:2px 0 0;color:var(--navy);font-size:17px}.lane-head p{margin:2px 0 0;font-size:12px;color:var(--muted)}.steps{position:relative;padding-left:5px}.steps:before{content:"";position:absolute;z-index:0;left:34px;top:40px;bottom:39px;width:2px;background:linear-gradient(var(--blue),#9bc9fb 70%,#6baaf0)}.main .steps{padding-right:5px}.main .steps:before{background:linear-gradient(var(--violet),#c4b5fd 58%,var(--green))}.node{position:relative;z-index:1;display:flex;gap:13px;align-items:flex-start;width:100%;min-height:82px;margin:0 0 13px;padding:14px;border:1px solid #d9e5f1;border-radius:15px;background:#fff;color:var(--ink);text-align:left;cursor:pointer;transition:.18s}.node:hover{border-color:var(--blue);transform:translateX(3px);box-shadow:0 9px 22px #1677ff20}.node:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}.main .node:hover{border-color:var(--violet);box-shadow:0 9px 22px #7c3aed20}.dot{display:grid;place-items:center;flex:0 0 31px;height:31px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:800;box-shadow:0 0 0 5px #fff}.main .dot{background:var(--violet)}.n-green .dot{background:var(--green)}.n-amber .dot{background:var(--amber)}.node h4{margin:0;font-size:15px;line-height:1.35}.node p{margin:3px 0 0;font-size:12px;line-height:1.45;color:var(--muted)}.node .open{display:inline-block;margin-top:6px;color:#1762ae;font-size:11px;font-weight:800}.main .node .open{color:#6d28d9}.side-snapshot{position:absolute;z-index:3;right:0;top:108px;width:198px;min-height:128px;margin:0;padding:13px 12px;border-color:#f7cf93;background:#fffaf1;box-shadow:0 7px 18px #d9770614}.side-snapshot:before{content:"";position:absolute;left:-29px;top:44px;width:29px;height:2px;background:#d97706}.side-snapshot:after{content:"";position:absolute;left:-6px;top:40px;width:8px;height:8px;border-top:2px solid #d97706;border-right:2px solid #d97706;transform:rotate(45deg)}.side-snapshot .dot{background:var(--amber)}.side-snapshot h4{font-size:13px}.side-snapshot p{font-size:11px}.bridge{position:absolute;z-index:5;top:306px;left:calc(50% - 54px);width:108px;height:42px;pointer-events:none;overflow:visible}.bridge path{fill:none;stroke:#1681e8;stroke-width:2.3;stroke-linecap:round}.bridge-label{position:absolute;z-index:6;top:281px;left:50%;transform:translateX(-50%);padding:3px 7px;border:1px solid #b9d9fa;border-radius:12px;background:#fff;color:#1762ae;font-size:11px;font-weight:800;white-space:nowrap}.legend{display:flex;flex-wrap:wrap;gap:11px;margin:18px 0 0;color:var(--muted);font-size:12px}.legend i{display:inline-block;width:9px;height:9px;margin-right:5px;border-radius:50%;background:var(--blue)}.legend .m{background:var(--violet)}.legend .a{background:var(--amber)}.legend .g{background:var(--green)}.foot{margin:17px 3px 0;color:#667085;font-size:12px}@media(max-width:900px){.lanes{grid-template-columns:1fr;gap:20px}.main .steps{padding-right:0}.side-snapshot{position:relative;top:auto;right:auto;width:100%;margin:0 0 13px}.side-snapshot:before,.side-snapshot:after,.bridge,.bridge-label{display:none}.main .steps:before{bottom:180px}}@media(max-width:620px){.wrap{padding:16px 12px 32px}.hero{padding:22px 20px}.hero h1{font-size:25px}.board{padding:14px}.board-title{display:block}.board-title p{margin-top:4px}}
+.detail-dialog{width:min(940px,calc(100% - 28px));max-height:min(88vh,800px);padding:0;border:0;border-radius:18px;background:#f3f8fe;color:var(--ink);box-shadow:0 22px 58px #102a4366}.detail-dialog::backdrop{background:#102a4380}.detail-wrap{padding:24px}.detail-hero{padding:22px 24px;border-radius:14px;background:linear-gradient(125deg,#102a43,#174b88,#1677ff);color:#fff}.detail-hero .eyebrow{font-size:12px;font-weight:800;letter-spacing:.1em;color:#c4e1ff}.detail-hero h2{margin:4px 0;font-size:25px}.detail-hero p{margin:0;color:#e1efff}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}.detail-card{padding:16px 17px;border:1px solid #dce7f3;border-radius:14px;background:#fff;box-shadow:0 7px 20px #163a6710}.detail-card.full{grid-column:1/-1}.detail-card h3{margin:0 0 8px;font-size:15px;color:#164b82}.detail-card p,.detail-card ul{margin:0}.detail-card ul{padding-left:18px}.detail-code{margin:0;padding:14px;border-radius:11px;background:#102a43;color:#d9f0ff;overflow:auto;font:12px/1.65 ui-monospace,Consolas,monospace;white-space:pre-wrap}.detail-guard{border-left:4px solid #059669;background:#effcf5}.detail-close{position:sticky;float:right;top:0;border:0;border-radius:9px;background:#1677ff;color:#fff;padding:9px 14px;font-weight:700;cursor:pointer;z-index:2}@media(max-width:620px){.detail-wrap{padding:14px}.detail-grid{grid-template-columns:1fr}.detail-card.full{grid-column:auto}.detail-hero{padding:20px 18px}.detail-hero h2{font-size:21px}}</style>
 </head>
 <body>
 <main class="wrap">
   <section class="hero">
     <div class="eyebrow">PRISMLAUNCH · 国内商品上架海外平台</div>
     <h1>棱镜上新 PrismLaunch｜业务流程图</h1>
-    <p>每个节点可点击在新窗口查看身份、输入、输出、JSON 合同和安全边界。</p>
+    <p>点击节点可查看身份、输入、输出、JSON 合同和安全边界。</p>
   </section>
-  <p class="tip"><strong>关键原则：</strong>每次新建上新任务时重新获取并冻结该任务的参考汇率；同一任务内使用同一份费用、税费口径与汇率快照。</p>
+  <p class="tip"><strong>关键原则：</strong>导入批次与待补记录均可保存；仅 `search_ready` 且去重唯一的 SKU 进入候选池。创建任务时即冻结任务级费用／汇率定价上下文；选中 SKU 后仅在主动启用测算时读取。</p>
   <section class="board">
-    <div class="board-title"><h2>端到端流程</h2><p>详情在点击后新开窗口展示。</p></div>
+    <div class="board-title"><h2>端到端流程</h2><p>详情在点击后于当前页面弹窗展示。</p></div>
     <div id="lanes" class="lanes"></div>
     <div class="legend"><span><i></i>资料库流程</span><span><i class="m"></i>上新任务主线</span><span><i class="a"></i>任务级费用／汇率快照</span><span><i class="g"></i>审核或发布结果</span></div>
     <p class="foot"> </p>
   </section>
 </main>
+<dialog id="detailDialog" class="detail-dialog" aria-labelledby="detailTitle"></dialog>
 <script>
 const modules={
-import:{id:'import',n:'A1',tone:'',name:'资料输入',small:'导入 Excel、图片与 PDF',role:'资料库流程 · 输入合同',summary:'接收国内商品资料，自动提取表格、图片与文档中的可识别信息，并保留原始文件。',identity:'商品资料接入与自动整理',input:'输入商品表文件、主图／包装图、规格 PDF 及导入说明。',output:'输出导入批次、已接收文件、按 SKU 暂存的字段、自动预填值与解析状态；交给导入校验与去重。',handoff:'下游：导入校验与去重模块。',skills:['识别 Excel／CSV、图片与 PDF','按 SKU 和上传线索建立初始关联','从表格、图片文字和文档自动预填字段','保存原始文件并记录时间','反馈无法读取或无法关联的文件'],guard:'资料输入可在任何时间单独运行；它不创建上新任务、不获取汇率、不计算售价，也不直接发布。',json:`{
+import:{id:'import',n:'A1',tone:'',name:'资料输入',small:'导入 Excel、图片与 PDF',role:'资料库流程 · 输入合同',summary:'接收国内商品资料，从表格和可读文档预填字段、关联图片资源，并保留原始文件。',identity:'商品资料接入与自动整理',input:'输入商品表文件、主图／包装图、规格 PDF 及导入说明。',output:'输出导入批次、已接收文件、按 SKU 暂存的字段、自动预填值与解析状态；交给导入校验与去重。',handoff:'下游：导入校验与去重模块。',skills:['解析 Excel／CSV 与可读 PDF','按 SKU 和上传线索建立初始关联','从表格和可读文档自动预填字段','保存原始文件并记录时间','反馈无法读取或无法关联的文件'],guard:'资料输入可在任何时间单独运行；它保存导入批次和待补记录，但不识别图片内容、不创建上新任务、不获取汇率、不计算售价，也不直接发布。',json:`{
   "import_request": {
     "batch_id": "IMPORT-20260826-01",
     "source_files": ["supplier.xlsx", "front.jpg", "package.jpg", "spec.pdf"],
@@ -33,13 +34,12 @@ import:{id:'import',n:'A1',tone:'',name:'资料输入',small:'导入 Excel、图
   },
   "handoff_to": "import_validation"
 }`},
-validate:{id:'validate',n:'A2',tone:'',name:'导入校验与去重',small:'缺失告警、重复拦截与合并审核',role:'资料库流程 · 质量合同',summary:'检查资料完整度、文件关联、格式与重复状态，生成可追溯的资料质量结论。',identity:'商品资料质量与去重把关',input:'导入批次中的 SKU 资料包，以及现有候选商品池的索引摘要。',output:'缺失或异常资料清单、完全重复拦截结果、疑似重复合并任务、基础商品事实卡和基础搜索资格。',handoff:'下游：基础商品事实卡写入私有候选商品池。',skills:['检查文件是否关联到正确 SKU','按当前用途提示必要信息','以 SKU、条码、主图哈希和属性组合去重','创建合并审核任务'],guard:'必要字段未填齐不得保存；通过保存校验后创建基础商品事实卡，完全重复记录只保留导入日志。',json:`{
+validate:{id:'validate',n:'A2',tone:'',name:'导入校验与去重',small:'缺失告警、重复拦截与合并审核',role:'资料库流程 · 质量合同',summary:'检查资料完整度、文件关联、格式与重复状态，生成可追溯的资料质量结论。',identity:'商品资料质量与去重把关',input:'导入批次中的 SKU 资料包，以及现有候选商品池的索引摘要。',output:'资料质量状态（draft_blocked／needs_completion／search_ready）、缺失项、完全重复拦截结果、疑似重复合并任务，以及满足条件时创建的基础商品事实卡。',handoff:'下游：基础商品事实卡写入私有候选商品池。',skills:['检查文件是否关联到正确 SKU','按当前用途提示必要信息','以 SKU、条码、主图哈希和属性组合去重','创建合并审核任务'],guard:'导入批次和待补记录可以保存；只有候选池准入字段齐备且去重唯一的记录创建 v1。完全重复记录只保留导入日志，疑似重复待合并期间不入池。',json:`{
   "validation_result": {
     "sku": "LM-KT-BTL-002-BLK-500",
-    "search_eligibility": "eligible",
-    "required_fields_validation": "passed",
-    "basic_fact_card": {"version":"v1","status":"saved_and_verified"},
-    "deduplication": {"result":"unique","next_action":"write_to_candidate_pool"}
+    "data_quality_status": "search_ready",
+    "candidate_admission_validation": "passed",
+    "deduplication": {"result":"unique","next_action":"create_v1_and_write_to_candidate_pool"}
   },
   "handoff_to": "private_candidate_pool"
 }`},
@@ -52,18 +52,19 @@ pool:{id:'pool',n:'A3',tone:'n-green',name:'私有候选商品池',small:'长期
   },
   "readable_by": "selection_service"
 }`},
-task:{id:'task',n:'1',tone:'',name:'创建上新任务',small:'固定条件 + 补充要求',role:'业务主线 · 任务输入合同',summary:'运营人员以固定条件限定搜索范围，再用自然语言补充商品细节。',identity:'上新任务创建助手',input:'目标平台、目标国家、中文一级商品大类、最低单件利润（≥金额＋币种）和其他补充要求。',output:'任务上下文：固定条件、补充要求和最低单件利润；交给生成选品条件。',handoff:'下游：生成选品条件模块。',skills:['校验固定条件','记录补充要求并检测冲突','保存任务版本与创建人'],guard:'任务只定义需求范围；不创建商品资料、不决定推荐顺序、不冻结费用或汇率、不直接发布。',json:`{
+task:{id:'task',n:'1',tone:'',name:'创建上新任务',small:'固定条件 + 任务级定价上下文',role:'业务主线 · 任务输入合同',summary:'运营人员以固定条件限定搜索范围；任务创建成功时同步冻结可追溯的费用／汇率定价上下文。',identity:'上新任务创建助手',input:'目标平台、目标国家、中文一级商品大类、其他补充要求、履约／服务档案，以及可选价格目标。',output:'任务上下文、创建时冻结的定价上下文快照与可选价格目标；交给生成选品条件和售价计算模块。',handoff:'下游：任务级费用／汇率快照模块与生成选品条件模块。',skills:['校验固定条件','记录补充要求并检测冲突','解析或应用受控履约档案','创建任务版本与定价上下文快照'],guard:'任务只定义需求范围并冻结任务级市场／配置口径；快照不含任何 SKU 成本、重量、尺寸、税则或申报价值，不决定推荐顺序，也不直接发布。',json:`{
   "task_context": {
     "task_id":"PL-20260826-001",
     "target_platform":"Amazon US",
     "destination_country":"US",
     "top_level_category_zh":"家居与厨房",
-    "minimum_unit_profit":{"operator":">=","amount":5,"currency":"USD"},
+    "pricing_goal":{"minimum_unit_profit":{"operator":">=","amount":5,"currency":"USD"}},
     "supplementary_requirements":"黑色、简约通勤风、约 16oz 的随行杯；不要吸管款。"
   },
-  "handoff_to":"task_understanding_llm"
+  "pricing_context_snapshot_id":"PCS-PL-20260826-001-v1",
+  "handoff_to":["task_pricing_context_snapshot","task_understanding_llm"]
 }`},
-rule:{id:'rule',n:'2',tone:'',name:'生成选品条件',small:'解析上新要求，形成可审阅条件卡',role:'业务主线 · 模型合同',summary:'将运营人员的需求解析为本次任务可执行、可审阅的选品条件。',identity:'跨境上新任务识别大师',input:'固定条件、补充要求和可使用的候选商品字段说明。',output:'选品条件卡：硬条件、必须条件、偏好、排除条件、资料处理要求和解释要求；交给检索、重排与规则引擎。',handoff:'下游：智能检索与上新推荐；旁路：费用费率与汇率快照；审核工作台可查看和编辑条件卡。',skills:['硬规则约束','理解中文自然语言上新问题','识别细分类型、属性、场景与排除项','把模糊要求拆为必须条件、偏好和排除条件','检测补充要求与固定条件的冲突'],guard:'不修改商品字段、不清除导入告警、不让重复记录入库；不编造商品事实、汇率、税率、费用或售价。',json:`{
+rule:{id:'rule',n:'2',tone:'',name:'生成选品条件',small:'解析上新要求，形成可审阅条件卡',role:'业务主线 · 模型合同',summary:'将运营人员的需求解析为本次任务可执行、可审阅的选品条件。',identity:'跨境上新任务识别大师',input:'固定条件、补充要求和可使用的候选商品字段说明。',output:'选品条件卡：硬条件、必须条件、偏好、排除条件、资料处理要求和解释要求；交给检索、重排与规则引擎。',handoff:'下游：智能检索与上新推荐；审核工作台可查看和编辑条件卡。费用／汇率定价上下文已在任务创建时冻结。',skills:['硬规则约束','理解中文自然语言上新问题','识别细分类型、属性、场景与排除项','把模糊要求拆为必须条件、偏好和排除条件','检测补充要求与固定条件的冲突'],guard:'不修改商品字段、不清除导入告警、不让重复记录入库；不编造商品事实、汇率、税率、费用或售价。',json:`{
   "selection_condition_card": {
     "task_id":"PL-20260826-001",
     "fixed_conditions":{"platform":"Amazon US","country":"US","category_zh":"家居与厨房"},
@@ -72,18 +73,23 @@ rule:{id:'rule',n:'2',tone:'',name:'生成选品条件',small:'解析上新要�
     "exclusions":["吸管款","完全重复商品","疑似重复待合并商品"],
     "information_policy":"资料缺失保留待补状态，不得伪造为已确认事实"
   },
-  "handoff_to":["retrieval_and_reranking","fee_exchange_snapshot"]
+  "handoff_to":["retrieval_and_reranking"]
 }`},
-fee:{id:'fee',n:'2A',tone:'n-amber',name:'费用费率与汇率快照',small:'新任务刷新，任务内冻结',role:'业务主线 · 受控数据合同',summary:'在任务条件确定后，读取受控外部数据与后台配置，为本任务保存可追溯的测算口径。',identity:'任务级费用、税费与汇率快照管理员',input:'任务编号、目标平台、目标国家、最低单件利润及币种。',output:'冻结参考汇率、平台费用／履约配置版本、税费计算口径版本和测算版本；只交给售价计算。',handoff:'下游：售价计算模块。',skills:['每次新任务获取最新可用参考汇率','记录币种对、来源、生效日期和抓取时间','读取版本化平台费用与物流模板','保存税费计算口径版本'],guard:'汇率同一任务内固定，新任务重新获取；进口关税最终预估仍需商品事实卡的用途、材质、原产国等资料。模型不得自行修改快照。',json:`{
-  "pricing_snapshot": {
+fee:{id:'fee',n:'1A',tone:'n-amber',name:'任务级费用费率与汇率快照',small:'创建任务时冻结，售价时读取',role:'业务主线 · 受控数据合同',summary:'创建任务时读取受控外部数据与后台配置，冻结可复现的任务级定价上下文；之后 SKU 测算只读取该上下文。',identity:'任务级费用、税费与汇率快照管理员',input:'任务编号、目标平台、目标国家、履约／服务档案或受控默认档案。',output:'冻结参考汇率、平台费用／履约配置版本、税费计算口径版本和任务快照版本；只交给后续售价计算。',handoff:'下游：生成选品条件模块与售价计算模块。',skills:['创建任务时获取最新可用参考汇率','记录币种对、来源、生效日期和抓取时间','读取版本化平台费用与物流模板','保存税费计算口径版本'],guard:'快照是任务级市场／配置口径，不含 SKU 成本、重量、尺寸、税则或申报价值。实质变更平台、国家或履约档案，或运营人员明确要求重新定价时，必须显式生成新快照版本。汇率、费用与税费数据分别记录来源，MCP 仅是调用接口；模型不得自行修改快照。',json:`{
+  "task_pricing_context_snapshot": {
+    "pricing_context_snapshot_id":"PCS-PL-20260826-001-v1",
     "task_id":"PL-20260826-001",
-    "reference_exchange_rate":{"pair":"CNY/USD","rate":0.139,"source":"approved_exchange_rate_service","scope":"frozen_for_this_task"},
+    "scope":"task_pricing_context",
+    "target_platform":"Amazon US",
+    "destination_country":"US",
+    "fulfillment_profile":"amazon-us-fba-default-v1",
+    "reference_exchange_rate":{"pair":"CNY/USD","rate":0.139,"source":"approved_exchange_rate_service","reference_date":"2026-08-27","fetched_at":"2026-08-27T10:10:00+08:00"},
     "fee_configuration_version":"amazon-us-fba-v2026-08",
     "tax_calculation_policy_version":"us-import-estimate-v1"
   },
   "handoff_to":"pricing_calculation"
 }`},
-select:{id:'select',n:'3',tone:'',name:'智能检索与上新推荐',small:'读取候选商品池，检索、重排与分层',role:'业务主线 · 模型与规则合同',summary:'先找回相关商品，过滤重复和硬性不符商品，再由重排模型与规则引擎给出推荐顺序。',identity:'跨境商品匹配与排序',input:'选品条件卡和只读候选商品摘要。',output:'候选商品列表：推荐分层、命中条件、资料风险和下一步动作。',handoff:'下游：多模态解析与商品事实核对；审核工作台查看推荐理由。',skills:['按中文一级类目硬筛选','关键词检索与语义检索找回候选','融合多路检索结果','Reranker 根据条件卡调整候选顺序','规则引擎过滤重复、风险与硬条件不符项','输出排序结果和可解释原因'],guard:'给出排序理由。',json:`{
+select:{id:'select',n:'3',tone:'',name:'智能检索与上新推荐',small:'读取候选商品池，检索、重排与分层',role:'业务主线 · 模型与规则合同',summary:'先以资料状态、去重和固定条件过滤，再由重排模型排序；规则引擎给出推荐／备选／不推荐结论。',identity:'跨境商品匹配与排序',input:'选品条件卡和只读候选商品摘要。',output:'候选商品列表：规则结论、相关性顺位、命中条件、资料风险和下一步动作。',handoff:'下游：多模态解析与商品事实核对；审核工作台查看推荐理由。',skills:['按中文一级类目硬筛选','关键词检索与语义检索找回候选','融合多路检索结果','Reranker 根据条件卡调整候选顺序','规则引擎过滤重复、风险与硬条件不符项','输出排序结果和可解释原因'],guard:'规则引擎根据硬条件和资料状态确定推荐／备选／不推荐；重排模型只改变合格候选的相关性顺序，大语言模型只解释理由。',json:`{
   "recommendation_result": {
     "task_id":"PL-20260826-001",
     "recommended_items":[{
@@ -96,30 +102,30 @@ select:{id:'select',n:'3',tone:'',name:'智能检索与上新推荐',small:'读�
   },
   "handoff_to":"multimodal_fact_verification"
 }`},
-truth:{id:'truth',n:'4',tone:'',name:'多模态解析与事实卡更新',small:'识别图片，写回增强事实卡',role:'业务主线 · 模型合同',summary:'多模态解析模型读取候选商品的基础商品事实卡 v1 与原始资源，识别图片、提取图片文字和文档信息，并将结构化结果写回为多模态增强商品事实卡 v2。',identity:'商品多模态解析大师',input:'被推荐 SKU 的基础商品事实卡 v1、主图／包装图、规格 PDF、目标平台字段需求。',output:'多模态结构化结果：图片识别结论、可用图片资源、可见规格与证据引用；事实卡服务据此将 v1 更新为增强事实卡 v2。',handoff:'下游：售价计算读取 v2 的已确认成本与归类资料；Listing 生成读取 v2 的可写事实与可用图片；规则审核读取 v2。',skills:['识别商品图片与包装图片中的可见内容','提取图片文字和 PDF 信息','核验图片与 v1 基础事实的对应关系','定位页码、图片区域和资源证据','输出结构化多模态结果与可用图片状态','把结果交给事实卡服务更新 v2'],guard:'本模块是图片识别与图片—资料核验的唯一模块；它不直接生成 Listing、不修改 v1 基础事实、不把图片视觉印象伪造成材质、原产国、性能、认证或安全性。商品事实卡只保存和版本化合并本模块输出。',json:`{
+truth:{id:'truth',n:'4',tone:'',name:'多模态解析与事实卡更新',small:'识别图片，写回增强事实卡',role:'业务主线 · 模型合同',summary:'多模态解析模型读取候选商品的基础商品事实卡 v1 与原始资源，识别图片、提取图片文字和文档信息，并以 v1 为底稿创建任务级多模态增强商品事实卡 v2。',identity:'商品多模态解析大师',input:'被推荐 SKU 的基础商品事实卡 v1、主图／包装图、规格 PDF、目标平台字段需求。',output:'多模态结构化结果：图片识别结论、可用图片资源、可见规格与证据引用；事实卡服务据此创建 v2，不改写 v1。',handoff:'下游：可选售价计算读取 v2 的已确认计算资料；Listing 生成读取审核允许的事实与可用图片；规则审核读取 v2。',skills:['识别商品图片与包装图片中的可见内容','提取图片文字和 PDF 信息','核验图片与 v1 基础事实的对应关系','定位页码、图片区域和资源证据','输出结构化多模态结果与可用图片状态','把结果交给事实卡服务创建 v2'],guard:'本模块是图片识别与图片—资料核验的唯一模块；它不直接生成 Listing、不修改 v1 基础事实、不把图片视觉印象伪造成材质、原产国、性能、认证或安全性。它只能标记“待审核的 Listing 候选”，不可自行给出可发布结论。',json:`{
   "multimodal_result": {
     "sku":"LM-KT-BTL-001-BLK-500",
     "base_fact_card_id":"FC-LM-KT-BTL-001-v1",
     "updates":[
-      {"attribute":"图片款式与颜色","value":"黑色直筒水瓶","evidence":"front.jpg#region-1","listing_allowed":true},
-      {"attribute":"可见容量标识","value":"500 ml","evidence":"package.jpg#region-2","listing_allowed":true}
+      {"attribute":"图片款式与颜色","value":"黑色直筒水瓶","evidence":"front.jpg#region-1","review_status":"pending","candidate_for_listing":true},
+      {"attribute":"可见容量标识","value":"500 ml","evidence":"package.jpg#region-2","review_status":"pending","candidate_for_listing":true}
     ],
     "image_assets":[{"asset":"front.jpg","status":"approved_for_listing"}]
   },
-  "fact_card_update":{"from_version":"v1","to_version":"v2","status":"enhanced"},
+  "fact_card_update":{"base_version":"v1","new_version":"v2","scope":"task_and_sku","status":"enhanced"},
   "handoff_to":["pricing_calculation","controlled_listing_generation","platform_review"]
-}`},price:{id:'price',n:'5',tone:'n-amber',name:'售价计算',small:'反算建议售价与费用构成',role:'业务主线 · 受控计算合同',summary:'基于已确认商品事实和本任务冻结快照，反算满足最低单件利润的可编辑建议售价。',identity:'跨境商品售价测算器',input:'多模态增强商品事实卡 v2 中已确认的成本、重量尺寸、原产国、用途材质与税则候选；任务最低单件利润；费用费率与汇率快照。',output:'建议售价、展示币种、费用构成、缺失字段、税费预估依据和测算版本；交给受控 Listing 生成。',handoff:'下游：受控 Listing 生成模块将建议售价写入可编辑草稿；审核工作台显示计算依据。',skills:['使用任务冻结汇率换算成本','读取版本化平台费用与履约模板','按商品事实计算或预估物流与关税成本','按最低单件利润反算建议售价','处理费率阶梯与最低收费','输出可追溯费用构成'],guard:'资料不足、税则候选低置信或快照不可用时不输出建议售价；建议售价不参与选品排序、不自动提交平台、不替代报关或税务意见。',json:`{
+}`},price:{id:'price',n:'5',tone:'n-amber',name:'售价计算',small:'反算建议售价与费用构成',role:'业务主线 · 受控计算合同',summary:'运营人员主动启用后，基于已确认商品事实和创建任务时冻结的定价上下文输出可编辑建议售价或费用构成。',identity:'跨境商品售价测算器',input:'v2 中已确认的成本、重量尺寸、原产国、用途材质与税则候选；任务级费用费率与汇率定价上下文快照；可选价格目标。',output:'建议售价、展示币种、费用构成、缺失字段、税费预估依据和测算版本；交给受控 Listing 生成。',handoff:'下游：受控 Listing 生成模块将建议售价写入可编辑草稿；审核工作台显示计算依据。',skills:['使用测算快照换算成本','读取版本化平台费用与履约模板','按商品事实计算或预估物流与关税成本','按可选利润目标反算建议售价','处理费率阶梯与最低收费','输出可追溯费用构成'],guard:'资料不足、税则候选低置信或快照不可用时不输出建议售价；建议售价不参与选品排序、不自动提交平台、不替代报关或税务意见。未启用测算也不阻塞 Listing 审核。',json:`{
   "pricing_result": {
     "task_id":"PL-20260826-001",
     "sku":"LM-KT-BTL-001-BLK-500",
     "status":"ready_for_operator_review",
     "suggested_sale_price":{"amount":21.99,"currency":"USD"},
-    "cost_breakdown":["换汇后供货成本","物流／履约费用","进口关税预估","平台费用","最低单件利润"],
+    "cost_breakdown":["换汇后供货成本","物流／履约费用","进口关税预估","平台费用","可选最低单件利润"],
     "calculation_version":"pricing-v1"
   },
   "handoff_to":"controlled_listing_generation"
 }`},
-generate:{id:'generate',n:'6',tone:'',name:'受控 Listing 生成',small:'本地化表达与结构化平台字段',role:'业务主线 · 模型合同',summary:'大语言模型只基于已确认、允许上架的商品事实与建议售价结果，生成适配 Amazon US 或 Shopify US 的可编辑页面草稿。',identity:'海外商品页面写作大师（大语言模型）',input:'可写商品事实、可用图片、目标平台字段要求、中英文术语对照、单位换算、店铺规则片段和建议售价结果。',output:'标题、卖点、详情、SEO 文本、变体、结构化字段建议及可编辑建议售价；每项内容绑定事实来源。',handoff:'下游：规则审核与人工确认。',skills:['中英文术语与单位本地化','生成 Amazon US 标题、五点与描述','生成 Shopify US 商品详情、SEO 与标签','将生成内容绑定到事实证据','把建议售价写入可编辑价格位置'],guard:'不得补造配件、认证、功效、安全或绝对化表述；无证据事实不能被猜测补全；建议售价是运营可改的测算结果，不是卖点。',json:`{
+generate:{id:'generate',n:'6',tone:'',name:'受控 Listing 生成',small:'本地化表达与结构化平台字段',role:'业务主线 · 模型合同',summary:'大语言模型只基于已确认、审核允许使用的商品事实，生成适配 Amazon US 或 Shopify US 的可编辑页面草稿；建议售价为可选输入。',identity:'海外商品页面写作大师（大语言模型）',input:'审核允许的 v2 商品事实、可用图片、目标平台字段要求、术语／单位规则、店铺规则片段和可选建议售价结果。',output:'标题、卖点、详情、SEO 文本、变体、结构化字段建议及可编辑建议售价；每项内容绑定事实来源。',handoff:'下游：规则审核与人工确认。',skills:['中英文术语与单位本地化','生成 Amazon US 标题、五点与描述','生成 Shopify US 商品详情、SEO 与标签','将生成内容绑定到事实证据','把建议售价写入可编辑价格位置'],guard:'不得补造配件、认证、功效、安全或绝对化表述；无证据事实不能被猜测补全；成本、申报价值和税费不进入文案上下文；建议售价是运营可改的测算结果，不是卖点。',json:`{
   "listing_draft": {
     "sku":"LM-KT-BTL-001-BLK-500",
     "target_platform":"Amazon US",
@@ -133,18 +139,25 @@ review:{id:'review',n:'7',tone:'',name:'规则审核与人工确认',small:'平�
   "review_result": {"task_id":"PL-20260826-001","sku":"LM-KT-BTL-001-BLK-500","decision":"needs_revision","issues":[{"area":"bullet_points[1]","reason":"性能表述缺少可写证据"}],"suggested_sale_price_confirmed":false},
   "handoff_to":"publish_or_revision"
 }`},
-publish:{id:'publish',n:'8',tone:'n-green',name:'发布与结果反馈',small:'草稿／上传文件与错误回流',role:'业务主线 · 发布合同',summary:'在审核通过后输出平台草稿或上传文件，并把平台结果回写任务中心。',identity:'平台发布执行器',input:'审核通过的 Listing 草稿、平台字段包、审核版本和商家授权的店铺配置。',output:'Shopify 可编辑商品草稿或 Amazon 可复核上传文件；同时输出平台响应、错误定位和发布日志。',handoff:'下游：任务中心与审核工作台接收发布反馈；失败项按错误位置回流到相应模块。',skills:['创建 Shopify 商品草稿','生成 Amazon 批量上传文件','保存平台响应、错误码与版本','把修复建议回写任务和审核记录'],guard:'不跳过审核直接发布；每次输出关联事实卡、售价测算与审核版本，失败重试时避免重复创建商品。',json:`{
+publish:{id:'publish',n:'8',tone:'n-green',name:'发布与结果反馈',small:'草稿／上传文件与错误回流',role:'业务主线 · 发布合同',summary:'在审核通过后输出平台草稿或上传文件，并把平台结果回写任务中心。',identity:'平台发布执行器',input:'审核通过的 Listing 草稿、平台字段包、审核版本和商家授权的店铺配置。',output:'Shopify 可编辑商品草稿或 Amazon 可复核上传文件；同时输出平台响应、错误定位和发布日志。',handoff:'下游：任务中心与审核工作台接收发布反馈；失败项按错误位置回流到相应模块。',skills:['创建 Shopify 商品草稿','生成 Amazon 批量上传文件','保存平台响应、错误码与版本','把修复建议回写任务和审核记录'],guard:'不跳过审核直接发布；每次输出关联事实卡与审核版本，若启用售价测算则一并关联其版本；失败重试时避免重复创建商品。',json:`{
   "publish_result": {"task_id":"PL-20260826-001","outputs":[{"platform":"Shopify","type":"可编辑商品草稿","status":"created"},{"platform":"Amazon","type":"上传文件","status":"ready_for_review"}],"feedback_route":"task_center"}
 }`}
 };
-const importIds=['import','validate','pool'],mainIds=['task','rule','select','truth','price','generate','review','publish'];
+const importIds=['import','validate','pool'],mainIds=['task','fee','rule','select','truth','price','generate','review','publish'];
 function nodeHtml(m,extra=''){return `<button class="node ${m.tone} ${extra}" data-id="${m.id}" type="button"><span class="dot">${m.n}</span><span><h4>${m.name}</h4><p>${m.small}</p><span class="open">点击查看模块详情 ↗</span></span></button>`}
 function importLane(){return `<section class="lane import"><div class="lane-head"><span class="kicker">INDEPENDENT DATA FLOW</span><h3>信息导入流程</h3><p>独立运行，可随时维护候选商品池</p></div><div class="steps">${importIds.map(id=>nodeHtml(modules[id])).join('')}</div></section>`}
-function mainLane(){return `<section class="lane main"><div class="lane-head"><span class="kicker">MAIN BUSINESS FLOW</span><h3>上新任务主线</h3><p>从固定条件创建到审核发布</p></div><div class="steps">${mainIds.map(id=>nodeHtml(modules[id])).join('')}${nodeHtml(modules.fee,'side-snapshot')}</div></section>`}
+function mainLane(){return `<section class="lane main"><div class="lane-head"><span class="kicker">MAIN BUSINESS FLOW</span><h3>上新任务主线</h3><p>从固定条件创建到审核发布；价格测算为可选路径</p></div><div class="steps">${mainIds.map(id=>nodeHtml(modules[id])).join('')}</div></section>`}
 const lanes=document.getElementById('lanes');
 lanes.innerHTML=importLane()+mainLane()+`<span class="bridge-label">只读候选商品池</span><svg class="bridge" viewBox="0 0 108 42" aria-hidden="true"><defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#1681e8"></path></marker></defs><path d="M4 22 C33 22,72 22,103 22" marker-end="url(#arrow)"></path></svg>`;
 function esc(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function openDetail(id){const m=modules[id];const w=window.open('',`PrismLaunch_${id}`,'popup=yes,width=930,height=720,resizable=yes,scrollbars=yes');if(!w){alert('浏览器拦截了新窗口，请允许弹窗后重试。');return}w.document.write(`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>${esc(m.name)}｜棱镜上新</title><style>body{margin:0;background:#f3f8fe;color:#1f2937;font:15px/1.65 "Microsoft YaHei",Arial,sans-serif}.wrap{max-width:900px;margin:auto;padding:28px}.hero{padding:25px 27px;border-radius:18px;background:linear-gradient(125deg,#102a43,#174b88,#1677ff);color:#fff}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.1em;color:#c4e1ff}.hero h1{margin:4px 0;font-size:28px}.hero p{margin:0;color:#e1efff}.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:18px}.card{padding:17px 18px;border:1px solid #dce7f3;border-radius:14px;background:#fff;box-shadow:0 7px 20px #163a6710}.card.full{grid-column:1/-1}.card h2{margin:0 0 8px;font-size:15px;color:#164b82}.card p,.card ul{margin:0}.card ul{padding-left:18px}.code{margin:0;padding:15px;border-radius:11px;background:#102a43;color:#d9f0ff;overflow:auto;font:12px/1.65 ui-monospace,Consolas,monospace;white-space:pre-wrap}.guard{border-left:4px solid #059669;background:#effcf5}.close{position:fixed;right:18px;bottom:17px;border:0;border-radius:9px;background:#1677ff;color:#fff;padding:9px 14px;font-weight:700;cursor:pointer}@media(max-width:620px){.wrap{padding:16px}.grid{grid-template-columns:1fr}.card.full{grid-column:auto}}</style></head><body><main class="wrap"><section class="hero"><div class="eyebrow">${esc(m.role)}</div><h1>${esc(m.name)}</h1><p>${esc(m.summary)}</p></section><section class="grid"><article class="card"><h2>模块身份</h2><p>${esc(m.identity)}</p></article><article class="card"><h2>关键技能</h2><ul>${m.skills.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></article><article class="card"><h2>输入</h2><p>${esc(m.input)}</p></article><article class="card"><h2>输出</h2><p>${esc(m.output)}</p></article><article class="card full"><h2>下游交付</h2><p>${esc(m.handoff)}</p></article><article class="card full guard"><h2>安全边界</h2><p>${esc(m.guard)}</p></article><article class="card full"><h2>输入／输出 JSON 合同</h2><pre class="code">${esc(m.json)}</pre></article></section></main><button class="close" onclick="window.close()">关闭窗口</button></body></html>`);w.document.close();w.focus();}
+const detailDialog=document.getElementById('detailDialog');
+function openDetail(id){
+  const m=modules[id];
+  detailDialog.innerHTML=`<div class="detail-wrap"><button class="detail-close" type="button" data-close-detail>关闭</button><section class="detail-hero"><div class="eyebrow">${esc(m.role)}</div><h2 id="detailTitle">${esc(m.name)}</h2><p>${esc(m.summary)}</p></section><section class="detail-grid"><article class="detail-card"><h3>模块身份</h3><p>${esc(m.identity)}</p></article><article class="detail-card"><h3>关键技能</h3><ul>${m.skills.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></article><article class="detail-card"><h3>输入</h3><p>${esc(m.input)}</p></article><article class="detail-card"><h3>输出</h3><p>${esc(m.output)}</p></article><article class="detail-card full"><h3>下游交付</h3><p>${esc(m.handoff)}</p></article><article class="detail-card full detail-guard"><h3>安全边界</h3><p>${esc(m.guard)}</p></article><article class="detail-card full"><h3>输入／输出 JSON 合同</h3><pre class="detail-code">${esc(m.json)}</pre></article></section></div>`;
+  detailDialog.showModal();
+  detailDialog.querySelector('[data-close-detail]').focus();
+}
+detailDialog.addEventListener('click',e=>{if(e.target===detailDialog||e.target.closest('[data-close-detail]'))detailDialog.close();});
 document.querySelectorAll('.node').forEach(b=>b.addEventListener('click',()=>openDetail(b.dataset.id)));
 </script>
 </body>
