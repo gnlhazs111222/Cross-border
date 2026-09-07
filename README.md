@@ -1,5 +1,7 @@
 # PrismLaunch Web Demo
 
+现已增加 **Fact Review / 事实人工核对**：商品详情 → 核对事实 → 补齐缺失包装重量 → 保存为待确认 → Confirm → 自动解除定价阻断。事实变更会清除双平台旧文案、审核和发布结果。内置缺重量 SKU 补 `0.42 kg` 后为 USD 19.20，导入样例缺重量 SKU 为 USD 18.90。详见 [人工事实核对说明](FACT_REVIEW.md)。
+
 跨境商品可信上新的本地演示：Materials → Launch Task → Top 3 → Evidence / FactCard V2 → Pricing → Listing → Review Block → Human Fix → Mock Publish。
 
 现已支持真实固定模板 **Excel / CSV 导入**。在 Materials 点击 **Import Supplier File / 导入供应商文件**，选择文件并查看校验预览，再导入有效商品。也可随时点击 **Load Demo Dataset / 载入内置数据** 恢复原来的 10 个 SKU。

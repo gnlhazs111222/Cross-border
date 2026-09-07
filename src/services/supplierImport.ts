@@ -82,6 +82,7 @@ export async function parseSupplierFile(file: File, mode: ImportMode, existing: 
       localizedCapacity: `${(capacity! / 29.5735295625).toFixed(1)} fl oz`, material: text(values.material),
       straw: strawValue === 'true' || strawValue === '1', countryOfOrigin: text(values.countryOfOrigin),
       supplierCost: supplierCost!, declaredValue: declaredValue!, packagingWeight,
+      packageLength: length, packageWidth: width, packageHeight: height,
       packagingDimensions: [length, width, height].every(n => n !== undefined) ? `${length} × ${width} × ${height} cm` : undefined,
       status: missing.length ? 'missing_data' : 'search_ready', duplicateStatus: 'unique', missing,
       visual: category === 'Bags & Accessories' ? 'bag' : category === 'Electronics' ? 'lamp' : 'bottle',

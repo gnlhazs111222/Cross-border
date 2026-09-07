@@ -1,4 +1,5 @@
 import { demoTask, HERO_SKU, products as builtInProducts } from '../data/mockData';
+import { COPY_FACTS, PRICING_FACTS, REQUIRED_COPY_FACTS, editableFact, factEditor, factNumber, normalizeFactValue } from './factReview';
 import { SUPPLIER_COLUMNS } from '../data/supplierTemplate';
 import type { DemoState, Evidence, Fact, FactCard, ImportMode, ImportPreview, Listing, Platform, Pricing, Product, Recommendation, Stage, Workspace } from '../types';
 
@@ -7,7 +8,7 @@ const delay = (ms = 420) => new Promise<void>(resolve => setTimeout(resolve, ms)
 const clone = <T,>(value: T): T => structuredClone(value);
 const initialState = (): DemoState => ({
   schemaVersion: 1, workspace: 'materials', stage: 'initial', history: ['initial'],
-  catalog: clone(builtInProducts), datasetSource: 'builtin', importReport: null,
+  catalog: clone(builtInProducts), datasetSource: 'builtin', importReport: null, factEdits: {},
   task: null, selectedSku: null, v1: null, v2: null, pricing: null, platform: 'amazon',
   listings: {}, reviews: {}, publications: {},
 });
@@ -21,6 +22,11 @@ function hydrate(): DemoState {
     s.catalog ??= clone(builtInProducts);
     s.datasetSource ??= 'builtin';
     s.importReport ??= null;
+    s.factEdits ??= {};
+    if (!s.factEdits || Array.isArray(s.factEdits) || typeof s.factEdits !== 'object'
+      || !Object.values(s.factEdits).every(edits => edits && typeof edits === 'object' && Object.values(edits).every(f =>
+        f && typeof f.key === 'string' && typeof f.value === 'string' && typeof f.source === 'string'
+        && ['Confirmed', 'Requires Confirmation', 'Rejected', 'Missing'].includes(f.status)))) return initialState();
     if (!Array.isArray(s.catalog) || s.catalog.length > 500 || !s.catalog.every(p =>
       p && typeof p.sku === 'string' && typeof p.name === 'string' && typeof p.category === 'string'
       && typeof p.color === 'string' && typeof p.material === 'string' && typeof p.countryOfOrigin === 'string'
@@ -62,9 +68,10 @@ function eligible(p: Product) {
   return p.status === 'search_ready' && p.duplicateStatus === 'unique' && p.category === demoTask.category;
 }
 function fact(key: string, label: string, value: string, source: string, anchor: string, allowed = true, confirmed = true): Fact {
-  return { key, label, value, source, anchor, allowed, status: confirmed ? 'Confirmed' : 'Requires Confirmation' };
+  return { key, label, value, source, anchor, allowed: confirmed && allowed, status: value === 'Missing' ? 'Missing' : confirmed ? 'Confirmed' : 'Requires Confirmation', sourceKind: 'mock' };
 }
 function cardV1(p: Product): FactCard {
+  const dimensions = p.packagingDimensions?.split(' × ').map(Number.parseFloat);
   const facts = [
     fact('color', 'Color', p.color, 'Supplier Spreadsheet', 'Products · column D'),
     fact('capacity', 'Capacity', `${p.capacity}ml / ${p.localizedCapacity}`, 'Specification PDF', 'Page 1 · specifications'),
@@ -72,43 +79,118 @@ function cardV1(p: Product): FactCard {
     fact('straw', 'Straw', p.straw ? 'Included' : 'No straw', 'Supplier Spreadsheet', 'Products · column F'),
     fact('countryOfOrigin', 'Country of origin', p.countryOfOrigin, 'Supplier Spreadsheet', 'Products · column G'),
     fact('packagingWeight', 'Packaging weight', p.packagingWeight ? `${p.packagingWeight} kg` : 'Missing', 'Supplier Spreadsheet', 'Packaging · column C', false, !!p.packagingWeight),
+    ...(['packageLength', 'packageWidth', 'packageHeight'] as const).map((key, i) => {
+      const value = p[key] ?? dimensions?.[i];
+      return fact(key, ['Package length', 'Package width', 'Package height'][i], value ? `${value} cm` : 'Missing', 'Supplier Spreadsheet', `Packaging · ${key}`, false, !!value);
+    }),
     fact('supplierCost', 'Supplier cost', `USD ${p.supplierCost.toFixed(2)}`, 'Supplier Spreadsheet', 'Commercial · column B', false),
     fact('declaredValue', 'Declared value', `USD ${(p.declaredValue ?? 8.2).toFixed(2)}`, 'Supplier Spreadsheet', 'Commercial · column C', false),
   ];
   if (p.importSource) {
-    const columns: Record<string, string> = { color: 'color', capacity: 'capacityMl', material: 'material', straw: 'hasStraw', countryOfOrigin: 'countryOfOrigin', packagingWeight: 'packagingWeightKg', supplierCost: 'supplierCost', declaredValue: 'declaredValue' };
+    const columns: Record<string, string> = { color: 'color', capacity: 'capacityMl', material: 'material', straw: 'hasStraw', countryOfOrigin: 'countryOfOrigin', packagingWeight: 'packagingWeightKg', packageLength: 'packageLengthCm', packageWidth: 'packageWidthCm', packageHeight: 'packageHeightCm', supplierCost: 'supplierCost', declaredValue: 'declaredValue' };
     for (const f of facts) {
-      f.source = 'Imported Supplier File';
+      f.source = 'Imported Supplier File'; f.sourceKind = 'supplier';
       f.anchor = `${p.importSource.fileName} · ${p.importSource.sheetName} · row ${p.importSource.row} · ${columns[f.key]}`;
     }
   }
-  return { version: 1, sku: p.sku, facts };
+  return { version: 1, sku: p.sku, facts: facts.map(f => clone(editsFor(p.sku)[f.key] ?? f)) };
+}
+function editsFor(sku: string): Record<string, Fact> { return Object.hasOwn(current.factEdits, sku) ? current.factEdits[sku] : {}; }
+function factRevision(sku: string, keys?: string[]) {
+  return Object.values(editsFor(sku)).filter(f => !keys || keys.includes(f.key)).reduce((sum, f) => sum + (f.revision ?? 0), 0);
+}
+function productView(p: Product): Product {
+  if (!Object.keys(editsFor(p.sku)).length) return clone(p);
+  const facts = cardV1(p).facts;
+  const confirmed = (key: string) => facts.find(f => f.key === key && f.status === 'Confirmed');
+  const missing = p.missing.filter(label => !['Packaging Weight', 'Packaging Dimensions'].includes(label) && !(label === 'Accessory Information' && editsFor(p.sku).packageIncludes?.status === 'Confirmed'));
+  if (!confirmed('packagingWeight')) missing.push('Packaging Weight');
+  if (['packageLength', 'packageWidth', 'packageHeight'].some(key => !confirmed(key))) missing.push('Packaging Dimensions');
+  for (const key of ['color', 'capacity', 'material', 'straw', 'countryOfOrigin', 'supplierCost', 'declaredValue']) {
+    if (!confirmed(key)) missing.push(facts.find(f => f.key === key)!.label);
+  }
+  const value = (key: string) => confirmed(key)?.value;
+  const dimensions = ['packageLength', 'packageWidth', 'packageHeight'].map(key => value(key) ? factNumber(value(key)!) : undefined);
+  return { ...p, color: value('color') ?? p.color, material: value('material') ?? p.material,
+    capacity: value('capacity') ? factNumber(value('capacity')!) : p.capacity,
+    localizedCapacity: value('capacity')?.split(' / ')[1] ?? p.localizedCapacity,
+    countryOfOrigin: value('countryOfOrigin') ?? p.countryOfOrigin,
+    straw: value('straw') ? value('straw') === 'Included' : p.straw,
+    supplierCost: value('supplierCost') ? factNumber(value('supplierCost')!) : p.supplierCost,
+    declaredValue: value('declaredValue') ? factNumber(value('declaredValue')!) : p.declaredValue,
+    packagingWeight: value('packagingWeight') ? factNumber(value('packagingWeight')!) : undefined,
+    packagingDimensions: dimensions.every(n => n !== undefined) ? `${dimensions.join(' × ')} cm` : undefined,
+    missing: [...new Set(missing)], status: missing.length ? 'missing_data' : 'search_ready',
+  };
 }
 function pricingFor(p: Product): Pricing {
-  const missing = [...(!p.packagingWeight ? ['Packaging Weight'] : []), ...(!p.packagingDimensions ? ['Packaging Dimensions'] : [])];
-  return { version: 'v1', status: missing.length ? 'blocked' : 'ready', supplierCost: p.supplierCost,
+  const facts = cardV1(p).facts;
+  const confirmed = (key: string) => facts.find(f => f.key === key && f.status === 'Confirmed');
+  const missing = [
+    ...(!confirmed('packagingWeight') ? ['Packaging Weight'] : []),
+    ...(['packageLength', 'packageWidth', 'packageHeight'].some(key => !confirmed(key)) ? ['Packaging Dimensions'] : []),
+    ...(!confirmed('supplierCost') ? ['Supplier cost'] : []),
+  ];
+  const cost = confirmed('supplierCost') ? factNumber(confirmed('supplierCost')!.value) : p.supplierCost;
+  const floor = Math.ceil((cost + 3.1 + 0.7 + 2.2 + 5 - 1e-9) * 100) / 100;
+  return { version: `v${1 + factRevision(p.sku, PRICING_FACTS)}`, status: missing.length ? 'blocked' : 'ready', supplierCost: cost,
     shipping: 3.1, duty: 0.7, platformCost: 2.2, targetProfit: 5,
-    suggestedPrice: missing.length ? null : p.sku === HERO_SKU ? Math.max(19.99, Math.ceil((p.supplierCost + 3.1 + 0.7 + 2.2 + 5) * 100) / 100) : Math.ceil((p.supplierCost + 3.1 + 0.7 + 2.2 + 5) * 100) / 100,
-    missing };
+    suggestedPrice: missing.length ? null : p.sku === HERO_SKU ? Math.max(19.99, floor) : floor, missing };
+}
+function synchronizeFacts() {
+  if (!current.selectedSku) return;
+  current.v1 = cardV1(selected());
+  if (current.v2) {
+    const baseKeys = new Set(current.v1.facts.map(f => f.key));
+    current.v2 = { ...current.v2, facts: [...clone(current.v1.facts), ...current.v2.facts.filter(f => !baseKeys.has(f.key)).map(f => clone(editsFor(current.selectedSku!)[f.key] ?? f))] };
+  }
+}
+function findCurrentFact(key: string): Fact {
+  const f = (current.v2 ?? current.v1)?.facts.find(f => f.key === key);
+  if (!f || !current.selectedSku) throw new Error('Open Fact Review for a product first.');
+  return f;
+}
+function changeFact(key: string, action: 'edit' | 'confirm' | 'reject', input?: string) {
+  const before = findCurrentFact(key);
+  if (action !== 'reject' && !editableFact(key)) throw new Error('This claim cannot be edited or confirmed in the demo.');
+  if (action === 'confirm' && (before.status === 'Missing' || !before.value.trim())) throw new Error('A value is required before confirmation.');
+  const value = action === 'edit' ? normalizeFactValue(key, input ?? '') : action === 'confirm' ? normalizeFactValue(key, factEditor(before).value) : before.value;
+  const status: Fact['status'] = action === 'edit' ? 'Requires Confirmation' : action === 'confirm' ? 'Confirmed' : 'Rejected';
+  const now = new Date().toISOString();
+  const updated: Fact = { ...before, value, status, allowed: status === 'Confirmed' && COPY_FACTS.includes(key),
+    source: 'Manual confirmation', sourceKind: 'manual', anchor: `Fact Review · ${key}`,
+    previousValue: action === 'edit' ? before.value : before.previousValue ?? before.value,
+    previousSource: before.sourceKind === 'manual' ? before.previousSource : `${before.source} · ${before.anchor}`,
+    updatedAt: now, confirmedAt: action === 'confirm' ? now : undefined, revision: (before.revision ?? 0) + 1,
+  };
+  const sku = current.selectedSku!;
+  current.factEdits = { ...current.factEdits, [sku]: { ...editsFor(sku), [key]: updated } };
+  synchronizeFacts();
+  // Both platforms depend on this product's facts and price. Never retain an old approval.
+  current.listings = {}; current.reviews = {}; current.publications = {};
+  current.pricing = pricingFor(selected());
+  advance(current.pricing.status === 'ready' ? 'pricing_ready' : current.v2 ? 'evidence_analyzed' : 'sku_selected');
+  return save();
 }
 function safeListing(platform: Platform, revision = 1): Listing {
   if (!current.v2 || current.pricing?.status !== 'ready') throw new Error('Analyze evidence and resolve pricing before generating a listing.');
+  if (selected().duplicateStatus !== 'unique' || selected().category !== demoTask.category) throw new Error('Duplicate or out-of-category products cannot generate listings for this task.');
   const sources = current.v2.facts.filter(f => f.allowed && f.status === 'Confirmed');
   const value = (key: string) => sources.find(f => f.key === key)?.value;
   const color = value('color'); const capacity = value('capacity'); const material = value('material');
   if (!color || !capacity || !material) throw new Error('Required confirmed facts are missing.');
   const lid = value('lidType'); const includes = value('packageIncludes');
   return {
-    platform, revision, riskDemoInjected: false,
-    title: `${color} ${material} Travel Bottle, ${capacity}${lid ? ', Screw-top Lid' : ''}`,
+    platform, revision, factRevision: factRevision(current.selectedSku!), riskDemoInjected: false,
+    title: `${color} ${material} Travel Bottle, ${capacity}${lid ? `, ${lid === 'Screw-top lid' ? 'Screw-top Lid' : lid}` : ''}`,
     bullets: [
       `${capacity} capacity for your everyday routine.`,
       `${material} body${value('finish') ? ` with a ${value('finish')!.toLowerCase()} finish` : ''}.`,
-      ...(lid ? ['Secure screw-top lid designed for everyday carrying.'] : []),
-      ...(value('straw') === 'No straw' ? ['A simple, straw-free design.'] : ['Includes a straw.']),
+      ...(lid ? [lid === 'Screw-top lid' ? 'Secure screw-top lid designed for everyday carrying.' : `${lid}.`] : []),
+      ...(value('straw') ? value('straw') === 'No straw' ? ['A simple, straw-free design.'] : ['Includes a straw.'] : []),
       ...(includes ? [`In the box: ${includes}.`] : []),
     ],
-    description: `Meet your everyday travel bottle. A ${color.toLowerCase()} ${material.toLowerCase()} body holds ${capacity}.${lid ? ' Finished with a screw-top lid.' : ''}${includes ? ` Includes ${includes.toLowerCase()}.` : ''}`,
+    description: `Meet your everyday travel bottle. A ${color.toLowerCase()} ${material.toLowerCase()} body holds ${capacity}.${lid ? ` Finished with a ${lid.toLowerCase()}.` : ''}${includes ? ` Includes ${includes.toLowerCase()}.` : ''}`,
     attributes: Object.fromEntries(sources.filter(f => ['color', 'capacity', 'material', 'straw', 'countryOfOrigin', 'finish', 'lidType'].includes(f.key)).map(f => [f.label, f.value])),
     sources,
   };
@@ -127,9 +209,12 @@ function reviewIssues(listing: Listing) {
 export const mockApi = {
   getState: () => clone(current),
   isStorageAvailable: () => storageAvailable,
-  async getCatalog() { await delay(180); return clone(current.catalog); },
+  catalog: () => current.catalog.map(productView),
+  async getCatalog() { await delay(180); return current.catalog.map(productView); },
+  factEditor, editableFact,
+  listingReady() { return !!current.v2 && !!current.selectedSku && selected().duplicateStatus === 'unique' && selected().category === demoTask.category && current.pricing?.status === 'ready' && REQUIRED_COPY_FACTS.every(key => current.v2!.facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed)); },
   getTaskTemplate: () => clone(demoTask),
-  async ready() { if (current.stage === 'initial') advance('materials_ready'); return save(); },
+  async ready() { synchronizeFacts(); if (current.pricing && current.selectedSku) current.pricing = pricingFor(selected()); if (current.stage === 'initial') advance('materials_ready'); return save(); },
   navigate(workspace: Workspace) { current.workspace = workspace; return save(); },
   async reset() { await delay(180); pendingImport = null; current = initialState(); return save(); },
   async loadBuiltInDataset() { await delay(180); pendingImport = null; current = initialState(); advance('materials_ready'); return save(); },
@@ -164,7 +249,7 @@ export const mockApi = {
   },
   recommendations(): Recommendation[] {
     if (!current.task) return [];
-    return current.catalog.filter(eligible).map(p => {
+    return current.catalog.map(productView).filter(eligible).map(p => {
       const reasons: string[] = []; const deductions: string[] = []; let score = 94;
       if (p.color === 'Black') reasons.push('Black matches requested color');
       else { score -= 23; deductions.push('Color does not match requested black'); }
@@ -183,20 +268,36 @@ export const mockApi = {
     if (p.category !== demoTask.category) return 'Category mismatch · outside Home & Kitchen';
     return 'Eligible for the candidate pool';
   },
-  isEligible: eligible,
+  isEligible: (p: Product) => eligible(productView(p)),
   previewPricing: (sku: string) => { const p = current.catalog.find(p => p.sku === sku); if (!p) throw new Error('Unknown SKU'); return pricingFor(p); },
   getFacts: (sku: string) => { const p = current.catalog.find(p => p.sku === sku); if (!p) throw new Error('Unknown SKU'); return cardV1(p); },
   async selectSku(sku: string) {
     await delay();
     if (!current.task) throw new Error('Create a launch task first.');
     const p = current.catalog.find(p => p.sku === sku);
-    if (!p || !eligible(p)) throw new Error('This product is not eligible for recommendation. Inspect missing data in Materials.');
+    if (!p || !eligible(productView(p))) throw new Error('This product is not eligible for recommendation. Inspect missing data in Materials.');
     if (current.selectedSku !== sku) {
       current.selectedSku = sku; current.v1 = cardV1(p); current.v2 = null; current.pricing = null;
       current.listings = {}; current.reviews = {}; current.publications = {}; advance('sku_selected');
     }
     current.workspace = 'evidence'; return save();
   },
+  async openFactReview(sku: string) {
+    await delay(180);
+    const p = current.catalog.find(p => p.sku === sku);
+    if (!p) throw new Error('Unknown SKU');
+    if (!current.task) current.task = clone(demoTask);
+    if (current.selectedSku !== sku) {
+      current.selectedSku = sku; current.v1 = cardV1(p); current.v2 = null;
+      current.listings = {}; current.reviews = {}; current.publications = {};
+      advance('sku_selected');
+    }
+    current.pricing = pricingFor(p); current.workspace = 'evidence';
+    return save();
+  },
+  async editFact(key: string, value: string) { await delay(180); return changeFact(key, 'edit', value); },
+  async confirmFact(key: string) { await delay(180); return changeFact(key, 'confirm'); },
+  async rejectFact(key: string) { await delay(180); return changeFact(key, 'reject'); },
   evidence(sku: string): Evidence[] {
     const p = current.catalog.find(p => p.sku === sku);
     if (!p) return [];
@@ -212,11 +313,12 @@ export const mockApi = {
     if (!current.v1 || !current.task) throw new Error('Select a product and task first.');
     if (!current.v2) {
       current.v2 = { version: 2, sku: p.sku, taskId: current.task.id, facts: [...clone(current.v1.facts),
-        fact('packageIncludes', 'Package includes', 'Bottle, Lid, Instruction card', p.importSource ? 'Mock Packaging Image' : 'Packaging Image', 'Image 2 · contents'),
-        fact('finish', 'Finish', `Matte ${p.color.toLowerCase()}`, p.importSource ? 'Mock Product Image' : 'Product Image', 'Image 1 · exterior'),
-        fact('lidType', 'Lid type', 'Screw-top lid', p.importSource ? 'Mock Specification PDF' : 'Specification PDF', 'Page 1 · closure'),
+        fact('packageIncludes', 'Package includes', 'Bottle, Lid, Instruction card', p.importSource ? 'Mock Packaging Image' : 'Packaging Image', 'Image 2 · contents', true, p.sku === HERO_SKU),
+        fact('finish', 'Finish', `Matte ${p.color.toLowerCase()}`, p.importSource ? 'Mock Product Image' : 'Product Image', 'Image 1 · exterior', true, p.sku === HERO_SKU),
+        fact('lidType', 'Lid type', 'Screw-top lid', p.importSource ? 'Mock Specification PDF' : 'Specification PDF', 'Page 1 · closure', true, p.sku === HERO_SKU),
         fact('leakproof', 'Leakproof performance', '100% leakproof', 'Supplier claim', 'Unverified · no supporting test report', false, false),
       ] };
+      synchronizeFacts();
       advance('evidence_analyzed');
       current.pricing = pricingFor(p);
       if (current.pricing.status === 'ready') advance('pricing_ready');
@@ -268,8 +370,9 @@ export const mockApi = {
     advance('listing_generated'); return save();
   },
   canPublish() {
+    if (!this.listingReady()) return false;
     const listing = current.listings[current.platform]; const review = current.reviews[current.platform];
-    return !!listing && review?.status === 'passed' && review.revision === listing.revision && current.pricing?.status === 'ready' && reviewIssues(listing).length === 0;
+    return !!listing && (listing.factRevision ?? 0) === factRevision(current.selectedSku!) && review?.status === 'passed' && review.revision === listing.revision && current.pricing?.status === 'ready' && reviewIssues(listing).length === 0;
   },
   async publish() {
     await delay(750);
