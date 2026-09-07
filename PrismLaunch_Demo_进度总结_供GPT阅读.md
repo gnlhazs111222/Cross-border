@@ -20,7 +20,7 @@
 | 数据与智能能力 | 10 个预置 SKU、固定任务、确定性规则和模板；全部为 Mock |
 | 数据保存 | 当前浏览器 localStorage，可刷新恢复、一键重置 |
 | 验证 | 最近一次生产构建上的 Chromium 浏览器验收为 8 项全部通过 |
-| 交付位置 | 本地仓库 `/mnt/data/pyc/Create_new_products`；本次代码提交的同步目标为 GitHub `gnlhazs111222/Create_new_products` 的 `pyc` 分支 |
+| 交付位置 | 本地仓库 `/mnt/data/pyc/Create_new_products`；GitHub 仓库现名为 `gnlhazs111222/Projects`（原名 `Create_new_products`），代码同步至 `pyc` 分支 |
 
 不能据此给出“生产系统已完成多少百分比”。目前完成的是约定范围内的演示版本。
 
