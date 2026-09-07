@@ -1,11 +1,13 @@
-import { demoTask, HERO_SKU, products } from '../data/mockData';
-import type { DemoState, Evidence, Fact, FactCard, Listing, Platform, Pricing, Product, Recommendation, Stage, Workspace } from '../types';
+import { demoTask, HERO_SKU, products as builtInProducts } from '../data/mockData';
+import { SUPPLIER_COLUMNS } from '../data/supplierTemplate';
+import type { DemoState, Evidence, Fact, FactCard, ImportMode, ImportPreview, Listing, Platform, Pricing, Product, Recommendation, Stage, Workspace } from '../types';
 
 export const STORAGE_KEY = 'prismlaunch.demo.v1';
 const delay = (ms = 420) => new Promise<void>(resolve => setTimeout(resolve, ms));
 const clone = <T,>(value: T): T => structuredClone(value);
 const initialState = (): DemoState => ({
   schemaVersion: 1, workspace: 'materials', stage: 'initial', history: ['initial'],
+  catalog: clone(builtInProducts), datasetSource: 'builtin', importReport: null,
   task: null, selectedSku: null, v1: null, v2: null, pricing: null, platform: 'amazon',
   listings: {}, reviews: {}, publications: {},
 });
@@ -15,10 +17,21 @@ function hydrate(): DemoState {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return initialState();
     const s = JSON.parse(raw) as DemoState;
+    // Migrate existing v1 browser sessions without discarding their launch progress.
+    s.catalog ??= clone(builtInProducts);
+    s.datasetSource ??= 'builtin';
+    s.importReport ??= null;
+    if (!Array.isArray(s.catalog) || s.catalog.length > 500 || !s.catalog.every(p =>
+      p && typeof p.sku === 'string' && typeof p.name === 'string' && typeof p.category === 'string'
+      && typeof p.color === 'string' && typeof p.material === 'string' && typeof p.countryOfOrigin === 'string'
+      && typeof p.capacity === 'number' && typeof p.localizedCapacity === 'string'
+      && typeof p.straw === 'boolean' && typeof p.supplierCost === 'number' && Array.isArray(p.missing)
+      && ['search_ready', 'missing_data'].includes(p.status)
+      && ['unique', 'duplicate', 'possible_duplicate'].includes(p.duplicateStatus))) return initialState();
     if (s.schemaVersion !== 1 || !['materials', 'tasks', 'evidence', 'studio', 'review'].includes(s.workspace)
       || !['amazon', 'shopify'].includes(s.platform) || !Array.isArray(s.history)
       || !s.listings || !s.reviews || !s.publications
-      || (s.selectedSku && !products.some(p => p.sku === s.selectedSku))) return initialState();
+      || (s.selectedSku && !s.catalog.some(p => p.sku === s.selectedSku))) return initialState();
     for (const platform of ['amazon', 'shopify'] as const) {
       const listing = s.listings[platform];
       if (listing && (!Array.isArray(listing.bullets) || !Array.isArray(listing.sources) || typeof listing.title !== 'string' || typeof listing.description !== 'string' || !listing.attributes)) return initialState();
@@ -30,6 +43,7 @@ function hydrate(): DemoState {
   } catch { return initialState(); }
 }
 let current = hydrate();
+let pendingImport: ImportPreview | null = null;
 function save() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(current)); storageAvailable = true; }
   catch { storageAvailable = false; }
@@ -40,7 +54,7 @@ function advance(stage: Stage) {
   if (current.history.at(-1) !== stage) current.history.push(stage);
 }
 function selected(): Product {
-  const product = products.find(p => p.sku === current.selectedSku);
+  const product = current.catalog.find(p => p.sku === current.selectedSku);
   if (!product) throw new Error('Select a product first.');
   return product;
 }
@@ -51,7 +65,7 @@ function fact(key: string, label: string, value: string, source: string, anchor:
   return { key, label, value, source, anchor, allowed, status: confirmed ? 'Confirmed' : 'Requires Confirmation' };
 }
 function cardV1(p: Product): FactCard {
-  return { version: 1, sku: p.sku, facts: [
+  const facts = [
     fact('color', 'Color', p.color, 'Supplier Spreadsheet', 'Products · column D'),
     fact('capacity', 'Capacity', `${p.capacity}ml / ${p.localizedCapacity}`, 'Specification PDF', 'Page 1 · specifications'),
     fact('material', 'Material', p.material, 'Specification PDF', 'Page 1 · body material'),
@@ -59,14 +73,22 @@ function cardV1(p: Product): FactCard {
     fact('countryOfOrigin', 'Country of origin', p.countryOfOrigin, 'Supplier Spreadsheet', 'Products · column G'),
     fact('packagingWeight', 'Packaging weight', p.packagingWeight ? `${p.packagingWeight} kg` : 'Missing', 'Supplier Spreadsheet', 'Packaging · column C', false, !!p.packagingWeight),
     fact('supplierCost', 'Supplier cost', `USD ${p.supplierCost.toFixed(2)}`, 'Supplier Spreadsheet', 'Commercial · column B', false),
-    fact('declaredValue', 'Declared value', 'USD 8.20', 'Supplier Spreadsheet', 'Commercial · column C', false),
-  ] };
+    fact('declaredValue', 'Declared value', `USD ${(p.declaredValue ?? 8.2).toFixed(2)}`, 'Supplier Spreadsheet', 'Commercial · column C', false),
+  ];
+  if (p.importSource) {
+    const columns: Record<string, string> = { color: 'color', capacity: 'capacityMl', material: 'material', straw: 'hasStraw', countryOfOrigin: 'countryOfOrigin', packagingWeight: 'packagingWeightKg', supplierCost: 'supplierCost', declaredValue: 'declaredValue' };
+    for (const f of facts) {
+      f.source = 'Imported Supplier File';
+      f.anchor = `${p.importSource.fileName} · ${p.importSource.sheetName} · row ${p.importSource.row} · ${columns[f.key]}`;
+    }
+  }
+  return { version: 1, sku: p.sku, facts };
 }
 function pricingFor(p: Product): Pricing {
   const missing = [...(!p.packagingWeight ? ['Packaging Weight'] : []), ...(!p.packagingDimensions ? ['Packaging Dimensions'] : [])];
   return { version: 'v1', status: missing.length ? 'blocked' : 'ready', supplierCost: p.supplierCost,
     shipping: 3.1, duty: 0.7, platformCost: 2.2, targetProfit: 5,
-    suggestedPrice: missing.length ? null : p.sku === HERO_SKU ? 19.99 : Math.ceil((p.supplierCost + 3.1 + 0.7 + 2.2 + 5) * 100) / 100,
+    suggestedPrice: missing.length ? null : p.sku === HERO_SKU ? Math.max(19.99, Math.ceil((p.supplierCost + 3.1 + 0.7 + 2.2 + 5) * 100) / 100) : Math.ceil((p.supplierCost + 3.1 + 0.7 + 2.2 + 5) * 100) / 100,
     missing };
 }
 function safeListing(platform: Platform, revision = 1): Listing {
@@ -105,11 +127,35 @@ function reviewIssues(listing: Listing) {
 export const mockApi = {
   getState: () => clone(current),
   isStorageAvailable: () => storageAvailable,
-  async getCatalog() { await delay(180); return clone(products); },
+  async getCatalog() { await delay(180); return clone(current.catalog); },
   getTaskTemplate: () => clone(demoTask),
   async ready() { if (current.stage === 'initial') advance('materials_ready'); return save(); },
   navigate(workspace: Workspace) { current.workspace = workspace; return save(); },
-  async reset() { await delay(180); current = initialState(); return save(); },
+  async reset() { await delay(180); pendingImport = null; current = initialState(); return save(); },
+  async loadBuiltInDataset() { await delay(180); pendingImport = null; current = initialState(); advance('materials_ready'); return save(); },
+  getSupplierTemplate: () => [...SUPPLIER_COLUMNS],
+  async previewSupplierFile(file: File, mode: ImportMode): Promise<ImportPreview> {
+    pendingImport = null;
+    const { parseSupplierFile } = await import('./supplierImport');
+    pendingImport = await parseSupplierFile(file, mode, current.catalog);
+    if (mode === 'append' && current.catalog.length + pendingImport.products.length > 500) {
+      pendingImport = null;
+      throw new Error('Too many products. Keep the dataset within 500 products.');
+    }
+    return clone(pendingImport);
+  },
+  async importSupplierFile() {
+    await delay(180);
+    const preview = pendingImport;
+    if (!preview?.products.length) throw new Error('No valid new products to import. The current dataset is unchanged.');
+    const catalog = preview.mode === 'append' ? [...current.catalog, ...preview.products] : preview.products;
+    if (new Set(catalog.map(p => p.sku)).size !== catalog.length) throw new Error('The dataset changed. Preview the file again.');
+    const { products: importedProducts, ...report } = preview;
+    void importedProducts;
+    current = { ...initialState(), catalog: clone(catalog), datasetSource: preview.mode === 'append' ? 'mixed' : 'imported', importReport: clone(report) };
+    advance('materials_ready'); pendingImport = null;
+    return save();
+  },
   async createTask() {
     await delay();
     if (current.stage === 'initial') advance('materials_ready');
@@ -118,17 +164,17 @@ export const mockApi = {
   },
   recommendations(): Recommendation[] {
     if (!current.task) return [];
-    return products.filter(eligible).map(p => {
+    return current.catalog.filter(eligible).map(p => {
       const reasons: string[] = []; const deductions: string[] = []; let score = 94;
       if (p.color === 'Black') reasons.push('Black matches requested color');
       else { score -= 23; deductions.push('Color does not match requested black'); }
       if (p.capacity === 500) reasons.push('500ml / 16.9 fl oz closely matches target capacity');
-      else { score -= 16; deductions.push('Capacity too large: 750ml / 25.4 fl oz'); }
+      else { score -= 16; deductions.push(p.capacity === 750 ? 'Capacity too large: 750ml / 25.4 fl oz' : 'Capacity does not match the 500ml target'); }
       if (!p.straw) reasons.push('No straw');
       else { score -= 12; deductions.push('Includes straw: does not meet the no-straw preference'); }
       reasons.push('Packaging information is complete');
       return { sku: p.sku, score, reasons, deductions };
-    }).sort((a, b) => b.score - a.score).slice(0, 3);
+    }).sort((a, b) => b.score - a.score || Number(b.sku === HERO_SKU) - Number(a.sku === HERO_SKU)).slice(0, 3);
   },
   exclusionReason(p: Product) {
     if (p.duplicateStatus === 'duplicate') return 'Exact duplicate · excluded from recommendations';
@@ -138,12 +184,12 @@ export const mockApi = {
     return 'Eligible for the candidate pool';
   },
   isEligible: eligible,
-  previewPricing: (sku: string) => { const p = products.find(p => p.sku === sku); if (!p) throw new Error('Unknown SKU'); return pricingFor(p); },
-  getFacts: (sku: string) => { const p = products.find(p => p.sku === sku); if (!p) throw new Error('Unknown SKU'); return cardV1(p); },
+  previewPricing: (sku: string) => { const p = current.catalog.find(p => p.sku === sku); if (!p) throw new Error('Unknown SKU'); return pricingFor(p); },
+  getFacts: (sku: string) => { const p = current.catalog.find(p => p.sku === sku); if (!p) throw new Error('Unknown SKU'); return cardV1(p); },
   async selectSku(sku: string) {
     await delay();
     if (!current.task) throw new Error('Create a launch task first.');
-    const p = products.find(p => p.sku === sku);
+    const p = current.catalog.find(p => p.sku === sku);
     if (!p || !eligible(p)) throw new Error('This product is not eligible for recommendation. Inspect missing data in Materials.');
     if (current.selectedSku !== sku) {
       current.selectedSku = sku; current.v1 = cardV1(p); current.v2 = null; current.pricing = null;
@@ -152,12 +198,12 @@ export const mockApi = {
     current.workspace = 'evidence'; return save();
   },
   evidence(sku: string): Evidence[] {
-    const p = products.find(p => p.sku === sku);
+    const p = current.catalog.find(p => p.sku === sku);
     if (!p) return [];
     return [
-      { id: 'EV-001', type: 'sheet', name: 'Supplier Spreadsheet', file: 'supplier_catalog.xlsx', anchor: `${sku} · Products & Packaging`, extracted: [`Color: ${p.color}`, `Straw: ${p.straw ? 'Included' : 'No straw'}`, `Packaging weight: ${p.packagingWeight ? `${p.packagingWeight} kg` : 'Missing'}`] },
-      { id: 'EV-002', type: 'pdf', name: 'Specification PDF', file: 'bottle_specification.pdf', anchor: 'Page 1 · specifications', extracted: [`Capacity: ${p.capacity}ml / ${p.localizedCapacity}`, `Body: ${p.material}`, 'Lid: Screw-top lid'] },
-      { id: 'EV-003', type: 'image', name: 'Product / Packaging Images', file: 'product_front.jpg + package_contents.jpg', anchor: 'Image 1 · exterior; image 2 · contents', extracted: [`Finish: Matte ${p.color.toLowerCase()}`, 'Package: Bottle, Lid, Instruction card', 'Leakproof performance: Not verified'] },
+      { id: 'EV-001', type: 'sheet', name: p.importSource ? 'Imported Supplier File' : 'Supplier Spreadsheet', file: p.importSource?.fileName ?? 'supplier_catalog.xlsx', anchor: p.importSource ? `${p.importSource.fileName} · ${p.importSource.sheetName} · row ${p.importSource.row}` : `${sku} · Products & Packaging`, extracted: [`Color: ${p.color}`, `Straw: ${p.straw ? 'Included' : 'No straw'}`, `Packaging weight: ${p.packagingWeight ? `${p.packagingWeight} kg` : 'Missing'}`] },
+      { id: 'EV-002', type: 'pdf', name: p.importSource ? 'Mock Specification PDF' : 'Specification PDF', file: 'bottle_specification.pdf', anchor: 'Page 1 · specifications', extracted: [`Capacity: ${p.capacity}ml / ${p.localizedCapacity}`, `Body: ${p.material}`, 'Lid: Screw-top lid'] },
+      { id: 'EV-003', type: 'image', name: p.importSource ? 'Mock Product / Packaging Images' : 'Product / Packaging Images', file: 'product_front.jpg + package_contents.jpg', anchor: 'Image 1 · exterior; image 2 · contents', extracted: [`Finish: Matte ${p.color.toLowerCase()}`, 'Package: Bottle, Lid, Instruction card', 'Leakproof performance: Not verified'] },
     ];
   },
   async analyzeEvidence() {
@@ -166,9 +212,9 @@ export const mockApi = {
     if (!current.v1 || !current.task) throw new Error('Select a product and task first.');
     if (!current.v2) {
       current.v2 = { version: 2, sku: p.sku, taskId: current.task.id, facts: [...clone(current.v1.facts),
-        fact('packageIncludes', 'Package includes', 'Bottle, Lid, Instruction card', 'Packaging Image', 'Image 2 · contents'),
-        fact('finish', 'Finish', `Matte ${p.color.toLowerCase()}`, 'Product Image', 'Image 1 · exterior'),
-        fact('lidType', 'Lid type', 'Screw-top lid', 'Specification PDF', 'Page 1 · closure'),
+        fact('packageIncludes', 'Package includes', 'Bottle, Lid, Instruction card', p.importSource ? 'Mock Packaging Image' : 'Packaging Image', 'Image 2 · contents'),
+        fact('finish', 'Finish', `Matte ${p.color.toLowerCase()}`, p.importSource ? 'Mock Product Image' : 'Product Image', 'Image 1 · exterior'),
+        fact('lidType', 'Lid type', 'Screw-top lid', p.importSource ? 'Mock Specification PDF' : 'Specification PDF', 'Page 1 · closure'),
         fact('leakproof', 'Leakproof performance', '100% leakproof', 'Supplier claim', 'Unverified · no supporting test report', false, false),
       ] };
       advance('evidence_analyzed');

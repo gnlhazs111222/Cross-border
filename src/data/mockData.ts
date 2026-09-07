@@ -5,7 +5,7 @@ const base: Product = {
   sku: HERO_SKU, name: 'Black Stainless Steel Travel Bottle', category: 'Home & Kitchen',
   color: 'Black', capacity: 500, localizedCapacity: '16.9 fl oz', material: 'Stainless Steel',
   straw: false, countryOfOrigin: 'China', status: 'search_ready', duplicateStatus: 'unique',
-  packagingWeight: 0.38, packagingDimensions: '8 × 8 × 25 cm', supplierCost: 8.2, missing: [], visual: 'bottle',
+  packagingWeight: 0.38, packagingDimensions: '8 × 8 × 25 cm', supplierCost: 8.2, declaredValue: 8.2, missing: [], visual: 'bottle',
 };
 export const products: Product[] = [
   base,

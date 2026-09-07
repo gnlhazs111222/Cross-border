@@ -1,2 +1,3 @@
 # Normalize CSV in Git and preserve CRLF when checked out for spreadsheet use.
 artifacts/*.csv text eol=crlf
+public/demo/*.csv text eol=crlf

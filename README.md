@@ -2,6 +2,10 @@
 
 跨境商品可信上新的本地演示：Materials → Launch Task → Top 3 → Evidence / FactCard V2 → Pricing → Listing → Review Block → Human Fix → Mock Publish。
 
+现已支持真实固定模板 **Excel / CSV 导入**。在 Materials 点击 **Import Supplier File / 导入供应商文件**，选择文件并查看校验预览，再导入有效商品。也可随时点击 **Load Demo Dataset / 载入内置数据** 恢复原来的 10 个 SKU。
+
+示例位于 `public/demo/prismlaunch-supplier-demo.xlsx` 和 `public/demo/prismlaunch-supplier-demo.csv`，页面提供下载链接。默认替换导入后：8 行处理、6 个 Ready、1 个 Missing Data、1 个重复行被跳过，最终 7 个商品。详见 [供应商导入说明](SUPPLIER_IMPORT.md)。
+
 现有项目书、流程图及资源目录完整保留。前端采用 React、Vite、TypeScript、Tailwind CSS，交互组件使用 Radix Dialog / Tabs 和 Lucide 图标。无需后端、账号或 API Key。
 
 ## 启动
@@ -63,7 +67,8 @@ npm run preview -- --port 5173
 - Amazon 与 Shopify 的文案、审核、发布结果独立。改文案、重新生成或切换 SKU 都会使对应旧审核失效；发布还会在数据层再次检查当前版本。
 - 商品成本、申报价值、运费与税费不进入消费者文案。只有第一次 Amazon 生成会添加用于风险演示的例外字段。
 - 人工编辑会产生新版本。Mock Review 仅检查已知证据文案、预置风险和其他未确认修改；任意不同文案会触发 R002，修复会恢复已确认措辞。
-- 全部数据固定模拟。没有实际文件上传 / OCR / LLM、物流 / 汇率 / 税则查询、真实平台发布、账号权限和后台服务。证据预览为提取字段，不包含真实原始 PDF 或表格。Amazon CSV 是演示格式，不是官方上传模板。这些不影响要求的 Demo 链路。
+- 内置目录固定模拟；用户选择的 Excel / CSV 在浏览器中真实解析、按固定列名校验，并保存为当前目录。默认替换目录，也可仅添加新 SKU；重复和无效行不写入。成功导入会重置旧上新进度。
+- 导入的供应商字段携带实际文件名和行号；补充 PDF / 图片证据仍明确标为 Mock。没有 OCR / LLM、物流 / 汇率 / 税则查询、真实平台发布、账号权限和后台服务。Amazon CSV 是演示格式，不是官方上传模板。
 - 如果浏览器禁用 localStorage，界面显示提醒，并继续支持当前内存会话。
 
 ## 验证
@@ -90,5 +95,6 @@ src/
   services/       Mock API、状态存储、推荐/审核/发布规则
   types/          TypeScript 数据契约
 tests/            浏览器验收用例
-public/           本地品牌图标
+public/           本地品牌图标、Excel / CSV 示例
+scripts/          从示例 CSV 生成对应 XLSX
 ```

@@ -5,7 +5,8 @@ export type Product = {
   sku: string; name: string; category: string; color: string; capacity: number;
   localizedCapacity: string; material: string; straw: boolean; countryOfOrigin: string;
   status: 'search_ready' | 'missing_data'; duplicateStatus: 'unique' | 'duplicate' | 'possible_duplicate';
-  packagingWeight?: number; packagingDimensions?: string; supplierCost: number;
+  packagingWeight?: number; packagingDimensions?: string; supplierCost: number; declaredValue?: number;
+  importSource?: { fileName: string; sheetName: string; row: number };
   missing: string[]; visual: 'bottle' | 'bag' | 'lamp';
 };
 export type Fact = {
@@ -21,8 +22,14 @@ export type Listing = { platform: Platform; title: string; bullets: string[]; de
 export type Issue = { id: string; severity: 'HIGH'; title: string; text: string; reason: string };
 export type Review = { status: 'blocked' | 'passed'; revision: number; issues: Issue[] };
 export type Publication = { platform: Platform; productId: string; status: string; revision: number };
+export type ImportMode = 'replace' | 'append';
+export type ImportIssue = { code: 'required' | 'number' | 'boolean' | 'formula' | 'extra' | 'long' | 'duplicate' | 'missing'; field: string };
+export type ImportRow = { row: number; sku: string; status: 'ready' | 'missing_data' | 'duplicate' | 'invalid'; issues: ImportIssue[] };
+export type ImportReport = { fileName: string; mode: ImportMode; processed: number; ready: number; missing: number; duplicates: number; invalid: number; rows: ImportRow[] };
+export type ImportPreview = ImportReport & { products: Product[] };
 export type DemoState = {
   schemaVersion: 1; workspace: Workspace; stage: Stage; history: Stage[];
+  catalog: Product[]; datasetSource: 'builtin' | 'imported' | 'mixed'; importReport: ImportReport | null;
   task: Task | null; selectedSku: string | null; v1: FactCard | null; v2: FactCard | null;
   pricing: Pricing | null; platform: Platform;
   listings: Partial<Record<Platform, Listing>>; reviews: Partial<Record<Platform, Review>>;

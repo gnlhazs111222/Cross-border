@@ -1,0 +1,9 @@
+sku,productName,category,color,capacityMl,material,hasStraw,countryOfOrigin,supplierCost,declaredValue,packagingWeightKg,packageLengthCm,packageWidthCm,packageHeightCm
+LM-KT-BTL-001-BLK-500,Black Stainless Steel Travel Bottle,Home & Kitchen,Black,500,Stainless Steel,false,China,8.20,8.20,0.38,8,8,25
+LM-KT-IMP-005-BLK-500,Imported Bottle Missing Packaging Weight,Home & Kitchen,Black,500,Stainless Steel,false,China,7.90,7.90,,8,8,25
+LM-KT-BTL-002-BLK-500,Black Straw Travel Bottle,Home & Kitchen,Black,500,Stainless Steel,true,China,8.60,8.60,0.40,8,8,26
+LM-KT-BTL-003-BLK-750,Black Large Travel Bottle,Home & Kitchen,Black,750,Stainless Steel,false,China,9.40,9.40,0.49,9,9,29
+LM-KT-BTL-004-WHT-500,Ivory Stainless Steel Bottle,Home & Kitchen,Ivory,500,Stainless Steel,false,China,8.20,8.20,0.38,8,8,25
+LM-KT-IMP-011-GRN-500,Imported Sage Travel Bottle,Home & Kitchen,Sage,500,Stainless Steel,false,China,8.10,8.10,0.38,8,8,25
+LM-KT-IMP-012-BLU-500,Imported Blue Travel Bottle,Home & Kitchen,Blue,500,Stainless Steel,false,China,8.30,8.30,0.38,8,8,25
+LM-KT-BTL-001-BLK-500,Duplicate Hero Row - Must Be Skipped,Home & Kitchen,Black,500,Stainless Steel,false,China,99.00,99.00,0.38,8,8,25
