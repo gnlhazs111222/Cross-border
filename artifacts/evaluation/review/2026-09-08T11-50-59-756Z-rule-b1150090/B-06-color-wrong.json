@@ -1,0 +1,35 @@
+{
+  "caseId": "B-06-color-wrong",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "contradiction",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 0,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "R002",
+        "severity": "HIGH",
+        "title": "Unverified edited content",
+        "text": "Text differs from the evidence-backed draft.",
+        "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+      }
+    ],
+    "metadata": {
+      "mode": "rule"
+    }
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "b4c3ee767799d0f353311cbe654590c8711e51fec36f7dc6c158e8c53b78aa48"
+}

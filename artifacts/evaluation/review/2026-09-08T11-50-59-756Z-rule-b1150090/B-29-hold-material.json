@@ -1,0 +1,35 @@
+{
+  "caseId": "B-29-hold-material",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "contradiction",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 0,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "R002",
+        "severity": "HIGH",
+        "title": "Unverified edited content",
+        "text": "Text differs from the evidence-backed draft.",
+        "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+      }
+    ],
+    "metadata": {
+      "mode": "rule"
+    }
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "44cf6e6f662c08d18ce279f4077e678482fb2d456f01ab9bd3760457db8931a6"
+}

@@ -143,6 +143,7 @@ model ListingDraft {
   @@unique([taskId, productId, platform, revision])
 }
 model ReviewResult {
+  metadata       Json?
   reviewMode     String @default("rules")
   highRiskCount  Int @default(0)
   invalidatedAt  DateTime?

@@ -1,0 +1,35 @@
+{
+  "caseId": "B-47-hold-authorized",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "supported",
+  "expected": "passed",
+  "actual": "blocked",
+  "latencyMs": 0,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "R002",
+        "severity": "HIGH",
+        "title": "Unverified edited content",
+        "text": "Text differs from the evidence-backed draft.",
+        "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+      }
+    ],
+    "metadata": {
+      "mode": "rule"
+    }
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "6dd9c335669dea2fcd3a77df90ffd43a94072196bdc575619e0c89a33a1540a4"
+}

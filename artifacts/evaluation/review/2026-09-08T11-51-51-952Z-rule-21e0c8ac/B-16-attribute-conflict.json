@@ -1,0 +1,19 @@
+{
+  "caseId": "B-16-attribute-conflict",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "contradiction",
+  "expected": "blocked",
+  "actual": "passed",
+  "latencyMs": 0,
+  "outcome": {
+    "status": "passed",
+    "issues": [],
+    "metadata": {
+      "mode": "rule"
+    }
+  },
+  "ruleStatus": "passed",
+  "ruleIssues": [],
+  "inputHash": "2de3330977e462c120b34486a070c7c0cedea73c081a50581f47c4938c7c5c61"
+}

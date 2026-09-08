@@ -1,0 +1,6 @@
+.semantic-review-details { min-width: 0; overflow-wrap: anywhere; }
+.semantic-review-details .badge { white-space: normal; }
+.semantic-review-details summary { cursor: pointer; }
+.semantic-review-details dl { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; font-size: 12px; }
+.semantic-review-details dd { margin: 0; }
+.review-stage-banner.failed, .review-stage-banner.needs_human_review { background: #fff6e8; color: #805011; }

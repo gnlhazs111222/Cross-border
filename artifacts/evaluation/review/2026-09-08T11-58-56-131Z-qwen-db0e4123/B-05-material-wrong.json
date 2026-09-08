@@ -1,0 +1,66 @@
+{
+  "caseId": "B-05-material-wrong",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "contradiction",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 710,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "Made from glass.",
+        "reason": "The bullet point claims the product is made from glass, but the authorized fact states the material is Stainless steel.",
+        "factKeys": [
+          "material"
+        ],
+        "suggestedFix": "Change 'Made from glass.' to 'Made from stainless steel.' or remove the incorrect material claim.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v2",
+      "ruleVersion": "review-hard-v1",
+      "inputHash": "e68c4ee7d70b66f2fc5a924b71bb86863a0b71bb1cb174a49f724ceae77969a3",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsm9cqs0004qqw83v5yzv0z"
+    }
+  },
+  "audit": {
+    "id": "cmtsm9cqs0004qqw83v5yzv0z",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 679,
+    "promptTokens": 634,
+    "completionTokens": 142,
+    "totalTokens": 776
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "9424ade901d7ac6693870a94d4788eccb3647071adf621f1689b1aa2709f1040"
+}

@@ -1,0 +1,40 @@
+{
+  "caseId": "B-01-exact-copy",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "supported",
+  "expected": "passed",
+  "actual": "passed",
+  "latencyMs": 464,
+  "outcome": {
+    "status": "passed",
+    "issues": [],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v1",
+      "ruleVersion": "review-hard-v1",
+      "inputHash": "044d06ea34a89f8147cd52057b478f60d69f81ca80a883a2bc2d6bd9ad278885",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsm7vp30000qqy4ln5hdc5m"
+    }
+  },
+  "audit": {
+    "id": "cmtsm7vp30000qqy4ln5hdc5m",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 413,
+    "promptTokens": 533,
+    "completionTokens": 17,
+    "totalTokens": 550
+  },
+  "ruleStatus": "passed",
+  "ruleIssues": [],
+  "inputHash": "f89e705a243fdeae92068b0f01f6e6472e841dd25cee73cd9783058391a53712"
+}

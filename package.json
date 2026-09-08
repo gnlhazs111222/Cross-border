@@ -26,7 +26,8 @@
     "ai:smoke": "tsx server/scripts/ai-smoke.ts",
     "security:check": "node scripts/check-secrets.mjs",
     "ai:listing-smoke": "tsx server/scripts/listing-smoke.ts",
-    "eval:recommendation": "tsx evaluation/recommendation/run.ts"
+    "eval:recommendation": "tsx evaluation/recommendation/run.ts",
+    "eval:review": "tsx evaluation/review/run.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",

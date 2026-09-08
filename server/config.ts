@@ -14,6 +14,8 @@ const schema = z.object({
   RECOMMENDATION_PROVIDER: z.enum(['rule', 'qwen']).default('rule'),
   RECOMMENDATION_MAX_TOKENS: z.coerce.number().int().min(300).max(3000).default(1800),
   LISTING_PROVIDER: z.enum(['template', 'qwen']).default('template'),
+  REVIEW_PROVIDER: z.enum(['rules', 'qwen']).default('rules'),
+  REVIEW_MAX_TOKENS: z.coerce.number().int().min(300).max(3000).default(1800),
   BAILIAN_LISTING_MAX_TOKENS: z.coerce.number().int().min(300).max(3000).default(1800),
   BAILIAN_API_KEY: z.string().default(''),
   BAILIAN_BASE_URL: z.string().url().default('https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1'),
@@ -27,6 +29,7 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env) {
   return { ...c, DATABASE_URL: `file:${isAbsolute(file) ? file : resolve(file)}`,
     RECOMMENDATION_PROVIDER: c.NODE_ENV === 'test' ? 'rule' as const : c.RECOMMENDATION_PROVIDER,
     LISTING_PROVIDER: c.NODE_ENV === 'test' ? 'template' as const : c.LISTING_PROVIDER,
+    REVIEW_PROVIDER: c.NODE_ENV === 'test' ? 'rules' as const : c.REVIEW_PROVIDER,
     AI_LIVE_ENABLED: c.NODE_ENV === 'test' ? false : c.AI_LIVE_ENABLED,
     BAILIAN_API_KEY: c.NODE_ENV === 'test' ? '' : c.BAILIAN_API_KEY,
   };

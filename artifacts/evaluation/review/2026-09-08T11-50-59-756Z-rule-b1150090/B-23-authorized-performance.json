@@ -1,0 +1,35 @@
+{
+  "caseId": "B-23-authorized-performance",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "supported",
+  "expected": "passed",
+  "actual": "blocked",
+  "latencyMs": 0,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "R002",
+        "severity": "HIGH",
+        "title": "Unverified edited content",
+        "text": "Text differs from the evidence-backed draft.",
+        "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+      }
+    ],
+    "metadata": {
+      "mode": "rule"
+    }
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "d37727a9f2bd8585022693ce2db8e6f8cc200538b88eea4c02a0a439a0b76a46"
+}

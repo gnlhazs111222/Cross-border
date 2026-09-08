@@ -24,6 +24,7 @@ export function DemoCapabilities() {
     ['CSV generation', 'A real file is generated and downloaded in the browser.'],
   ];
   if (capabilities?.listing.activeProvider === 'qwen') local.push(['Listing intelligence', 'Listing supports templates and opt-in Qwen generation with validation and template fallback.']);
+  if (capabilities?.review.activeProvider === 'qwen') local.push(['Semantic review', 'Hard rules and opt-in Qwen check facts against copy. Failures and ambiguous results keep publishing locked.']);
   const simulated = [
     ['Recommendation', capabilities?.recommendation.activeProvider === 'qwen' ? 'Deterministic eligibility checks run first. Qwen ranks only eligible products.' : 'Deterministic ranking follows the saved task; scores are not model confidence.'],
     ['Evidence enrichment', 'Supplemental PDF and image facts are seeded examples, not OCR results.'],
@@ -41,11 +42,11 @@ export function DemoCapabilities() {
           <p><strong>{t('Browser persisted:')}</strong> {capabilities.storage.browser.join(' · ')}</p>
           <p><strong>{t('Live text connection:')}</strong> {t(capabilities.textModel.liveAvailable ? 'Available for explicit smoke only' : capabilities.textModel.configured ? 'Configured, live calls disabled' : 'Not configured')} · {capabilities.textModel.model}</p>
           <p><strong>{t('Active business providers:')}</strong> {capabilities.recommendation.activeProvider} / {capabilities.evidence.activeProvider} / {capabilities.listing.activeProvider} / {capabilities.review.activeProvider}</p>
-          <small>{t('Qwen Listing and Recommendation are implemented and opt-in. Evidence stays mocked; review stays rule-based. Automated tests make no live AI calls.')}</small>
+          <small>{t(capabilities.review.liveImplemented ? 'Qwen listing, recommendation and semantic review are implemented and opt-in. Current active providers are shown above. Evidence stays mocked. Automated tests make no live AI calls.' : 'Qwen Listing and Recommendation are implemented and opt-in. Evidence stays mocked; review stays rule-based. Automated tests make no live AI calls.')}</small>
         </>}
       </section>}
       <div className="capability-grid">{([{ title: 'REAL / LOCAL', tone: 'green' as const, items: local }, { title: 'DEMO / MOCK', tone: 'amber' as const, items: simulated }]).map(group => <section key={group.title}><Badge tone={group.tone}>{group.title}</Badge>{group.items.map(([label, detail]) => <div className="capability-row" key={label}><h3>{t(label)}</h3><p>{t(detail)}</p></div>)}</section>)}</div>
-      <p className="capability-footnote">{t('Confirmed records a demo or operator decision, not independent product certification. The review engine checks known wording; it is not general AI compliance review.')}</p>
+      <p className="capability-footnote">{t(capabilities?.review.activeProvider === 'qwen' ? 'Confirmed records an operator decision, not independent product certification. Semantic review checks consistency with supplied facts, not complete platform or legal compliance.' : 'Confirmed records a demo or operator decision, not independent product certification. The review engine checks known wording; it is not general AI compliance review.')}</p>
     </Modal>
   </>;
 }

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { z } from 'zod';
 import { readConfig } from '../config';
 import { BailianTextModelProvider, MockTextModelProvider } from '../providers/text';
-import { domainProviders, QwenReviewProvider } from '../providers/domain';
+import { domainProviders, QwenEvidenceProvider } from '../providers/domain';
 import { demoTask, products } from '../../src/data/mockData';
 
 const config = { ...readConfig({ NODE_ENV: 'test' }), NODE_ENV: 'development' as const, AI_LIVE_ENABLED: true, BAILIAN_API_KEY: 'unit-test-key', BAILIAN_BASE_URL: 'https://provider.test/v1' };
@@ -12,7 +12,7 @@ test('MockTextModelProvider and active domain providers are deterministic and lo
   assert.equal((await mock.generateText()).provider, 'mock');
   const result = await mock.generateStructured({ prompt: 'test', purpose: 'unit', example: { ok: true }, schema: z.object({ ok: z.boolean() }) }); assert.deepEqual(result.data, { ok: true });
   const top = await domainProviders.recommendation.recommend(products, demoTask); assert.equal(top[0].score, 94); assert.equal(top[0].sku, products[0].sku);
-  await assert.rejects(new QwenReviewProvider().review(), /not implemented/);
+  await assert.rejects(new QwenEvidenceProvider().enrich(), /not implemented/);
 });
 test('OpenAI SDK uses the supplied base URL, model and auth with mock transport; budget is enforced', async () => {
   let count = 0; const audit: unknown[] = [];

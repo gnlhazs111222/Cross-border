@@ -76,7 +76,7 @@ function applyWorkflow(workflow: WorkflowSnapshot) {
   current.listings = clone(workflow.listings); current.reviews = clone(workflow.reviews); current.publications = clone(workflow.publications);
   const platform = current.platform;
   if (current.publications[platform]) advance('published');
-  else if (current.reviews[platform]) advance(current.reviews[platform]!.status === 'passed' ? 'review_passed' : 'review_blocked');
+  else if (current.reviews[platform]) advance(workflow.publishAllowed[platform] ? 'review_passed' : current.reviews[platform]!.status === 'blocked' ? 'review_blocked' : 'listing_generated');
   else if (current.listings[platform]) advance('listing_generated');
   else if (current.v2) advance(current.pricing?.status === 'ready' ? 'pricing_ready' : 'evidence_analyzed');
   else advance(current.selectedSku ? 'sku_selected' : current.task ? 'task_created' : 'materials_ready');
@@ -363,7 +363,7 @@ export const mockApi = {
     current.platform = platform;
     const review = current.reviews[platform];
     if (current.publications[platform]) advance('published');
-    else if (review) advance(review.status === 'passed' ? 'review_passed' : 'review_blocked');
+    else if (review) advance(serverOwner ? serverWorkflow?.publishAllowed[platform] ? 'review_passed' : review.status === 'blocked' ? 'review_blocked' : 'listing_generated' : review.status === 'passed' ? 'review_passed' : 'review_blocked');
     else if (current.listings[platform]) advance('listing_generated');
     else if (current.pricing?.status === 'ready') advance('pricing_ready');
     return save();

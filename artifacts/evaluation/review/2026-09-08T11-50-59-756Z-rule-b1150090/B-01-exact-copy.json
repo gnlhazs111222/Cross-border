@@ -1,0 +1,19 @@
+{
+  "caseId": "B-01-exact-copy",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "supported",
+  "expected": "passed",
+  "actual": "passed",
+  "latencyMs": 0,
+  "outcome": {
+    "status": "passed",
+    "issues": [],
+    "metadata": {
+      "mode": "rule"
+    }
+  },
+  "ruleStatus": "passed",
+  "ruleIssues": [],
+  "inputHash": "f89e705a243fdeae92068b0f01f6e6472e841dd25cee73cd9783058391a53712"
+}

@@ -7,6 +7,7 @@ const stageLabels: Record<Stage, string> = {
   listing_generated: 'Review required', review_blocked: 'Publish blocked', review_passed: 'Ready to publish', published: 'Mock publish complete',
 };
 export function stageLabel(state: DemoState) {
+  if (state.stage === 'review_passed' && state.reviews[state.platform]?.reviewMode === 'rules_qwen') return 'Semantic review recorded';
   return state.workspace === 'evidence' && state.pricing?.status === 'blocked' ? 'Facts need attention' : stageLabels[state.stage];
 }
 export function nextStepMessage(state: DemoState) {
@@ -22,6 +23,15 @@ export function nextStepMessage(state: DemoState) {
     case 'review':
       if (state.publications[state.platform]) return state.platform === 'amazon' ? 'Download the Amazon CSV to finish the demo. Nothing was uploaded to Amazon.' : 'The simulated Shopify draft is ready. Nothing was created in a real store.';
       if (!state.listings[state.platform]) return 'Generate a draft in Listing Studio before running review.';
+      if (state.reviews[state.platform]?.reviewMode === 'rules_qwen') {
+        switch (state.reviews[state.platform]?.status) {
+          case 'passed': return 'A semantic review result is saved. Check the current publish authorization below.';
+          case 'blocked': return 'Edit the reported claims in Listing Studio, then run review again.';
+          case 'needs_human_review': return 'Clarify the ambiguous facts or copy, then run review again.';
+          case 'failed': return 'Review did not complete. Use Run Review to retry; publishing stays locked.';
+          case 'running': return 'Wait for review to finish before attempting publication.';
+        }
+      }
       if (state.reviews[state.platform]?.status === 'blocked') return 'Apply Suggested Fix, then run review again. Publishing remains blocked until it passes.';
       if (state.reviews[state.platform]?.status === 'passed') return 'This revision passed the local rules. You can now simulate publishing.';
       return 'Run Review on the current revision. A saved fix is not yet a passed review.';

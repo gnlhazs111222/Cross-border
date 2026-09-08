@@ -11,7 +11,7 @@ export type Capabilities = {
   recommendation: { activeProvider: 'rule' | 'qwen'; liveAvailable: boolean; liveImplemented: true; liveModel: string };
   evidence: { activeProvider: 'mock'; liveAvailable: boolean; liveImplemented: false };
   listing: { activeProvider: 'template' | 'qwen'; liveAvailable: boolean; liveImplemented: true; liveModel: string };
-  review: { activeProvider: 'rules'; liveAvailable: boolean; liveImplemented: false };
+  review: { activeProvider: 'rules' | 'qwen'; liveAvailable: boolean; liveImplemented: true; liveModel: string };
 };
 
 export type FactPreview = { v1: FactCard; product: Product; pricing: Pricing };

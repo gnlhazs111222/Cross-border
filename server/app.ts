@@ -1,6 +1,7 @@
 import { getRecommendations, runRecommendations } from './services/recommendations';
 import { createRecommendationRuntime } from './providers/qwenRecommendation';
 import { createListingRuntime } from './providers/qwenListing';
+import { createReviewRuntime } from './providers/qwenReview';
 import { getWorkflow, getListing, createListing, reviseListing, reviewListing, publishListing, publishedAmazonCsv } from './services/listings';
 import { createV1, factSnapshot, taskFactSnapshots, analyzeFacts, mutateFact, templateFromFacts } from './services/facts';
 import Fastify from 'fastify';
@@ -23,6 +24,7 @@ export async function buildApp(config: ServerConfig, db: PrismaClient, options: 
   const app = Fastify({ logger: options.logger ?? (config.NODE_ENV === 'development' ? { level: 'info', redact: ['req.headers.authorization', 'req.headers.cookie', 'res.headers["set-cookie"]', 'password', 'apiKey'] } : false), requestTimeout: 35000, connectionTimeout: 35000, bodyLimit: 3 * 1024 * 1024 });
   const providers = createTextProviders(config, db, options.transport);
   const listingRuntime = createListingRuntime(config, providers.bailian, (id, errorCode) => db.aiCall.update({ where: { id }, data: { success: false, errorCode } }));
+  const reviewRuntime = createReviewRuntime(config, providers.bailian, (id, errorCode) => db.aiCall.update({ where: { id }, data: { success: false, errorCode } }));
   const recommendationRuntime = createRecommendationRuntime(config, providers.bailian, (id, errorCode) => db.aiCall.update({ where: { id }, data: { success: false, errorCode } }), options.recommendationAudit);
   await app.register(cookie);
   app.decorateRequest('user', null);
@@ -143,27 +145,27 @@ export async function buildApp(config: ServerConfig, db: PrismaClient, options: 
   });
   const listingVersion = z.object({ expectedVersion: z.number().int().nonnegative().max(1_000_000), expectedFactsRevision: z.number().int().positive() }).strict();
   app.get(`${factPath}/listings`, protectedRoute, async request => {
-    const p = factParams.parse(request.params); return { data: await getWorkflow(db, request.user!.id, p.taskId, p.productId) };
+    const p = factParams.parse(request.params); return { data: await getWorkflow(db, request.user!.id, p.taskId, p.productId, reviewRuntime) };
   });
   app.post(`${factPath}/listings`, protectedRoute, async request => {
     const p = factParams.parse(request.params); const input = listingVersion.extend({ platform: z.enum(['amazon', 'shopify']) }).parse(request.body);
-    return { data: await createListing(db, request.user!.id, p.taskId, p.productId, input, listingRuntime) };
+    return { data: await createListing(db, request.user!.id, p.taskId, p.productId, input, listingRuntime, reviewRuntime) };
   });
   const listingParams = z.object({ id: z.string().min(1).max(220) });
-  app.get('/api/listings/:id', protectedRoute, async request => ({ data: await getListing(db, request.user!.id, listingParams.parse(request.params).id) }));
+  app.get('/api/listings/:id', protectedRoute, async request => ({ data: await getListing(db, request.user!.id, listingParams.parse(request.params).id, reviewRuntime) }));
   app.patch('/api/listings/:id', protectedRoute, async request => {
     const input = listingVersion.extend({ title: z.string().trim().min(1).max(220), bullets: z.array(z.string().max(1000)).min(1).max(20), description: z.string().trim().min(1).max(10000) }).parse(request.body);
-    return { data: await reviseListing(db, request.user!.id, listingParams.parse(request.params).id, 'edit', input) };
+    return { data: await reviseListing(db, request.user!.id, listingParams.parse(request.params).id, 'edit', input, listingRuntime, reviewRuntime) };
   });
   for (const action of ['regenerate', 'apply-suggested-fix', 'review', 'publish', 'inject-demo-risk'] as const) {
     app.post(`/api/listings/:id/${action}`, protectedRoute, async request => {
       if (action === 'inject-demo-risk' && config.NODE_ENV === 'production') throw new AppError('not_found', 'Not found.', 404);
       const id = listingParams.parse(request.params).id; const input = listingVersion.parse(request.body);
-      return { data: action === 'review' ? await reviewListing(db, request.user!.id, id, input) : action === 'publish' ? await publishListing(db, request.user!.id, id, input) : await reviseListing(db, request.user!.id, id, action === 'regenerate' ? 'regenerate' : action === 'inject-demo-risk' ? 'inject-risk' : 'fix', input, listingRuntime) };
+      return { data: action === 'review' ? await reviewListing(db, request.user!.id, id, input, reviewRuntime) : action === 'publish' ? await publishListing(db, request.user!.id, id, input, reviewRuntime) : await reviseListing(db, request.user!.id, id, action === 'regenerate' ? 'regenerate' : action === 'inject-demo-risk' ? 'inject-risk' : 'fix', input, listingRuntime, reviewRuntime) };
     });
   }
   app.get('/api/publish/:id/amazon-csv', protectedRoute, async (request, reply) => {
-    const result = await publishedAmazonCsv(db, request.user!.id, listingParams.parse(request.params).id);
+    const result = await publishedAmazonCsv(db, request.user!.id, listingParams.parse(request.params).id, reviewRuntime);
     return reply.type('text/csv; charset=utf-8').header('Content-Disposition', `attachment; filename="${result.filename}"`).send(result.csv);
   });
   app.get('/api/capabilities', async () => {
@@ -173,7 +175,7 @@ export async function buildApp(config: ServerConfig, db: PrismaClient, options: 
       storage: { server: ['User', 'Product', 'LaunchTask', 'TaskSelection', 'FactCard', 'Fact', 'Evidence', 'ListingDraft', 'ReviewResult', 'PublishResult'], browser: ['Language', 'UI preferences', 'Non-authoritative cache'] },
       textModel: { activeProvider: 'mock', liveAvailable: available, configured: !!config.BAILIAN_API_KEY, liveEnabled: config.AI_LIVE_ENABLED, model: config.BAILIAN_TEXT_MODEL, remainingCalls: providers.bailian.remainingCalls },
       recommendation: { activeProvider: config.RECOMMENDATION_PROVIDER === 'qwen' && available ? 'qwen' : 'rule', liveAvailable: available, liveImplemented: true, liveModel: config.BAILIAN_TEXT_MODEL }, evidence: { activeProvider: 'mock', liveAvailable: available, liveImplemented: false },
-      listing: { activeProvider: config.LISTING_PROVIDER === 'qwen' && available ? 'qwen' : 'template', liveAvailable: available, liveImplemented: true, liveModel: config.BAILIAN_TEXT_MODEL }, review: { activeProvider: 'rules', liveAvailable: available, liveImplemented: false },
+      listing: { activeProvider: config.LISTING_PROVIDER === 'qwen' && available ? 'qwen' : 'template', liveAvailable: available, liveImplemented: true, liveModel: config.BAILIAN_TEXT_MODEL }, review: { activeProvider: reviewRuntime.mode, liveAvailable: available, liveImplemented: true, liveModel: config.BAILIAN_TEXT_MODEL },
     }; return { data: result };
   });
   app.post('/api/ai/smoke-test', protectedRoute, async request => {

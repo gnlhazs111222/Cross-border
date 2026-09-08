@@ -1,0 +1,65 @@
+{
+  "caseId": "B-28-hold-capacity",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "contradiction",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 1141,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "title"
+        },
+        "text": "Holds one litre.",
+        "reason": "The title claims the capacity is one litre, but the authorized fact states the capacity is 500ml. These values contradict each other.",
+        "factKeys": [
+          "capacity"
+        ],
+        "suggestedFix": "Update the title to reflect the authorized capacity of 500ml, e.g., 'Holds 500ml'.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v2",
+      "ruleVersion": "review-hard-v1",
+      "inputHash": "5cb84058f10f52c9821cd0a71e784cc600163692b7a6ddd4ca90bae0ff314bac",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsmdfut0003qqi4ydp32b5z"
+    }
+  },
+  "audit": {
+    "id": "cmtsmdfut0003qqi4ydp32b5z",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 1100,
+    "promptTokens": 625,
+    "completionTokens": 150,
+    "totalTokens": 775
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "ff3cd31bd2d14d34a1d6753b8036496ecbd1cf084b67a868bf195ff0c3dd782b"
+}

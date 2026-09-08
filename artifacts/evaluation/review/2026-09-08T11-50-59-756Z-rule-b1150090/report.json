@@ -1,0 +1,1860 @@
+{
+  "runId": "2026-09-08T11-50-59-756Z-rule-b1150090",
+  "datasetHash": "173a13a9a684896e9206371c04f7af9098319fb1c9fa99d8769854bda8cadad2",
+  "datasetVersion": 1,
+  "labelProvenance": "AI-authored synthetic; NOT human reviewed",
+  "independentEvaluationMeaning": "Separate fixed expected labels and runner; not an independent human benchmark. Holdout fixtures are visible in this repository.",
+  "provider": "rule",
+  "model": null,
+  "split": "all",
+  "requestedCount": 48,
+  "completedCount": 48,
+  "metrics": {
+    "total": 48,
+    "confusion": {
+      "tp": 28,
+      "tn": 3,
+      "fp": 11,
+      "fn": 2
+    },
+    "failed": 0,
+    "abstained": 0,
+    "ambiguousExpected": 4,
+    "ambiguousPassed": 0,
+    "binaryCoverage": 1,
+    "exactStatusAccuracy": 0.6458333333333334,
+    "precision": 0.717948717948718,
+    "recall": 0.9333333333333333,
+    "falsePositiveRate": 0.7857142857142857,
+    "falseNegativeRate": 0.06666666666666667
+  },
+  "pairedRuleMetrics": {
+    "total": 48,
+    "confusion": {
+      "tp": 28,
+      "tn": 3,
+      "fp": 11,
+      "fn": 2
+    },
+    "failed": 0,
+    "abstained": 0,
+    "ambiguousExpected": 4,
+    "ambiguousPassed": 0,
+    "binaryCoverage": 1,
+    "exactStatusAccuracy": 0.6458333333333334,
+    "precision": 0.717948717948718,
+    "recall": 0.9333333333333333,
+    "falsePositiveRate": 0.7857142857142857,
+    "falseNegativeRate": 0.06666666666666667
+  },
+  "groups": {
+    "supported": {
+      "total": 4,
+      "confusion": {
+        "tp": 0,
+        "tn": 2,
+        "fp": 2,
+        "fn": 0
+      },
+      "failed": 0,
+      "abstained": 0,
+      "ambiguousExpected": 0,
+      "ambiguousPassed": 0,
+      "binaryCoverage": 1,
+      "exactStatusAccuracy": 0.5,
+      "precision": 0,
+      "recall": null,
+      "falsePositiveRate": 0.5,
+      "falseNegativeRate": null
+    },
+    "paraphrase": {
+      "total": 4,
+      "confusion": {
+        "tp": 0,
+        "tn": 0,
+        "fp": 4,
+        "fn": 0
+      },
+      "failed": 0,
+      "abstained": 0,
+      "ambiguousExpected": 0,
+      "ambiguousPassed": 0,
+      "binaryCoverage": 1,
+      "exactStatusAccuracy": 0,
+      "precision": 0,
+      "recall": null,
+      "falsePositiveRate": 1,
+      "falseNegativeRate": null
+    },
+    "contradiction": {
+      "total": 10,
+      "confusion": {
+        "tp": 8,
+        "tn": 0,
+        "fp": 0,
+        "fn": 2
+      },
+      "failed": 0,
+      "abstained": 0,
+      "ambiguousExpected": 0,
+      "ambiguousPassed": 0,
+      "binaryCoverage": 1,
+      "exactStatusAccuracy": 0.8,
+      "precision": 1,
+      "recall": 0.8,
+      "falsePositiveRate": null,
+      "falseNegativeRate": 0.2
+    },
+    "unsupported": {
+      "total": 10,
+      "confusion": {
+        "tp": 10,
+        "tn": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      "failed": 0,
+      "abstained": 0,
+      "ambiguousExpected": 0,
+      "ambiguousPassed": 0,
+      "binaryCoverage": 1,
+      "exactStatusAccuracy": 1,
+      "precision": 1,
+      "recall": 1,
+      "falsePositiveRate": null,
+      "falseNegativeRate": 0
+    },
+    "unauthorized": {
+      "total": 4,
+      "confusion": {
+        "tp": 4,
+        "tn": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      "failed": 0,
+      "abstained": 0,
+      "ambiguousExpected": 0,
+      "ambiguousPassed": 0,
+      "binaryCoverage": 1,
+      "exactStatusAccuracy": 1,
+      "precision": 1,
+      "recall": 1,
+      "falsePositiveRate": null,
+      "falseNegativeRate": 0
+    },
+    "internal": {
+      "total": 2,
+      "confusion": {
+        "tp": 2,
+        "tn": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      "failed": 0,
+      "abstained": 0,
+      "ambiguousExpected": 0,
+      "ambiguousPassed": 0,
+      "binaryCoverage": 1,
+      "exactStatusAccuracy": 1,
+      "precision": 1,
+      "recall": 1,
+      "falsePositiveRate": null,
+      "falseNegativeRate": 0
+    },
+    "ambiguity": {
+      "total": 4,
+      "confusion": {
+        "tp": 0,
+        "tn": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      "failed": 0,
+      "abstained": 0,
+      "ambiguousExpected": 4,
+      "ambiguousPassed": 0,
+      "binaryCoverage": null,
+      "exactStatusAccuracy": 0,
+      "precision": null,
+      "recall": null,
+      "falsePositiveRate": null,
+      "falseNegativeRate": null
+    },
+    "omission": {
+      "total": 2,
+      "confusion": {
+        "tp": 0,
+        "tn": 0,
+        "fp": 2,
+        "fn": 0
+      },
+      "failed": 0,
+      "abstained": 0,
+      "ambiguousExpected": 0,
+      "ambiguousPassed": 0,
+      "binaryCoverage": 1,
+      "exactStatusAccuracy": 0,
+      "precision": 0,
+      "recall": null,
+      "falsePositiveRate": 1,
+      "falseNegativeRate": null
+    },
+    "cross-category": {
+      "total": 8,
+      "confusion": {
+        "tp": 4,
+        "tn": 1,
+        "fp": 3,
+        "fn": 0
+      },
+      "failed": 0,
+      "abstained": 0,
+      "ambiguousExpected": 0,
+      "ambiguousPassed": 0,
+      "binaryCoverage": 1,
+      "exactStatusAccuracy": 0.625,
+      "precision": 0.5714285714285714,
+      "recall": 1,
+      "falsePositiveRate": 0.75,
+      "falseNegativeRate": 0
+    }
+  },
+  "limitations": [
+    "Synthetic labels require human review.",
+    "Small samples do not establish population accuracy.",
+    "Errors and abstentions are excluded from binary confusion rates; inspect coverage and exact-status accuracy.",
+    "Baseline compares to a frozen safe draft, and does not inspect attributes.",
+    "No automatic retries or live claim is made by offline results."
+  ],
+  "rows": [
+    {
+      "caseId": "B-01-exact-copy",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "supported",
+      "expected": "passed",
+      "actual": "passed",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "passed",
+        "issues": [],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "passed",
+      "ruleIssues": [],
+      "inputHash": "f89e705a243fdeae92068b0f01f6e6472e841dd25cee73cd9783058391a53712"
+    },
+    {
+      "caseId": "B-02-paraphrase-holds",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "paraphrase",
+      "expected": "passed",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "5aa2a897d3fb0ce977bb947b3f66dc89f08531b9237f5d72f9ec9f4a1bcec456"
+    },
+    {
+      "caseId": "B-03-paraphrase-lid",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "paraphrase",
+      "expected": "passed",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "74759b84129468eed08946d76400b9a8faedc03d2f00c5de829cf50927345a8d"
+    },
+    {
+      "caseId": "B-04-capacity-wrong",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "contradiction",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "79db4892d56aebb9cd7d4de7122ea1cc51f984476e1bca2f2d8aa0a3b8d6734b"
+    },
+    {
+      "caseId": "B-05-material-wrong",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "contradiction",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "b1ba7e92332b6ccca261d0220021c87e46679e93e0754358d041b9d3d892be34"
+    },
+    {
+      "caseId": "B-06-color-wrong",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "contradiction",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "b4c3ee767799d0f353311cbe654590c8711e51fec36f7dc6c158e8c53b78aa48"
+    },
+    {
+      "caseId": "B-07-absolute-leakproof",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "unsupported",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R001",
+            "severity": "HIGH",
+            "title": "Unsupported performance claim",
+            "text": "100% leakproof",
+            "reason": "No verified evidence supports an absolute leakproof claim."
+          },
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R001",
+          "severity": "HIGH",
+          "title": "Unsupported performance claim",
+          "text": "100% leakproof",
+          "reason": "No verified evidence supports an absolute leakproof claim."
+        },
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "ab4c3e4415338b988da805560525c20aefbb5d81330856235caccae7e4048326"
+    },
+    {
+      "caseId": "B-08-implicit-leakproof",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "unsupported",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "9a00ddb4999f99f331726e7812af92a27721697c3b99e4526f9c80db7a8d7d6e"
+    },
+    {
+      "caseId": "B-09-insulation",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "unsupported",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "07afcc650a5a39b03c384f599c0700cc551bdfd1d4039d5223a30ed9440ee8b7"
+    },
+    {
+      "caseId": "B-10-dishwasher",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "unsupported",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "cca55d3a9606fa43b959f43950ad03534c3a46d0dc20c210592599427f486a3c"
+    },
+    {
+      "caseId": "B-11-pending",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "unauthorized",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "faa1c1d2299949018a7c6db48f554d99972ce9198ba8fbd062546fc65a1f7aaf"
+    },
+    {
+      "caseId": "B-12-rejected",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "unauthorized",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "3565072023c7f6fa3aaba8be86b2eb15127dee4de626c1bdfff11d772debe766"
+    },
+    {
+      "caseId": "B-13-private",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "internal",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "30d0dbc666385fac9d784748a4c4f315536d5ed37d20a6ffea596aa7271939bb"
+    },
+    {
+      "caseId": "B-14-ambiguous-size",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "ambiguity",
+      "expected": "needs_human_review",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "52877dad2d2a5b9c3f09b600f88cb3023bc6a802237c455dda82838bddc7c856"
+    },
+    {
+      "caseId": "B-15-safe-omission",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "omission",
+      "expected": "passed",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "3efba3eca41c388e3bf2126bbf618b252dc1c05e534c6994a03c474fa89373b8"
+    },
+    {
+      "caseId": "B-16-attribute-conflict",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "contradiction",
+      "expected": "blocked",
+      "actual": "passed",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "passed",
+        "issues": [],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "passed",
+      "ruleIssues": [],
+      "inputHash": "2de3330977e462c120b34486a070c7c0cedea73c081a50581f47c4938c7c5c61"
+    },
+    {
+      "caseId": "B-17-bag-safe",
+      "split": "dev",
+      "category": "Backpacks",
+      "risk": "cross-category",
+      "expected": "passed",
+      "actual": "passed",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "passed",
+        "issues": [],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "passed",
+      "ruleIssues": [],
+      "inputHash": "01c97064324a20401c9924a98847f85af4287b8d0996f2494d782b71af5420df"
+    },
+    {
+      "caseId": "B-18-bag-waterproof",
+      "split": "dev",
+      "category": "Backpacks",
+      "risk": "cross-category",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "0239032e00aff189758c23d152fbfe7523c63bcea41d354d3750c3de9e2a2cc8"
+    },
+    {
+      "caseId": "B-19-lamp-safe",
+      "split": "dev",
+      "category": "Lamps",
+      "risk": "cross-category",
+      "expected": "passed",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "d9494260b119993905be4cda157605830440d11a2e654e4b7b55a508dbb1914a"
+    },
+    {
+      "caseId": "B-20-lamp-health",
+      "split": "dev",
+      "category": "Lamps",
+      "risk": "cross-category",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "72f81dae89186a16dc045108e6b6f927c41578cb7e5d852fb8cc24f008b344de"
+    },
+    {
+      "caseId": "B-21-instruction-attack",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "unsupported",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "f870bcee87a6dd8d7ba9541f83d85e399e25b790d47fb54f2fe78afda84b645c"
+    },
+    {
+      "caseId": "B-22-straw-conflict",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "contradiction",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "20ece3d9ff74352c5be4c9ceb6583cf30dc7747b8b11ace0c308ce943e0476c3"
+    },
+    {
+      "caseId": "B-23-authorized-performance",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "supported",
+      "expected": "passed",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "d37727a9f2bd8585022693ce2db8e6f8cc200538b88eea4c02a0a439a0b76a46"
+    },
+    {
+      "caseId": "B-24-ambiguous-secure",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "ambiguity",
+      "expected": "needs_human_review",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "754f447ced7531a413921fec441cbccec7ca2259051bb5fb3758fa925b684dab"
+    },
+    {
+      "caseId": "B-25-hold-exact",
+      "split": "holdout",
+      "category": "Water bottles",
+      "risk": "supported",
+      "expected": "passed",
+      "actual": "passed",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "passed",
+        "issues": [],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "passed",
+      "ruleIssues": [],
+      "inputHash": "f89e705a243fdeae92068b0f01f6e6472e841dd25cee73cd9783058391a53712"
+    },
+    {
+      "caseId": "B-26-hold-paraphrase",
+      "split": "holdout",
+      "category": "Water bottles",
+      "risk": "paraphrase",
+      "expected": "passed",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "c22d0b80aeca6e3f1f9c857ac235bb90ea5d86faa7a374cb013fdbf09bea2aa7"
+    },
+    {
+      "caseId": "B-27-hold-closure",
+      "split": "holdout",
+      "category": "Water bottles",
+      "risk": "paraphrase",
+      "expected": "passed",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "5451765da858905e4248beca24c134d403e4f957fafd7b61f27597dca7f07043"
+    },
+    {
+      "caseId": "B-28-hold-capacity",
+      "split": "holdout",
+      "category": "Water bottles",
+      "risk": "contradiction",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "ff3cd31bd2d14d34a1d6753b8036496ecbd1cf084b67a868bf195ff0c3dd782b"
+    },
+    {
+      "caseId": "B-29-hold-material",
+      "split": "holdout",
+      "category": "Water bottles",
+      "risk": "contradiction",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "44cf6e6f662c08d18ce279f4077e678482fb2d456f01ab9bd3760457db8931a6"
+    },
+    {
+      "caseId": "B-30-hold-color",
+      "split": "holdout",
+      "category": "Water bottles",
+      "risk": "contradiction",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "7a88434cc4d3d49d9fd3f806e85c81239e69cab48d929c48d356fe57f0e01eeb"
+    },
+    {
+      "caseId": "B-31-hold-leakproof",
+      "split": "holdout",
+      "category": "Water bottles",
+      "risk": "unsupported",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R001",
+            "severity": "HIGH",
+            "title": "Unsupported performance claim",
+            "text": "100% leakproof",
+            "reason": "No verified evidence supports an absolute leakproof claim."
+          },
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R001",
+          "severity": "HIGH",
+          "title": "Unsupported performance claim",
+          "text": "100% leakproof",
+          "reason": "No verified evidence supports an absolute leakproof claim."
+        },
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "3dbae7252eee6e54e09834ad1c102038f0c56ca0a4cd988af2b1a7e4bcc9795c"
+    },
+    {
+      "caseId": "B-32-hold-implicit",
+      "split": "holdout",
+      "category": "Water bottles",
+      "risk": "unsupported",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "50819004421b99745cb29fba1b01125514f405d50e889e33c0e0c2080dd88eb5"
+    },
+    {
+      "caseId": "B-33-hold-heat",
+      "split": "holdout",
+      "category": "Water bottles",
+      "risk": "unsupported",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "f2f07e1f588070491ab034e008709f36416a905a79d050400a6702802afead6d"
+    },
+    {
+      "caseId": "B-34-hold-freezer",
+      "split": "holdout",
+      "category": "Water bottles",
+      "risk": "unsupported",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 1,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "339d99a75b75cda09aa71612fe8176907a2bcfdded0d8123abfbf70843a94a75"
+    },
+    {
+      "caseId": "B-35-hold-pending",
+      "split": "holdout",
+      "category": "Water bottles",
+      "risk": "unauthorized",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "085c2d2a2ab7db01cdc77dcf7e16786ad2d2398fea1e54f8da97b254e549ae94"
+    },
+    {
+      "caseId": "B-36-hold-rejected",
+      "split": "holdout",
+      "category": "Water bottles",
+      "risk": "unauthorized",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "1e820541068beb542a31623eb58af5660c3afbc722a7594fd65be50829e05405"
+    },
+    {
+      "caseId": "B-37-hold-private",
+      "split": "holdout",
+      "category": "Water bottles",
+      "risk": "internal",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "5f52f9fba36acb6fa7d48a9e221c263a5da2d96fc39d3ab699fe3fc9aabb739c"
+    },
+    {
+      "caseId": "B-38-hold-ambiguous",
+      "split": "holdout",
+      "category": "Water bottles",
+      "risk": "ambiguity",
+      "expected": "needs_human_review",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "7fbbb846ae559b6ed83a7588f708f713b68bffce1d717bbdc05b4515e680e68f"
+    },
+    {
+      "caseId": "B-39-hold-omission",
+      "split": "holdout",
+      "category": "Water bottles",
+      "risk": "omission",
+      "expected": "passed",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "e8e8738220d2324d607e908441d9495c91d580a2e5f580ec5108d76761a54e65"
+    },
+    {
+      "caseId": "B-40-hold-attribute",
+      "split": "holdout",
+      "category": "Water bottles",
+      "risk": "contradiction",
+      "expected": "blocked",
+      "actual": "passed",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "passed",
+        "issues": [],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "passed",
+      "ruleIssues": [],
+      "inputHash": "bcf315d944dbc9dcba0011d7e4ff596e029ed3b11d26a142acfc0de3ad454ebf"
+    },
+    {
+      "caseId": "B-41-hold-bag-safe",
+      "split": "holdout",
+      "category": "Backpacks",
+      "risk": "cross-category",
+      "expected": "passed",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "0968037a71b411d0184a21271bd00bae2e095accc447c8b4f98a41260e9f2d56"
+    },
+    {
+      "caseId": "B-42-hold-bag-load",
+      "split": "holdout",
+      "category": "Backpacks",
+      "risk": "cross-category",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "766346ea60627a850634f71dc69416c4851372d45c815b992940c54efe72b5dc"
+    },
+    {
+      "caseId": "B-43-hold-lamp-safe",
+      "split": "holdout",
+      "category": "Lamps",
+      "risk": "cross-category",
+      "expected": "passed",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "c5a96c2f302c50a84dd6638a14c2f2cea8da4c673027deeb2f5c55e43ee576c6"
+    },
+    {
+      "caseId": "B-44-hold-lamp-cert",
+      "split": "holdout",
+      "category": "Lamps",
+      "risk": "cross-category",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "1151cb323557198b0a85d7a82987a571f8705f01ded5c0a654a009bed134ba7a"
+    },
+    {
+      "caseId": "B-45-hold-injection",
+      "split": "holdout",
+      "category": "Water bottles",
+      "risk": "unsupported",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "6f90470354e02c314b2b39ec88e41e52c2b8f16ef34381f0341ba1b63b6d3d90"
+    },
+    {
+      "caseId": "B-46-hold-lid",
+      "split": "holdout",
+      "category": "Water bottles",
+      "risk": "contradiction",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "1f4524c129d9635ed2698fef827b2d2c9fcda13dc3cebf5b50a294afeed5cece"
+    },
+    {
+      "caseId": "B-47-hold-authorized",
+      "split": "holdout",
+      "category": "Water bottles",
+      "risk": "supported",
+      "expected": "passed",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "fd3738af7761868f4a7949b8fe494c16a24bd00ba211e85e7bbf25fddac4d5f4"
+    },
+    {
+      "caseId": "B-48-hold-sturdy",
+      "split": "holdout",
+      "category": "Water bottles",
+      "risk": "ambiguity",
+      "expected": "needs_human_review",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "R002",
+            "severity": "HIGH",
+            "title": "Unverified edited content",
+            "text": "Text differs from the evidence-backed draft.",
+            "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+          }
+        ],
+        "metadata": {
+          "mode": "rule"
+        }
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "a58e021d19ca002fdd78d8f66343c73cd13e26ce6348be9f95e0c4029c47ac7e"
+    }
+  ]
+}

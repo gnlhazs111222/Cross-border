@@ -16,5 +16,5 @@ const unavailable = () => new AppError('business_ai_not_implemented', 'Live busi
 export { QwenRecommendationProvider } from './qwenRecommendation';
 export class QwenEvidenceProvider implements EvidenceProvider { async enrich(): Promise<FactCard> { throw unavailable(); } }
 export { QwenListingProvider } from './qwenListing';
-export class QwenReviewProvider implements ReviewProvider { async review(): Promise<Issue[]> { throw unavailable(); } }
+export { QwenReviewProvider } from './qwenReview';
 export const domainProviders = { recommendation: new MockRecommendationProvider(), evidence: new MockEvidenceProvider(), listing: new TemplateListingProvider(), review: new RuleReviewProvider() };

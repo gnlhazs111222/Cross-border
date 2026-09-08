@@ -1,0 +1,63 @@
+{
+  "caseId": "B-09-insulation",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "unsupported",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 1076,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "Keeps water cold for 24 hours.",
+        "reason": "The description makes a specific performance claim ('Keeps water cold for 24 hours') that is not supported by any authorized fact. The allowed facts only specify capacity, material, color, lid type, and straw presence, with no data on thermal retention duration.",
+        "factKeys": [],
+        "suggestedFix": "Remove the specific time-based performance claim or replace it with general language if thermal properties are not verified (e.g., 'Insulated stainless steel bottle').",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v2",
+      "ruleVersion": "review-hard-v1",
+      "inputHash": "de81d8405209768ba033a1759844eb5f29573c5e6a6e9e0ce82fcce8c7b904af",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsnelsp0007qq3k8tpca3g4"
+    }
+  },
+  "audit": {
+    "id": "cmtsnelsp0007qq3k8tpca3g4",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 1028,
+    "promptTokens": 640,
+    "completionTokens": 172,
+    "totalTokens": 812
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "c78d2366c70a95edf5e073585a8429286392d35351ecb1e8badf0ba9fdcef9e2"
+}
