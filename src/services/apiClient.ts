@@ -1,5 +1,5 @@
-import type { Capabilities, CatalogResponse, PublicUser, ServerProduct, ServerTask } from '../../shared/contracts';
-import type { ImportPreview, Task } from '../types';
+import type { FactSnapshot, Capabilities, CatalogResponse, PublicUser, ServerProduct, ServerTask } from '../../shared/contracts';
+import type { ImportPreview, Listing, Platform, Task } from '../types';
 
 export const SERVER_MODE = typeof window !== 'undefined' && import.meta.env?.MODE !== 'competition' && new URLSearchParams(window.location.search).get('mode') !== 'local';
 export class ApiError extends Error { constructor(public code: string, message: string, public status = 0) { super(message); } }
@@ -16,6 +16,7 @@ async function request<T>(path: string, method = 'GET', body?: unknown): Promise
   } catch (error) { if (error instanceof ApiError) throw error; throw new ApiError('api_unavailable', 'The local API is unavailable.'); }
   finally { clearTimeout(timer); }
 }
+const factPath = (taskId: string, productId: string) => `/tasks/${encodeURIComponent(taskId)}/products/${encodeURIComponent(productId)}`;
 export const apiClient = {
   health: () => request<{ status: string; service: string }>('/health'),
   auth: {
@@ -36,6 +37,16 @@ export const apiClient = {
     get: (id: string) => request<ServerTask>(`/tasks/${encodeURIComponent(id)}`),
     create: (task: Task) => request<ServerTask>('/tasks', 'POST', { code: task.id, platform: task.platform, market: task.market, category: task.category, requirements: task.requirements, minimumProfit: task.minProfit }),
     select: (taskId: string, sku: string, purpose: 'selected' | 'fact_review') => request<ServerTask>(`/tasks/${encodeURIComponent(taskId)}/selection`, 'POST', { productId: sku, purpose }),
+  },
+  facts: {
+    list: (taskId: string) => request<FactSnapshot[]>(`/tasks/${encodeURIComponent(taskId)}/fact-snapshots`),
+    getSnapshot: (taskId: string, productId: string) => request<FactSnapshot>(`${factPath(taskId, productId)}/fact-snapshot`),
+    createV1: (taskId: string, productId: string) => request<FactSnapshot>(`${factPath(taskId, productId)}/fact-cards/v1`, 'POST', {}),
+    analyze: (taskId: string, productId: string, expectedRevision: number) => request<FactSnapshot>(`${factPath(taskId, productId)}/analyze`, 'POST', { expectedRevision }),
+    update: (id: string, value: string, expectedRevision: number) => request<FactSnapshot>(`/facts/${encodeURIComponent(id)}`, 'PATCH', { value, expectedRevision }),
+    confirm: (id: string, expectedRevision: number) => request<FactSnapshot>(`/facts/${encodeURIComponent(id)}/confirm`, 'POST', { expectedRevision }),
+    reject: (id: string, expectedRevision: number) => request<FactSnapshot>(`/facts/${encodeURIComponent(id)}/reject`, 'POST', { expectedRevision }),
+    template: (taskId: string, productId: string, platform: Platform, revision: number, expectedRevision: number) => request<Listing>(`${factPath(taskId, productId)}/listing-template`, 'POST', { platform, revision, expectedRevision }),
   },
   capabilities: () => request<Capabilities>('/capabilities'),
   reset: () => request<CatalogResponse>('/demo/reset', 'POST', {}),

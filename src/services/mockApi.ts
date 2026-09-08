@@ -1,7 +1,9 @@
+import { baseFactCard, effectiveProduct, pricingFromFacts, productEvidence, reviewFact } from '../../shared/facts';
+import type { FactSnapshot, FactPreview } from '../../shared/contracts';
 import { apiClient, SERVER_MODE } from './apiClient';
 import { enrichProductEvidence, makeTemplateListing, rankProducts, reviewAgainstTemplate } from '../../shared/domain';
-import { demoTask, HERO_SKU, products as builtInProducts } from '../data/mockData';
-import { COPY_FACTS, PRICING_FACTS, REQUIRED_COPY_FACTS, editableFact, factEditor, factNumber, normalizeFactValue } from './factReview';
+import { demoTask, products as builtInProducts } from '../data/mockData';
+import { PRICING_FACTS, REQUIRED_COPY_FACTS, editableFact, factEditor } from './factReview';
 import { SUPPLIER_COLUMNS } from '../data/supplierTemplate';
 import type { DemoState, Evidence, Fact, FactCard, ImportMode, ImportPreview, Listing, Platform, Pricing, Product, Recommendation, Stage, Workspace } from '../types';
 
@@ -53,6 +55,33 @@ function hydrate(input?: string | null): DemoState {
 }
 let current = SERVER_MODE ? initialState() : hydrate();
 let serverOwner: string | null = null;
+let serverPreviews: Record<string, FactPreview> = {};
+let serverSnapshots: Record<string, FactSnapshot> = {};
+function applySnapshot(snapshot: FactSnapshot) {
+  serverSnapshots[snapshot.product.sku] = clone(snapshot);
+  if (current.selectedSku !== snapshot.product.sku) return;
+  const changed = current.factsRevision !== snapshot.factsRevision;
+  current.v1 = clone(snapshot.v1); current.v2 = clone(snapshot.v2); current.pricing = clone(snapshot.pricing);
+  current.factsRevision = snapshot.factsRevision; current.factEdits = {};
+  if (changed || snapshot.downstreamInvalidated) {
+    current.listings = {}; current.reviews = {}; current.publications = {};
+    advance(snapshot.v2 ? snapshot.pricingReadiness.ready ? 'pricing_ready' : 'evidence_analyzed' : 'sku_selected');
+  }
+}
+async function refreshServerFacts() {
+  if (!serverOwner || !current.selectedSku || !current.task) return;
+  applySnapshot(await apiClient.facts.getSnapshot(current.task.recordId!, selected().recordId!)); save();
+}
+async function mutateServerFact(key: string, action: 'edit' | 'confirm' | 'reject', value?: string) {
+  const before = findCurrentFact(key);
+  try {
+    const snap = action === 'edit' ? await apiClient.facts.update(before.recordId!, value ?? '', current.factsRevision!) : await apiClient.facts[action](before.recordId!, current.factsRevision!);
+    applySnapshot(snap);
+    advance(snap.pricingReadiness.ready ? 'pricing_ready' : snap.v2 ? 'evidence_analyzed' : 'sku_selected');
+    return save();
+  } catch (error) { await refreshServerFacts(); throw error; }
+}
+
 let pendingImport: ImportPreview | null = null;
 function save() {
   try {
@@ -76,77 +105,25 @@ function selected(): Product {
 function eligible(p: Product) {
   return p.status === 'search_ready' && p.duplicateStatus === 'unique' && p.category === demoTask.category;
 }
-function fact(key: string, label: string, value: string, source: string, anchor: string, allowed = true, confirmed = true): Fact {
-  return { key, label, value, source, anchor, allowed: confirmed && allowed, status: value === 'Missing' ? 'Missing' : confirmed ? 'Confirmed' : 'Requires Confirmation', sourceKind: 'mock' };
-}
 function cardV1(p: Product): FactCard {
-  const dimensions = p.packagingDimensions?.split(' × ').map(Number.parseFloat);
-  const facts = [
-    fact('color', 'Color', p.color, 'Supplier Spreadsheet', 'Products · column D'),
-    fact('capacity', 'Capacity', `${p.capacity}ml / ${p.localizedCapacity}`, 'Specification PDF', 'Page 1 · specifications'),
-    fact('material', 'Material', p.material, 'Specification PDF', 'Page 1 · body material'),
-    fact('straw', 'Straw', p.straw ? 'Included' : 'No straw', 'Supplier Spreadsheet', 'Products · column F'),
-    fact('countryOfOrigin', 'Country of origin', p.countryOfOrigin, 'Supplier Spreadsheet', 'Products · column G'),
-    fact('packagingWeight', 'Packaging weight', p.packagingWeight ? `${p.packagingWeight} kg` : 'Missing', 'Supplier Spreadsheet', 'Packaging · column C', false, !!p.packagingWeight),
-    ...(['packageLength', 'packageWidth', 'packageHeight'] as const).map((key, i) => {
-      const value = p[key] ?? dimensions?.[i];
-      return fact(key, ['Package length', 'Package width', 'Package height'][i], value ? `${value} cm` : 'Missing', 'Supplier Spreadsheet', `Packaging · ${key}`, false, !!value);
-    }),
-    fact('supplierCost', 'Supplier cost', `USD ${p.supplierCost.toFixed(2)}`, 'Supplier Spreadsheet', 'Commercial · column B', false),
-    fact('declaredValue', 'Declared value', `USD ${(p.declaredValue ?? 8.2).toFixed(2)}`, 'Supplier Spreadsheet', 'Commercial · column C', false),
-  ];
-  if (p.importSource) {
-    const columns: Record<string, string> = { color: 'color', capacity: 'capacityMl', material: 'material', straw: 'hasStraw', countryOfOrigin: 'countryOfOrigin', packagingWeight: 'packagingWeightKg', packageLength: 'packageLengthCm', packageWidth: 'packageWidthCm', packageHeight: 'packageHeightCm', supplierCost: 'supplierCost', declaredValue: 'declaredValue' };
-    for (const f of facts) {
-      f.source = 'Imported Supplier File'; f.sourceKind = 'supplier';
-      f.anchor = `${p.importSource.fileName} · ${p.importSource.sheetName} · row ${p.importSource.row} · ${columns[f.key]}`;
-    }
-  }
-  return { version: 1, sku: p.sku, facts: facts.map(f => clone(editsFor(p.sku)[f.key] ?? f)) };
+  if (serverOwner) return clone(serverSnapshots[p.sku]?.v1 ?? serverPreviews[p.sku].v1);
+  const card = baseFactCard(p);
+  return { ...card, facts: card.facts.map(f => clone(editsFor(p.sku)[f.key] ?? f)) };
 }
 function editsFor(sku: string): Record<string, Fact> { return Object.hasOwn(current.factEdits, sku) ? current.factEdits[sku] : {}; }
 function factRevision(sku: string, keys?: string[]) {
+  if (serverOwner) return serverSnapshots[sku]?.factsRevision ?? 0;
   return Object.values(editsFor(sku)).filter(f => !keys || keys.includes(f.key)).reduce((sum, f) => sum + (f.revision ?? 0), 0);
 }
 function productView(p: Product): Product {
-  if (!Object.keys(editsFor(p.sku)).length) return clone(p);
-  const facts = cardV1(p).facts;
-  const confirmed = (key: string) => facts.find(f => f.key === key && f.status === 'Confirmed');
-  const missing = p.missing.filter(label => !['Packaging Weight', 'Packaging Dimensions'].includes(label) && !(label === 'Accessory Information' && editsFor(p.sku).packageIncludes?.status === 'Confirmed'));
-  if (!confirmed('packagingWeight')) missing.push('Packaging Weight');
-  if (['packageLength', 'packageWidth', 'packageHeight'].some(key => !confirmed(key))) missing.push('Packaging Dimensions');
-  for (const key of ['color', 'capacity', 'material', 'straw', 'countryOfOrigin', 'supplierCost', 'declaredValue']) {
-    if (!confirmed(key)) missing.push(facts.find(f => f.key === key)!.label);
-  }
-  const value = (key: string) => confirmed(key)?.value;
-  const dimensions = ['packageLength', 'packageWidth', 'packageHeight'].map(key => value(key) ? factNumber(value(key)!) : undefined);
-  return { ...p, color: value('color') ?? p.color, material: value('material') ?? p.material,
-    capacity: value('capacity') ? factNumber(value('capacity')!) : p.capacity,
-    localizedCapacity: value('capacity')?.split(' / ')[1] ?? p.localizedCapacity,
-    countryOfOrigin: value('countryOfOrigin') ?? p.countryOfOrigin,
-    straw: value('straw') ? value('straw') === 'Included' : p.straw,
-    supplierCost: value('supplierCost') ? factNumber(value('supplierCost')!) : p.supplierCost,
-    declaredValue: value('declaredValue') ? factNumber(value('declaredValue')!) : p.declaredValue,
-    packagingWeight: value('packagingWeight') ? factNumber(value('packagingWeight')!) : undefined,
-    packagingDimensions: dimensions.every(n => n !== undefined) ? `${dimensions.join(' × ')} cm` : undefined,
-    missing: [...new Set(missing)], status: missing.length ? 'missing_data' : 'search_ready',
-  };
+  if (serverOwner) return clone(serverSnapshots[p.sku]?.product ?? serverPreviews[p.sku].product);
+  return Object.keys(editsFor(p.sku)).length ? effectiveProduct(p, [...cardV1(p).facts, ...Object.values(editsFor(p.sku)).filter(f => !cardV1(p).facts.some(b => b.key === f.key))]) : clone(p);
 }
 function pricingFor(p: Product): Pricing {
-  const facts = cardV1(p).facts;
-  const confirmed = (key: string) => facts.find(f => f.key === key && f.status === 'Confirmed');
-  const missing = [
-    ...(!confirmed('packagingWeight') ? ['Packaging Weight'] : []),
-    ...(['packageLength', 'packageWidth', 'packageHeight'].some(key => !confirmed(key)) ? ['Packaging Dimensions'] : []),
-    ...(!confirmed('supplierCost') ? ['Supplier cost'] : []),
-  ];
-  const cost = confirmed('supplierCost') ? factNumber(confirmed('supplierCost')!.value) : p.supplierCost;
-  const floor = Math.ceil((cost + 3.1 + 0.7 + 2.2 + 5 - 1e-9) * 100) / 100;
-  return { version: `v${1 + factRevision(p.sku, PRICING_FACTS)}`, status: missing.length ? 'blocked' : 'ready', supplierCost: cost,
-    shipping: 3.1, duty: 0.7, platformCost: 2.2, targetProfit: 5,
-    suggestedPrice: missing.length ? null : p.sku === HERO_SKU ? Math.max(19.99, floor) : floor, missing };
+  return serverOwner ? clone(serverSnapshots[p.sku]?.pricing ?? serverPreviews[p.sku].pricing) : pricingFromFacts(p, cardV1(p).facts, factRevision(p.sku, PRICING_FACTS));
 }
 function synchronizeFacts() {
+  if (serverOwner) return;
   if (!current.selectedSku) return;
   current.v1 = cardV1(selected());
   if (current.v2) {
@@ -161,17 +138,7 @@ function findCurrentFact(key: string): Fact {
 }
 function changeFact(key: string, action: 'edit' | 'confirm' | 'reject', input?: string) {
   const before = findCurrentFact(key);
-  if (action !== 'reject' && !editableFact(key)) throw new Error('This claim cannot be edited or confirmed in the demo.');
-  if (action === 'confirm' && (before.status === 'Missing' || !before.value.trim())) throw new Error('A value is required before confirmation.');
-  const value = action === 'edit' ? normalizeFactValue(key, input ?? '') : action === 'confirm' ? normalizeFactValue(key, factEditor(before).value) : before.value;
-  const status: Fact['status'] = action === 'edit' ? 'Requires Confirmation' : action === 'confirm' ? 'Confirmed' : 'Rejected';
-  const now = new Date().toISOString();
-  const updated: Fact = { ...before, value, status, allowed: status === 'Confirmed' && COPY_FACTS.includes(key),
-    source: 'Manual confirmation', sourceKind: 'manual', anchor: `Fact Review · ${key}`,
-    previousValue: action === 'edit' ? before.value : before.previousValue ?? before.value,
-    previousSource: before.sourceKind === 'manual' ? before.previousSource : `${before.source} · ${before.anchor}`,
-    updatedAt: now, confirmedAt: action === 'confirm' ? now : undefined, revision: (before.revision ?? 0) + 1,
-  };
+  const updated = reviewFact(before, action, input);
   const sku = current.selectedSku!;
   current.factEdits = { ...current.factEdits, [sku]: { ...editsFor(sku), [key]: updated } };
   synchronizeFacts();
@@ -184,7 +151,7 @@ function changeFact(key: string, action: 'edit' | 'confirm' | 'reject', input?: 
 function safeListing(platform: Platform, revision = 1): Listing {
   if (!current.v2 || current.pricing?.status !== 'ready') throw new Error('Analyze evidence and resolve pricing before generating a listing.');
   if (selected().duplicateStatus !== 'unique' || selected().category !== demoTask.category) throw new Error('Duplicate or out-of-category products cannot generate listings for this task.');
-  return makeTemplateListing({ factCard: current.v2, pricing: current.pricing!, platform, revision, factRevision: factRevision(current.selectedSku!) });
+  return makeTemplateListing({ factCard: serverOwner ? serverSnapshots[current.selectedSku!].v2! : current.v2, pricing: current.pricing!, platform, revision, factRevision: factRevision(current.selectedSku!) });
 }
 function reviewIssues(listing: Listing) { return reviewAgainstTemplate(listing, safeListing(listing.platform, listing.revision)); }
 
@@ -193,22 +160,33 @@ export const mockApi = {
   async connectServer(userId: string) {
     const [catalog, tasks] = await Promise.all([apiClient.products.list(), apiClient.tasks.list()]);
     let cached = initialState();
+    let corruptActiveCache = false;
     try {
       const active = localStorage.getItem(STORAGE_KEY);
       // Corrupt active state resets browser-only work; it never rewrites server products/tasks.
       const activeData = active ? JSON.parse(active) : null;
       const raw = activeData?.ownerId === userId ? active : localStorage.getItem(`${STORAGE_KEY}:${userId}`);
       if (raw) { const candidate = JSON.parse(raw); if (candidate.ownerId === userId && candidate.serverRevision === catalog.revision) cached = hydrate(raw); }
-    } catch { cached = initialState(); }
+    } catch { cached = initialState(); corruptActiveCache = true; }
     serverOwner = userId;
     const task = tasks[0] ?? null;
-    const selectedSku = cached.selectedSku && task?.selectedSku === cached.selectedSku ? cached.selectedSku : null;
+    const selectedSku = corruptActiveCache ? null : task?.selectedSku ?? null;
+    serverPreviews = catalog.factPreviews; serverSnapshots = {};
     const importedCount = catalog.products.filter(p => p.importSource).length;
     current = { ...cached, catalog: catalog.products, serverRevision: catalog.revision, task, selectedSku, datasetSource: !importedCount ? 'builtin' : importedCount === catalog.products.length ? 'imported' : 'mixed' };
     if (!selectedSku) { current.v1 = null; current.v2 = null; current.pricing = null; current.listings = {}; current.reviews = {}; current.publications = {}; }
-    synchronizeFacts(); return save();
+    current.factEdits = {}; current.v1 = null; current.v2 = null; current.pricing = null;
+    if (task) {
+      const snapshots = await apiClient.facts.list(task.recordId);
+      for (const snap of snapshots) serverSnapshots[snap.product.sku] = snap;
+      if (selectedSku) applySnapshot(serverSnapshots[selectedSku] ?? await apiClient.facts.createV1(task.recordId, selectedSku));
+    }
+    for (const platform of ['amazon', 'shopify'] as const) {
+      if (current.listings[platform]?.factRevision !== current.factsRevision) { delete current.listings[platform]; delete current.reviews[platform]; delete current.publications[platform]; }
+    }
+    return save();
   },
-  disconnectServer() { if (serverOwner) { try { localStorage.removeItem(STORAGE_KEY); } catch { /* in-memory logout */ } } serverOwner = null; pendingImport = null; current = initialState(); },
+  disconnectServer() { if (serverOwner) { try { localStorage.removeItem(STORAGE_KEY); } catch { /* in-memory logout */ } } serverOwner = null; serverSnapshots = {}; serverPreviews = {}; pendingImport = null; current = initialState(); },
   isStorageAvailable: () => storageAvailable,
   catalog: () => current.catalog.map(productView),
   async getCatalog() { await delay(180); return current.catalog.map(productView); },
@@ -217,7 +195,7 @@ export const mockApi = {
   getTaskTemplate: () => clone(demoTask),
   async ready() { synchronizeFacts(); if (current.pricing && current.selectedSku) current.pricing = pricingFor(selected()); if (current.stage === 'initial') advance('materials_ready'); return save(); },
   navigate(workspace: Workspace) { current.workspace = workspace; return save(); },
-  async reset() { await delay(180); const data = serverOwner ? await apiClient.reset() : null; pendingImport = null; current = initialState(); if (data) { current.catalog = data.products; current.serverRevision = data.revision; } return save(); },
+  async reset() { await delay(180); const data = serverOwner ? await apiClient.reset() : null; pendingImport = null; current = initialState(); serverSnapshots = {}; if (data) { serverPreviews = data.factPreviews; current.catalog = data.products; current.serverRevision = data.revision; } return save(); },
   async loadBuiltInDataset() { await this.reset(); advance('materials_ready'); return save(); },
   getSupplierTemplate: () => [...SUPPLIER_COLUMNS],
   async previewSupplierFile(file: File, mode: ImportMode): Promise<ImportPreview> {
@@ -236,6 +214,7 @@ export const mockApi = {
     if (!preview?.products.length) throw new Error('No valid new products to import. The current dataset is unchanged.');
     if (serverOwner) {
       const result = await apiClient.products.import(preview, current.serverRevision!);
+      serverSnapshots = {}; serverPreviews = result.factPreviews;
       current = { ...initialState(), catalog: result.products, serverRevision: result.revision, datasetSource: preview.mode === 'append' ? 'mixed' : 'imported', importReport: clone(result.report ?? preview) };
       advance('materials_ready'); pendingImport = null; return save();
     }
@@ -276,6 +255,9 @@ export const mockApi = {
       current.selectedSku = sku; current.v1 = cardV1(p); current.v2 = null; current.pricing = null;
       current.listings = {}; current.reviews = {}; current.publications = {}; advance('sku_selected');
     }
+    if (serverOwner) applySnapshot(await apiClient.facts.createV1(current.task.recordId!, p.recordId!));
+    // Preserve the selected-hero story: its pricing appears after Analyze, while Fact Review can preview it immediately.
+    if (!current.v2 && current.pricing?.status === 'ready') current.pricing = null;
     current.workspace = 'evidence'; return save();
   },
   async openFactReview(sku: string) {
@@ -289,25 +271,26 @@ export const mockApi = {
       current.listings = {}; current.reviews = {}; current.publications = {};
       advance('sku_selected');
     }
+    if (serverOwner) applySnapshot(await apiClient.facts.createV1(current.task.recordId!, p.recordId!));
     current.pricing = pricingFor(p); current.workspace = 'evidence';
     return save();
   },
-  async editFact(key: string, value: string) { await delay(180); return changeFact(key, 'edit', value); },
-  async confirmFact(key: string) { await delay(180); return changeFact(key, 'confirm'); },
-  async rejectFact(key: string) { await delay(180); return changeFact(key, 'reject'); },
+  async editFact(key: string, value: string) { await delay(180); return serverOwner ? mutateServerFact(key, 'edit', value) : changeFact(key, 'edit', value); },
+  async confirmFact(key: string) { await delay(180); return serverOwner ? mutateServerFact(key, 'confirm') : changeFact(key, 'confirm'); },
+  async rejectFact(key: string) { await delay(180); return serverOwner ? mutateServerFact(key, 'reject') : changeFact(key, 'reject'); },
   evidence(sku: string): Evidence[] {
+    if (serverOwner) return clone(serverSnapshots[sku]?.evidence ?? []);
     const p = current.catalog.find(p => p.sku === sku);
-    if (!p) return [];
-    return [
-      { id: 'EV-001', type: 'sheet', name: p.importSource ? 'Imported Supplier File' : 'Supplier Spreadsheet', file: p.importSource?.fileName ?? 'supplier_catalog.xlsx', anchor: p.importSource ? `${p.importSource.fileName} · ${p.importSource.sheetName} · row ${p.importSource.row}` : `${sku} · Products & Packaging`, extracted: [`Color: ${p.color}`, `Straw: ${p.straw ? 'Included' : 'No straw'}`, `Packaging weight: ${p.packagingWeight ? `${p.packagingWeight} kg` : 'Missing'}`] },
-      { id: 'EV-002', type: 'pdf', name: p.importSource ? 'Mock Specification PDF' : 'Specification PDF', file: 'bottle_specification.pdf', anchor: 'Page 1 · specifications', extracted: [`Capacity: ${p.capacity}ml / ${p.localizedCapacity}`, `Body: ${p.material}`, 'Lid: Screw-top lid'] },
-      { id: 'EV-003', type: 'image', name: p.importSource ? 'Mock Product / Packaging Images' : 'Product / Packaging Images', file: 'product_front.jpg + package_contents.jpg', anchor: 'Image 1 · exterior; image 2 · contents', extracted: [`Finish: Matte ${p.color.toLowerCase()}`, 'Package: Bottle, Lid, Instruction card', 'Leakproof performance: Not verified'] },
-    ];
+    return p ? productEvidence(p) : [];
   },
   async analyzeEvidence() {
     await delay(700);
     const p = selected();
     if (!current.v1 || !current.task) throw new Error('Select a product and task first.');
+    if (serverOwner) {
+      applySnapshot(await apiClient.facts.analyze(current.task.recordId!, p.recordId!, current.factsRevision!));
+      advance('evidence_analyzed'); if (current.pricing?.status === 'ready') advance('pricing_ready'); return save();
+    }
     if (!current.v2) {
       current.v2 = enrichProductEvidence(p, current.v1, current.task);
       synchronizeFacts();
@@ -328,8 +311,9 @@ export const mockApi = {
   },
   async generateListing() {
     await delay(600);
+    await refreshServerFacts();
     const previous = current.listings[current.platform];
-    const listing = safeListing(current.platform, (previous?.revision ?? 0) + 1);
+    const listing = serverOwner ? await apiClient.facts.template(current.task!.recordId!, selected().recordId!, current.platform, (previous?.revision ?? 0) + 1, current.factsRevision!) : safeListing(current.platform, (previous?.revision ?? 0) + 1);
     // Intentional isolated demo fixture: the only generated claim outside the allowlist.
     if (current.platform === 'amazon' && !previous) { listing.bullets[2] = '100% leakproof'; listing.riskDemoInjected = true; }
     current.listings[current.platform] = listing;
@@ -338,6 +322,7 @@ export const mockApi = {
   },
   async editListing(edit: Pick<Listing, 'title' | 'bullets' | 'description'>) {
     await delay(200);
+    await refreshServerFacts();
     const listing = current.listings[current.platform];
     if (!listing) throw new Error('Generate a listing first.');
     Object.assign(listing, clone(edit)); listing.revision += 1;
@@ -346,6 +331,7 @@ export const mockApi = {
   },
   async runReview() {
     await delay(650);
+    await refreshServerFacts();
     const listing = current.listings[current.platform];
     if (!listing) throw new Error('Generate a listing first.');
     const issues = reviewIssues(listing);
@@ -355,9 +341,10 @@ export const mockApi = {
   },
   async applyFix() {
     await delay(350);
+    await refreshServerFacts();
     const listing = current.listings[current.platform];
     if (!listing) throw new Error('Generate a listing first.');
-    current.listings[current.platform] = safeListing(current.platform, listing.revision + 1);
+    current.listings[current.platform] = serverOwner ? await apiClient.facts.template(current.task!.recordId!, selected().recordId!, current.platform, listing.revision + 1, current.factsRevision!) : safeListing(current.platform, listing.revision + 1);
     delete current.reviews[current.platform]; delete current.publications[current.platform];
     advance('listing_generated'); return save();
   },
@@ -368,12 +355,14 @@ export const mockApi = {
   },
   async publish() {
     await delay(750);
+    await refreshServerFacts();
     if (!this.canPublish()) throw new Error('Publish blocked: the current revision must pass review.');
     const platform = current.platform;
     current.publications[platform] = { platform, productId: platform === 'shopify' ? 'SHOP-DEMO-1042' : 'AMZ-DEMO-1042', status: platform === 'shopify' ? 'Draft' : 'Export ready', revision: current.listings[platform]!.revision };
     advance('published'); return save();
   },
-  exportCsv() {
+  async exportCsv() {
+    await refreshServerFacts();
     if (current.platform !== 'amazon' || !current.publications.amazon || !this.canPublish()) throw new Error('Publish the reviewed Amazon draft before exporting.');
     const listing = current.listings.amazon!;
     const rows = [

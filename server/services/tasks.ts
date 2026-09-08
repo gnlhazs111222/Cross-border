@@ -18,7 +18,7 @@ export async function selectProduct(db: PrismaClient, userId: string, taskId: st
   if (!task || !product) throw new AppError('not_found', 'Task or product not found.', 404);
   const data = product.data as { duplicateStatus: string };
   if (purpose === 'selected' && (data.duplicateStatus !== 'unique' || task.category !== product.category)) throw new AppError('product_not_eligible', 'This product is not eligible for the task.');
-  // Fact completion still belongs to the browser workflow; this stores the owned relationship only.
+  // Selection establishes the owned relationship required to create a server FactCard.
   await db.taskSelection.upsert({ where: { taskId: task.id }, update: { productId: product.id, purpose, revision: { increment: 1 } }, create: { taskId: task.id, productId: product.id, purpose } });
   return (await tasks(db, userId)).find(t => t.recordId === task.id)!;
 }

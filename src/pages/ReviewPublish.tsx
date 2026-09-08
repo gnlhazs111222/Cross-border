@@ -10,13 +10,13 @@ export function ReviewPublish() {
   const { state, busy, act, navigate, setState, notify } = useDemo();
   const listing = state.listings[state.platform]; const review = state.reviews[state.platform]; const publication = state.publications[state.platform];
   const canPublish = mockApi.canPublish();
-  const exportCsv = () => {
+  const exportCsv = async () => {
     try {
-      const blob = new Blob([mockApi.exportCsv()], { type: 'text/csv;charset=utf-8;' });
+      const blob = new Blob([await mockApi.exportCsv()], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob); const link = document.createElement('a');
       link.href = url; link.download = `PrismLaunch-${state.selectedSku}-Amazon.csv`; document.body.appendChild(link); link.click(); link.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000); notify('Amazon CSV downloaded.');
-    } catch (error) { notify(error instanceof Error ? error.message : 'Export failed.', true); }
+    } catch (error) { setState(mockApi.getState()); notify(error instanceof Error ? error.message : 'Export failed.', true); }
   };
   return <><PageHeader eyebrow={t("05 / REVIEW & PUBLISH")} title={t("One final check. A confident launch.")} description={t("Catch unsupported claims, make a human correction, then publish your reviewed revision.")} action={<Badge tone="blue">{t("Mock publish only")}</Badge>} /><div className="studio-toolbar"><PlatformTabs value={state.platform} disabled={!!busy} onChange={p => setState(mockApi.setPlatform(p))} />{listing && <span className="muted">{t('Reviewing revision {revision}', { revision: listing.revision })}</span>}</div>
     {!listing ? <EmptyState title={t("Generate a listing before review")} description={t('There is no {platform} draft for this product yet.', { platform: state.platform === 'amazon' ? 'Amazon' : 'Shopify' })} action={<NextButton onClick={() => navigate('studio')}>{t("Go to Listing Studio")}</NextButton>} /> : <>

@@ -1,3 +1,4 @@
+import { createV1, factSnapshot, taskFactSnapshots, analyzeFacts, mutateFact, templateFromFacts } from './services/facts';
 import Fastify from 'fastify';
 import cookie from '@fastify/cookie';
 import { z } from 'zod';
@@ -91,13 +92,48 @@ export async function buildApp(config: ServerConfig, db: PrismaClient, options: 
   app.get('/api/tasks/:id/recommendations', protectedRoute, async request => {
     const { id } = z.object({ id: z.string() }).parse(request.params); const task = (await tasks(db, request.user!.id)).find(t => t.recordId === id || t.id === id);
     if (!task) throw new AppError('not_found', 'Task not found.', 404);
-    return { data: await domainProviders.recommendation.recommend((await catalog(db, request.user!.id)).products, task) };
+    const snapshots = await taskFactSnapshots(db, request.user!.id, task.recordId);
+    const products = (await catalog(db, request.user!.id)).products.map(p => snapshots.find(s => s.product.sku === p.sku)?.product ?? p);
+    return { data: await domainProviders.recommendation.recommend(products, task) };
+  });
+  const factPath = '/api/tasks/:taskId/products/:productId';
+  const factParams = z.object({ taskId: z.string().min(1).max(220), productId: z.string().min(1).max(220) });
+  const revisionBody = z.object({ expectedRevision: z.number().int().positive() }).strict();
+  for (const resource of ['fact-snapshot', 'fact-cards', 'facts', 'evidence'] as const) {
+    app.get(`${factPath}/${resource}`, protectedRoute, async request => {
+      const p = factParams.parse(request.params); const snap = await factSnapshot(db, request.user!.id, p.taskId, p.productId);
+      return { data: resource === 'fact-snapshot' ? snap : resource === 'fact-cards' ? { v1: snap.v1, v2: snap.v2, factsRevision: snap.factsRevision } : snap[resource] };
+    });
+  }
+  app.get('/api/tasks/:id/fact-snapshots', protectedRoute, async request => {
+    const { id } = z.object({ id: z.string().min(1).max(220) }).parse(request.params);
+    return { data: await taskFactSnapshots(db, request.user!.id, id) };
+  });
+  app.post(`${factPath}/fact-cards/v1`, protectedRoute, async request => {
+    const p = factParams.parse(request.params); z.object({}).strict().parse(request.body ?? {});
+    return { data: await createV1(db, request.user!.id, p.taskId, p.productId) };
+  });
+  app.post(`${factPath}/analyze`, protectedRoute, async request => {
+    const p = factParams.parse(request.params); const input = revisionBody.parse(request.body);
+    return { data: await analyzeFacts(db, request.user!.id, p.taskId, p.productId, input.expectedRevision) };
+  });
+  for (const action of ['edit', 'confirm', 'reject'] as const) {
+    app.route({ method: action === 'edit' ? 'PATCH' : 'POST', url: `/api/facts/:factId${action === 'edit' ? '' : `/${action}`}`, ...protectedRoute, handler: async request => {
+      const { factId } = z.object({ factId: z.string().min(1).max(220) }).parse(request.params);
+      const input = (action === 'edit' ? revisionBody.extend({ value: z.string().max(220) }) : revisionBody).parse(request.body);
+      return { data: await mutateFact(db, request.user!.id, factId, action, input.expectedRevision, 'value' in input ? input.value as string : undefined) };
+    } });
+  }
+  app.post(`${factPath}/listing-template`, protectedRoute, async request => {
+    const p = factParams.parse(request.params);
+    const input = revisionBody.extend({ platform: z.enum(['amazon', 'shopify']), revision: z.number().int().positive() }).parse(request.body);
+    return { data: await templateFromFacts(db, request.user!.id, p.taskId, p.productId, input.platform, input.revision, input.expectedRevision) };
   });
   app.get('/api/capabilities', async () => {
     await db.$queryRaw`SELECT 1`;
     const available = config.AI_LIVE_ENABLED && !!config.BAILIAN_API_KEY;
     const result: Capabilities = { backend: true, database: true, authentication: true,
-      storage: { server: ['User', 'Product', 'LaunchTask', 'TaskSelection'], browser: ['FactCard', 'Fact edits', 'ListingDraft', 'ReviewResult', 'PublishResult', 'Language'] },
+      storage: { server: ['User', 'Product', 'LaunchTask', 'TaskSelection', 'FactCard', 'Fact', 'Evidence'], browser: ['ListingDraft', 'ReviewResult', 'PublishResult', 'Language'] },
       textModel: { activeProvider: 'mock', liveAvailable: available, configured: !!config.BAILIAN_API_KEY, liveEnabled: config.AI_LIVE_ENABLED, model: config.BAILIAN_TEXT_MODEL, remainingCalls: providers.bailian.remainingCalls },
       recommendation: { activeProvider: 'mock', liveAvailable: available, liveImplemented: false }, evidence: { activeProvider: 'mock', liveAvailable: available, liveImplemented: false },
       listing: { activeProvider: 'template', liveAvailable: available, liveImplemented: false }, review: { activeProvider: 'rules', liveAvailable: available, liveImplemented: false },

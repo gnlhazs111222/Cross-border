@@ -1,6 +1,6 @@
 # PrismLaunch Full Demo
 
-当前默认是完整演示模式：**React → Fastify → Prisma / SQLite → Cookie 登录**。商品目录和基础上新任务已由服务端持久化；原有 Fact Review、文案、规则审核和模拟发布继续可用。
+当前默认是完整演示模式：**React → Fastify → Prisma / SQLite → Cookie 登录**。商品、任务、FactCard V1/V2、人工事实核对与证据元数据均由服务端持久化；原有文案、规则审核和模拟发布继续可用。
 
 百炼 Qwen 文本 Provider 已完成两次真实连接验证；业务智能仍采用 Mock / 模板 / 规则，默认不会花费模型 API。
 
@@ -39,11 +39,11 @@ npm run preview:local
 
 ## 数据与模型边界
 
-- SQLite 权威保存：User、Session、Product、LaunchTask、TaskSelection、AI 调用元数据。
-- 浏览器仍保存：FactCard、人工修改、文案、审核、模拟发布和语言偏好。
-- 目录 / 任务在浏览器中仅有兼容性缓存；会话初始化从 API 覆盖，清空 localStorage 后仍可恢复服务端商品和任务。
+- SQLite 权威保存：User、Session、Product、LaunchTask、TaskSelection、FactCard、Fact、Evidence、AI 调用元数据。
+- 浏览器仍保存：文案、审核、模拟发布和语言偏好；文案绑定服务端 factsRevision。
+- 目录 / 任务 / 事实在浏览器中仅有兼容性快照；会话初始化从 API 覆盖，清空 localStorage 后仍可恢复。旧 factEdits 不会自动升级成可信的服务端事实。
 - XLSX / CSV 继续在浏览器按固定模板解析，服务端再校验并保存；替换 / 追加、重复处理和原始顺序保留。
-- FactCard / Listing / Review 的数据库模型已建立，但本轮未迁移其实际业务写入。
+- Listing / Review / Publish 的业务保存仍在浏览器；模板生成从后端读取 Confirmed + Allowed facts，事实变化返回失效通知并清除旧结果。
 - Key 只存服务端 `.env`，不提交、不打包到浏览器。默认 `AI_LIVE_ENABLED=false`。
 - 推荐、PDF / 图片补充、业务文案智能、语义审核和平台发布没有全面 AI 化，详情见能力说明弹窗。
 
@@ -71,18 +71,19 @@ npm run ai:smoke
 AI_LIVE_ENABLED=true NODE_TLS_REJECT_UNAUTHORIZED=1 npm run ai:smoke -- --live
 ```
 
-本轮已经成功做过两次真实 smoke，不需重复；成功标记存在时命令自动跳过。默认每个 API 进程最多 20 次调用，smoke CLI 更严格地限制为两次，SDK 不自动重试。
+上一轮已经成功做过两次真实 smoke，不需重复；成功标记存在时命令自动跳过。默认每个 API 进程最多 20 次调用，smoke CLI 更严格地限制为两次，SDK 不自动重试。
 
 ## 文档与素材
 
 - [Full Demo 架构、API、持久化、Provider 与真实调用报告](docs/FULL_DEMO.md)
-- [本轮验收记录](artifacts/full-demo/VERIFICATION.md)
+- [事实服务端迁移与本轮验收](docs/FACT_SERVER_MIGRATION.md)
+- [上一轮后端基础验收](artifacts/full-demo/VERIFICATION.md)
 - [供应商导入说明](SUPPLIER_IMPORT.md)
 - [人工事实核对](FACT_REVIEW.md)
 - [比赛版 3 / 5 分钟讲稿](docs/DEMO_SCRIPT.md)
 - [比赛版问答](docs/DEMO_QA.md)
 - [比赛版截图](artifacts/presentation/README.md)
 
-比赛讲稿和旧截图描述的是冻结的离线比赛版；默认 Full Demo 需要先登录，产品 / 任务存储边界以本文件和 Full Demo 文档为准。
+比赛讲稿和旧截图描述的是冻结的离线比赛版；默认 Full Demo 需要先登录，产品 / 任务 / 事实存储边界以本文件和 Full Demo 文档为准。
 
 示例文件仍位于 `public/demo/prismlaunch-supplier-demo.xlsx`、`public/demo/prismlaunch-supplier-demo.csv`，页面可以下载。

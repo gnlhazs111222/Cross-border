@@ -1,3 +1,4 @@
+import { baseFactCard, pricingFromFacts } from '../../shared/facts';
 import type { Prisma, PrismaClient, Product as DbProduct } from '@prisma/client';
 import type { z } from 'zod';
 import { products as builtInProducts } from '../../src/data/mockData';
@@ -14,7 +15,7 @@ export async function seedProducts(db: Database, userId: string) {
 }
 export async function catalog(db: Database, userId: string): Promise<CatalogResponse> {
   const [rows, user] = await Promise.all([db.product.findMany({ where: { userId }, orderBy: [{ position: 'asc' }, { createdAt: 'asc' }, { sku: 'asc' }] }), db.user.findUniqueOrThrow({ where: { id: userId } })]);
-  return { products: rows.map(toProduct), revision: user.catalogRevision };
+  return { products: rows.map(toProduct), revision: user.catalogRevision, factPreviews: Object.fromEntries(rows.map(row => { const p = toProduct(row); const v1 = baseFactCard(p); return [p.sku, { v1, product: p, pricing: pricingFromFacts(p, v1.facts) }]; })) };
 }
 export async function resetCatalog(db: PrismaClient, userId: string) {
   return db.$transaction(async tx => {

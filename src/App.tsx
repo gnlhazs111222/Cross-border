@@ -37,7 +37,7 @@ export default function App() {
     if (lock.current) return false;
     lock.current = true; setBusy(label);
     try { setState(await action()); if (['reset', 'load-dataset', 'import-save'].includes(label)) window.scrollTo({ top: 0 }); notify(message); return true; }
-    catch (error) { notify(error instanceof Error ? error.message : 'Something went wrong. Please retry.', true); return false; }
+    catch (error) { setState(mockApi.getState()); notify(error instanceof Error ? error.message : 'Something went wrong. Please retry.', true); return false; }
     finally { lock.current = false; setBusy(null); }
   };
   const navigate = (workspace: Workspace) => { if (lock.current) return; setState(mockApi.navigate(workspace)); window.scrollTo({ top: 0 }); };
