@@ -110,7 +110,7 @@ test('pending and rejected facts are excluded from backend template; confirmed p
   assert.equal((await app.inject({ method: 'POST', url: `/api/facts/${claim.recordId}/confirm`, headers: { cookie }, payload: { expectedRevision: s.factsRevision } })).statusCode, 400);
 });
 
-test('fact change cascades server downstream deletion, synchronizes base cards and rejects stale writes', async () => {
+test('fact change invalidates retained downstream history, synchronizes base cards and rejects stale writes', async () => {
   const before = await analyze(await select(HERO_SKU));
   const user = await db.user.findUniqueOrThrow({ where: { email: 'demo@prismlaunch.local' } });
   await db.listingDraft.create({ data: { userId: user.id, taskId: before.taskId, productId: before.productId, platform: 'amazon', revision: 1, factRevision: before.factsRevision, data: {},
@@ -118,7 +118,8 @@ test('fact change cascades server downstream deletion, synchronizes base cards a
   const s = await mutate(before, 'color', 'edit', 'Navy');
   assert.equal(s.downstreamInvalidated, true); assert.equal(s.factsRevision, before.factsRevision + 1);
   assert.equal(s.v1.facts.find(f => f.key === 'color')!.value, 'Navy'); assert.equal(s.v2!.facts.find(f => f.key === 'color')!.value, 'Navy');
-  assert.equal(await db.listingDraft.count(), 0); assert.equal(await db.reviewResult.count(), 0); assert.equal(await db.publishResult.count(), 0);
+  assert.equal(await db.listingDraft.count(), 1); assert.equal((await db.listingDraft.findFirstOrThrow()).status, 'stale');
+  assert.ok((await db.reviewResult.findFirstOrThrow()).invalidatedAt); assert.ok((await db.publishResult.findFirstOrThrow()).invalidatedAt);
   const id = before.facts.find(f => f.key === 'color')!.recordId;
   assert.equal((await app.inject({ method: 'PATCH', url: `/api/facts/${id}`, headers: { cookie }, payload: { value: 'White', expectedRevision: before.factsRevision } })).statusCode, 409);
   assert.equal((await app.inject({ method: 'POST', url: `${route(s)}/listing-template`, headers: { cookie }, payload: { platform: 'amazon', revision: 2, expectedRevision: before.factsRevision } })).statusCode, 409);

@@ -605,5 +605,10 @@
   "Live connection availability does not mean the Qwen business adapters are implemented. Normal workflows and all automated tests stay mock/template/rules.": "连接可用不代表 Qwen 业务适配器已经实现。普通业务和自动化测试仍使用 Mock / 模板 / 规则。",
   "The dataset changed. Reload and preview the file again.": "资料集已变化，请刷新并重新预览文件。",
   "Sign in failed.": "登录失败。",
-  "Logout failed.": "退出失败。"
+  "Logout failed.": "退出失败。",
+  "Listing changed. Reload the current version before retrying.": "文案版本已变化，已读取最新状态，请检查后重试。",
+  "The listing is stale. Regenerate from the current facts.": "文案已失效，请根据当前事实重新生成。",
+  "Publish the current reviewed Amazon draft before exporting.": "请先发布当前已通过审核的 Amazon 文案，再导出 CSV。",
+  "Listing not found.": "未找到此文案。",
+  "Publication not found.": "未找到此发布记录。"
 }

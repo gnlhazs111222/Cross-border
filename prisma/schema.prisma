@@ -122,6 +122,8 @@ model Evidence {
   updatedAt  DateTime @updatedAt
 }
 model ListingDraft {
+  status       String @default("stale")
+  generationMode String @default("template")
   id           String     @id @default(cuid())
   userId       String
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -140,6 +142,9 @@ model ListingDraft {
   @@unique([taskId, productId, platform, revision])
 }
 model ReviewResult {
+  reviewMode     String @default("rules")
+  highRiskCount  Int @default(0)
+  invalidatedAt  DateTime?
   id             String       @id @default(cuid())
   listingDraftId String
   listingDraft   ListingDraft @relation(fields: [listingDraftId], references: [id], onDelete: Cascade)
@@ -150,6 +155,8 @@ model ReviewResult {
   updatedAt      DateTime     @updatedAt
 }
 model PublishResult {
+  externalDemoId String @default("")
+  invalidatedAt DateTime?
   id             String       @id @default(cuid())
   listingDraftId String
   listingDraft   ListingDraft @relation(fields: [listingDraftId], references: [id], onDelete: Cascade)

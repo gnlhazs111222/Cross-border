@@ -1,6 +1,6 @@
 # PrismLaunch Full Demo
 
-当前默认是完整演示模式：**React → Fastify → Prisma / SQLite → Cookie 登录**。商品、任务、FactCard V1/V2、人工事实核对与证据元数据均由服务端持久化；原有文案、规则审核和模拟发布继续可用。
+当前默认是完整演示模式：**React → Fastify → Prisma / SQLite → Cookie 登录**。商品、任务、事实、文案、审核和模拟发布均由服务端持久化。浏览器保留界面偏好与非权威快照。
 
 百炼 Qwen 文本 Provider 已完成两次真实连接验证；业务智能仍采用 Mock / 模板 / 规则，默认不会花费模型 API。
 
@@ -39,11 +39,11 @@ npm run preview:local
 
 ## 数据与模型边界
 
-- SQLite 权威保存：User、Session、Product、LaunchTask、TaskSelection、FactCard、Fact、Evidence、AI 调用元数据。
-- 浏览器仍保存：文案、审核、模拟发布和语言偏好；文案绑定服务端 factsRevision。
+- SQLite 权威保存：User、Session、Product、LaunchTask、TaskSelection、FactCard、Fact、Evidence、ListingDraft、ReviewResult、PublishResult、AI 调用元数据。
+- 浏览器只保存界面偏好和非权威业务快照；文案绑定服务端 factsRevision，刷新 / 清空 localStorage 后仍可恢复数据库中的审核和发布。
 - 目录 / 任务 / 事实在浏览器中仅有兼容性快照；会话初始化从 API 覆盖，清空 localStorage 后仍可恢复。旧 factEdits 不会自动升级成可信的服务端事实。
 - XLSX / CSV 继续在浏览器按固定模板解析，服务端再校验并保存；替换 / 追加、重复处理和原始顺序保留。
-- Listing / Review / Publish 的业务保存仍在浏览器；模板生成从后端读取 Confirmed + Allowed facts，事实变化返回失效通知并清除旧结果。
+- 模板生成、规则审核、发布授权与 CSV 下载全部由后端执行。事实变化使历史结果 stale；文案修改创建新版本并使该平台旧结果失效，保留历史。
 - Key 只存服务端 `.env`，不提交、不打包到浏览器。默认 `AI_LIVE_ENABLED=false`。
 - 推荐、PDF / 图片补充、业务文案智能、语义审核和平台发布没有全面 AI 化，详情见能力说明弹窗。
 
@@ -76,7 +76,8 @@ AI_LIVE_ENABLED=true NODE_TLS_REJECT_UNAUTHORIZED=1 npm run ai:smoke -- --live
 ## 文档与素材
 
 - [Full Demo 架构、API、持久化、Provider 与真实调用报告](docs/FULL_DEMO.md)
-- [事实服务端迁移与本轮验收](docs/FACT_SERVER_MIGRATION.md)
+- [文案 / 审核 / 发布迁移与本轮验收](docs/LISTING_SERVER_MIGRATION.md)
+- [上一轮事实迁移验收](docs/FACT_SERVER_MIGRATION.md)
 - [上一轮后端基础验收](artifacts/full-demo/VERIFICATION.md)
 - [供应商导入说明](SUPPLIER_IMPORT.md)
 - [人工事实核对](FACT_REVIEW.md)

@@ -1,4 +1,4 @@
-import type { Fact, FactCard, Evidence, Pricing, ImportReport, Product, Task } from '../src/types';
+import type { Fact, FactCard, Evidence, Pricing, Listing, Review, Publication, Platform, ImportReport, Product, Task } from '../src/types';
 
 export type PublicUser = { id: string; email: string; displayName: string };
 export type ServerProduct = Product & { recordId: string };
@@ -20,4 +20,13 @@ export type FactSnapshot = FactPreview & {
   factsRevision: number; downstreamInvalidated: boolean;
   pricingReadiness: { ready: boolean; missing: string[] };
   listingReadiness: { ready: boolean; blockedFacts: string[] };
+};
+
+export type WorkflowSnapshot = {
+  taskId: string; productId: string; factsRevision: number;
+  heads: Partial<Record<Platform, { recordId: string; revision: number; status: string }>>;
+  listings: Partial<Record<Platform, Listing>>;
+  reviews: Partial<Record<Platform, Review>>;
+  publications: Partial<Record<Platform, Publication>>;
+  publishAllowed: Partial<Record<Platform, boolean>>;
 };

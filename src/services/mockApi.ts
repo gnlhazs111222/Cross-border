@@ -1,5 +1,6 @@
+import { amazonCsv } from '../../shared/csv';
 import { baseFactCard, effectiveProduct, pricingFromFacts, productEvidence, reviewFact } from '../../shared/facts';
-import type { FactSnapshot, FactPreview } from '../../shared/contracts';
+import type { WorkflowSnapshot, FactSnapshot, FactPreview } from '../../shared/contracts';
 import { apiClient, SERVER_MODE } from './apiClient';
 import { enrichProductEvidence, makeTemplateListing, rankProducts, reviewAgainstTemplate } from '../../shared/domain';
 import { demoTask, products as builtInProducts } from '../data/mockData';
@@ -57,6 +58,30 @@ let current = SERVER_MODE ? initialState() : hydrate();
 let serverOwner: string | null = null;
 let serverPreviews: Record<string, FactPreview> = {};
 let serverSnapshots: Record<string, FactSnapshot> = {};
+let serverWorkflow: WorkflowSnapshot | null = null;
+function applyWorkflow(workflow: WorkflowSnapshot) {
+  serverWorkflow = clone(workflow);
+  current.listings = clone(workflow.listings); current.reviews = clone(workflow.reviews); current.publications = clone(workflow.publications);
+  const platform = current.platform;
+  if (current.publications[platform]) advance('published');
+  else if (current.reviews[platform]) advance(current.reviews[platform]!.status === 'passed' ? 'review_passed' : 'review_blocked');
+  else if (current.listings[platform]) advance('listing_generated');
+  else if (current.v2) advance(current.pricing?.status === 'ready' ? 'pricing_ready' : 'evidence_analyzed');
+  else advance(current.selectedSku ? 'sku_selected' : current.task ? 'task_created' : 'materials_ready');
+}
+async function refreshWorkflow() {
+  if (serverOwner && current.task && current.selectedSku) applyWorkflow(await apiClient.listings.list(current.task.recordId!, selected().recordId!));
+}
+async function serverAction(action: () => Promise<WorkflowSnapshot>) {
+  try { applyWorkflow(await action()); return save(); }
+  catch (error) { await refreshServerFacts(); await refreshWorkflow(); save(); throw error; }
+}
+function activeServerListing() {
+  const listing = current.listings[current.platform];
+  if (!listing?.recordId) throw new Error('Generate a listing first.');
+  return listing;
+}
+
 function applySnapshot(snapshot: FactSnapshot) {
   serverSnapshots[snapshot.product.sku] = clone(snapshot);
   if (current.selectedSku !== snapshot.product.sku) return;
@@ -64,7 +89,7 @@ function applySnapshot(snapshot: FactSnapshot) {
   current.v1 = clone(snapshot.v1); current.v2 = clone(snapshot.v2); current.pricing = clone(snapshot.pricing);
   current.factsRevision = snapshot.factsRevision; current.factEdits = {};
   if (changed || snapshot.downstreamInvalidated) {
-    current.listings = {}; current.reviews = {}; current.publications = {};
+    serverWorkflow = null; current.listings = {}; current.reviews = {}; current.publications = {};
     advance(snapshot.v2 ? snapshot.pricingReadiness.ready ? 'pricing_ready' : 'evidence_analyzed' : 'sku_selected');
   }
 }
@@ -77,6 +102,7 @@ async function mutateServerFact(key: string, action: 'edit' | 'confirm' | 'rejec
   try {
     const snap = action === 'edit' ? await apiClient.facts.update(before.recordId!, value ?? '', current.factsRevision!) : await apiClient.facts[action](before.recordId!, current.factsRevision!);
     applySnapshot(snap);
+    await refreshWorkflow();
     advance(snap.pricingReadiness.ready ? 'pricing_ready' : snap.v2 ? 'evidence_analyzed' : 'sku_selected');
     return save();
   } catch (error) { await refreshServerFacts(); throw error; }
@@ -171,22 +197,22 @@ export const mockApi = {
     serverOwner = userId;
     const task = tasks[0] ?? null;
     const selectedSku = corruptActiveCache ? null : task?.selectedSku ?? null;
-    serverPreviews = catalog.factPreviews; serverSnapshots = {};
+    serverPreviews = catalog.factPreviews; serverSnapshots = {}; serverWorkflow = null;
     const importedCount = catalog.products.filter(p => p.importSource).length;
     current = { ...cached, catalog: catalog.products, serverRevision: catalog.revision, task, selectedSku, datasetSource: !importedCount ? 'builtin' : importedCount === catalog.products.length ? 'imported' : 'mixed' };
     if (!selectedSku) { current.v1 = null; current.v2 = null; current.pricing = null; current.listings = {}; current.reviews = {}; current.publications = {}; }
+    current.listings = {}; current.reviews = {}; current.publications = {};
     current.factEdits = {}; current.v1 = null; current.v2 = null; current.pricing = null;
     if (task) {
       const snapshots = await apiClient.facts.list(task.recordId);
       for (const snap of snapshots) serverSnapshots[snap.product.sku] = snap;
       if (selectedSku) applySnapshot(serverSnapshots[selectedSku] ?? await apiClient.facts.createV1(task.recordId, selectedSku));
     }
-    for (const platform of ['amazon', 'shopify'] as const) {
-      if (current.listings[platform]?.factRevision !== current.factsRevision) { delete current.listings[platform]; delete current.reviews[platform]; delete current.publications[platform]; }
-    }
+    if (selectedSku) await refreshWorkflow();
+    else advance(task ? 'task_created' : 'materials_ready');
     return save();
   },
-  disconnectServer() { if (serverOwner) { try { localStorage.removeItem(STORAGE_KEY); } catch { /* in-memory logout */ } } serverOwner = null; serverSnapshots = {}; serverPreviews = {}; pendingImport = null; current = initialState(); },
+  disconnectServer() { if (serverOwner) { try { localStorage.removeItem(STORAGE_KEY); } catch { /* in-memory logout */ } } serverOwner = null; serverSnapshots = {}; serverWorkflow = null; serverPreviews = {}; pendingImport = null; current = initialState(); },
   isStorageAvailable: () => storageAvailable,
   catalog: () => current.catalog.map(productView),
   async getCatalog() { await delay(180); return current.catalog.map(productView); },
@@ -195,7 +221,7 @@ export const mockApi = {
   getTaskTemplate: () => clone(demoTask),
   async ready() { synchronizeFacts(); if (current.pricing && current.selectedSku) current.pricing = pricingFor(selected()); if (current.stage === 'initial') advance('materials_ready'); return save(); },
   navigate(workspace: Workspace) { current.workspace = workspace; return save(); },
-  async reset() { await delay(180); const data = serverOwner ? await apiClient.reset() : null; pendingImport = null; current = initialState(); serverSnapshots = {}; if (data) { serverPreviews = data.factPreviews; current.catalog = data.products; current.serverRevision = data.revision; } return save(); },
+  async reset() { await delay(180); const data = serverOwner ? await apiClient.reset() : null; pendingImport = null; current = initialState(); serverSnapshots = {}; serverWorkflow = null; if (data) { serverPreviews = data.factPreviews; current.catalog = data.products; current.serverRevision = data.revision; } return save(); },
   async loadBuiltInDataset() { await this.reset(); advance('materials_ready'); return save(); },
   getSupplierTemplate: () => [...SUPPLIER_COLUMNS],
   async previewSupplierFile(file: File, mode: ImportMode): Promise<ImportPreview> {
@@ -214,7 +240,7 @@ export const mockApi = {
     if (!preview?.products.length) throw new Error('No valid new products to import. The current dataset is unchanged.');
     if (serverOwner) {
       const result = await apiClient.products.import(preview, current.serverRevision!);
-      serverSnapshots = {}; serverPreviews = result.factPreviews;
+      serverSnapshots = {}; serverWorkflow = null; serverPreviews = result.factPreviews;
       current = { ...initialState(), catalog: result.products, serverRevision: result.revision, datasetSource: preview.mode === 'append' ? 'mixed' : 'imported', importReport: clone(result.report ?? preview) };
       advance('materials_ready'); pendingImport = null; return save();
     }
@@ -255,7 +281,7 @@ export const mockApi = {
       current.selectedSku = sku; current.v1 = cardV1(p); current.v2 = null; current.pricing = null;
       current.listings = {}; current.reviews = {}; current.publications = {}; advance('sku_selected');
     }
-    if (serverOwner) applySnapshot(await apiClient.facts.createV1(current.task.recordId!, p.recordId!));
+    if (serverOwner) { applySnapshot(await apiClient.facts.createV1(current.task.recordId!, p.recordId!)); await refreshWorkflow(); }
     // Preserve the selected-hero story: its pricing appears after Analyze, while Fact Review can preview it immediately.
     if (!current.v2 && current.pricing?.status === 'ready') current.pricing = null;
     current.workspace = 'evidence'; return save();
@@ -271,7 +297,7 @@ export const mockApi = {
       current.listings = {}; current.reviews = {}; current.publications = {};
       advance('sku_selected');
     }
-    if (serverOwner) applySnapshot(await apiClient.facts.createV1(current.task.recordId!, p.recordId!));
+    if (serverOwner) { applySnapshot(await apiClient.facts.createV1(current.task.recordId!, p.recordId!)); await refreshWorkflow(); }
     current.pricing = pricingFor(p); current.workspace = 'evidence';
     return save();
   },
@@ -311,9 +337,10 @@ export const mockApi = {
   },
   async generateListing() {
     await delay(600);
+    if (serverOwner) return serverAction(() => apiClient.listings.create(current.task!.recordId!, selected().recordId!, current.platform, serverWorkflow?.heads[current.platform]?.revision ?? 0, current.factsRevision!));
     await refreshServerFacts();
     const previous = current.listings[current.platform];
-    const listing = serverOwner ? await apiClient.facts.template(current.task!.recordId!, selected().recordId!, current.platform, (previous?.revision ?? 0) + 1, current.factsRevision!) : safeListing(current.platform, (previous?.revision ?? 0) + 1);
+    const listing = safeListing(current.platform, (previous?.revision ?? 0) + 1);
     // Intentional isolated demo fixture: the only generated claim outside the allowlist.
     if (current.platform === 'amazon' && !previous) { listing.bullets[2] = '100% leakproof'; listing.riskDemoInjected = true; }
     current.listings[current.platform] = listing;
@@ -322,6 +349,7 @@ export const mockApi = {
   },
   async editListing(edit: Pick<Listing, 'title' | 'bullets' | 'description'>) {
     await delay(200);
+    if (serverOwner) { const l = activeServerListing(); return serverAction(() => apiClient.listings.update(l.recordId!, edit, l.revision, current.factsRevision!)); }
     await refreshServerFacts();
     const listing = current.listings[current.platform];
     if (!listing) throw new Error('Generate a listing first.');
@@ -331,6 +359,7 @@ export const mockApi = {
   },
   async runReview() {
     await delay(650);
+    if (serverOwner) { const l = activeServerListing(); return serverAction(() => apiClient.reviews.run(l.recordId!, l.revision, current.factsRevision!)); }
     await refreshServerFacts();
     const listing = current.listings[current.platform];
     if (!listing) throw new Error('Generate a listing first.');
@@ -341,20 +370,23 @@ export const mockApi = {
   },
   async applyFix() {
     await delay(350);
+    if (serverOwner) { const l = activeServerListing(); return serverAction(() => apiClient.listings.applySuggestedFix(l.recordId!, l.revision, current.factsRevision!)); }
     await refreshServerFacts();
     const listing = current.listings[current.platform];
     if (!listing) throw new Error('Generate a listing first.');
-    current.listings[current.platform] = serverOwner ? await apiClient.facts.template(current.task!.recordId!, selected().recordId!, current.platform, listing.revision + 1, current.factsRevision!) : safeListing(current.platform, listing.revision + 1);
+    current.listings[current.platform] = safeListing(current.platform, listing.revision + 1);
     delete current.reviews[current.platform]; delete current.publications[current.platform];
     advance('listing_generated'); return save();
   },
   canPublish() {
+    if (serverOwner) return !!serverWorkflow?.publishAllowed[current.platform];
     if (!this.listingReady()) return false;
     const listing = current.listings[current.platform]; const review = current.reviews[current.platform];
     return !!listing && (listing.factRevision ?? 0) === factRevision(current.selectedSku!) && review?.status === 'passed' && review.revision === listing.revision && current.pricing?.status === 'ready' && reviewIssues(listing).length === 0;
   },
   async publish() {
     await delay(750);
+    if (serverOwner) { const l = activeServerListing(); return serverAction(() => apiClient.publish.create(l.recordId!, l.revision, current.factsRevision!)); }
     await refreshServerFacts();
     if (!this.canPublish()) throw new Error('Publish blocked: the current revision must pass review.');
     const platform = current.platform;
@@ -362,14 +394,15 @@ export const mockApi = {
     advance('published'); return save();
   },
   async exportCsv() {
+    if (serverOwner) {
+      const id = current.publications.amazon?.recordId;
+      if (!id) throw new Error('Publish the reviewed Amazon draft before exporting.');
+      try { return await apiClient.publish.amazonCsv(id); }
+      catch (error) { await refreshServerFacts(); await refreshWorkflow(); save(); throw error; }
+    }
     await refreshServerFacts();
     if (current.platform !== 'amazon' || !current.publications.amazon || !this.canPublish()) throw new Error('Publish the reviewed Amazon draft before exporting.');
     const listing = current.listings.amazon!;
-    const rows = [
-      ['sku', 'title', 'bullet_point_1', 'bullet_point_2', 'bullet_point_3', 'bullet_point_4', 'bullet_point_5', 'description', 'price', 'currency', 'marketplace', 'status'],
-      [current.selectedSku!, listing.title, ...Array.from({ length: 5 }, (_, i) => listing.bullets[i] ?? ''), listing.description, current.pricing!.suggestedPrice!.toFixed(2), 'USD', 'Amazon US', 'Mock export'],
-    ];
-    const quote = (cell: string) => `"${cell.replace(/"/g, '""')}"`;
-    return '\uFEFF' + rows.map(row => row.map(quote).join(',')).join('\r\n') + '\r\n';
+    return amazonCsv(current.selectedSku!, listing, current.pricing!.suggestedPrice!);
   },
 };

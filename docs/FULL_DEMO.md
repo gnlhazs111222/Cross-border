@@ -1,6 +1,6 @@
 # PrismLaunch Full Demo 交付说明
 
-更新：2026-09-08，已完成 FactCard / Fact / Evidence 服务端迁移。本轮详情与验收见 [FACT_SERVER_MIGRATION.md](FACT_SERVER_MIGRATION.md)。
+更新：2026-09-08，已完成 ListingDraft / ReviewResult / PublishResult 服务端迁移。当前全部业务状态以 SQLite 为权威来源。本轮详情与验收见 [LISTING_SERVER_MIGRATION.md](LISTING_SERVER_MIGRATION.md)。
 
 本轮从比赛版 `4a2920f` 升级后端基础。保留 `competition-demo-v1` 标签、`pyc` 分支、原 fixtures、原业务断言和离线比赛入口；新增工作在 `full-demo` 分支完成。没有 Docker、Redis、云数据库、OAuth、真实平台发布或 Agent 框架。
 
@@ -13,7 +13,7 @@ React Web
   │                                    └─ Provider interfaces
   │                                        ├─ Mock / Template / Rules
   │                                        └─ Bailian Text Provider → OpenAI JS SDK
-  └─ mockApi → browser-persisted drafts / reviews / simulated publication; facts from API snapshots
+  └─ mockApi → non-authoritative UI cache; all business data from API snapshots
 
 Offline competition mode
   React → mockApi → localStorage
@@ -33,6 +33,7 @@ server/
   services/catalog.ts    目录读取、导入事务、当前用户 Demo reset
   services/tasks.ts      任务与选中商品的持久化
   services/facts.ts      V1/V2、人工核对、事实快照、版本和下游失效
+  services/listings.ts   文案版本、规则审核、发布授权、历史与 CSV
   providers/text.ts      TextModelProvider、Mock、Bailian、预算与调用记录
   providers/domain.ts    四类业务 Provider 和明确禁用的 Qwen 预留适配器
   scripts/               migrate、seed、显式 AI smoke
@@ -69,20 +70,20 @@ Prisma / SQLite 已迁移创建 12 个模型：
 | TaskSelection | 任务与商品关系，selected / fact_review 用途及 revision，真实持久化 |
 | FactCard / Fact | V1/V2、字段、来源、状态、权限和修订历史，已真实持久化 |
 | Evidence | 真实保存来源元数据与预置提取值；补充分析仍为 Mock |
-| ListingDraft / ReviewResult / PublishResult | 后续文案、审核和发布版本关系；当前业务仍在浏览器 |
+| ListingDraft / ReviewResult / PublishResult | 已真实持久化；文案按平台独立版本化，审核 / 发布绑定文案版本，历史保留 |
 | AiCall | 模型、用途、成功 / 失败、耗时、token usage 和时间，真实写入 |
 
 所有模型都有 id、createdAt、updatedAt；需要业务版本的模型包含 version / revision。任务 Schema 没有硬编码 Amazon US，具体值来自本轮仍使用的固定 Demo Task。
 
 **权威数据源：**
 
-- User、Product、LaunchTask、TaskSelection、FactCard、Fact、Evidence：SQLite。
-- Listing、Review、Mock Publish：当前浏览器，Listing 绑定服务端 factsRevision。
-- 语言及轻量界面状态：localStorage。
+- User、Product、LaunchTask、TaskSelection、FactCard、Fact、Evidence、ListingDraft、ReviewResult、PublishResult：SQLite。
+- Listing 绑定服务端 factsRevision，审核与发布绑定具体 Listing revision。
+- 语言、轻量界面状态和非权威业务快照：localStorage。
 
-为了保留原 Demo state 契约，浏览器存储中可以看到目录、任务和事实的非权威快照。每次会话初始化都先读取 API，并用数据库结果覆盖这些缓存字段；缓存不会回写数据库。清空全部 localStorage 后，商品、任务和事实仍能从 API 恢复；伪造本地 catalog、V1/V2、factEdits 不会替换服务端数据。目录或 factsRevision 变化会丢弃旧的浏览器下游结果。
+为了保留原 Demo state 契约，浏览器存储中可以看到目录、任务、事实、文案、审核和发布的非权威快照。每次会话初始化都先读取 API，并用数据库结果覆盖这些缓存字段；缓存不会回写数据库。清空全部 localStorage 后，商品、任务、事实、文案、审核和发布仍能从 API 恢复；伪造本地缓存不能修改数据库或获得发布授权。目录或 factsRevision 变化会丢弃旧的浏览器下游结果。
 
-浏览器下游状态按用户保存，活动缓存包含 ownerId；退出登录清理活动缓存，下次登录不会把其他账户的缓存作为当前工作区。这里的 ownerId 是公开用户标识，不是登录 token。浏览器状态不是服务端安全边界，当前版本也不是生产级多用户审计系统。
+浏览器非权威快照按用户保存，活动缓存包含 ownerId；退出登录清理活动缓存，下次登录不会把其他账户的缓存作为当前工作区。这里的 ownerId 是公开用户标识，不是登录 token。浏览器状态不是服务端安全边界，当前版本也不是生产级多用户审计系统。
 
 ## 4. Auth
 
@@ -151,6 +152,15 @@ POST /api/tasks/:taskId/products/:productId/listing-template
 PATCH /api/facts/:factId
 POST /api/facts/:factId/confirm
 POST /api/facts/:factId/reject
+GET  /api/tasks/:taskId/products/:productId/listings
+POST /api/tasks/:taskId/products/:productId/listings
+GET  /api/listings/:id
+PATCH /api/listings/:id
+POST /api/listings/:id/regenerate
+POST /api/listings/:id/apply-suggested-fix
+POST /api/listings/:id/review
+POST /api/listings/:id/publish
+GET  /api/publish/:id/amazon-csv
 GET  /api/capabilities
 POST /api/demo/reset
 POST /api/ai/smoke-test
@@ -266,7 +276,7 @@ npm run preview:local
 
 独立离线模式默认 5174，完全不请求 API。`competition-demo-v1` 标签仍精确指向旧比赛版 `4a2920f`。
 
-后端基础轮验收见 `artifacts/full-demo/VERIFICATION.md`；最新事实迁移验收见 `docs/FACT_SERVER_MIGRATION.md`。E2E 为隔离测试账户，不共用 Demo 用户；原比赛断言保留。
+后端基础轮验收见 `artifacts/full-demo/VERIFICATION.md`；事实迁移验收见 `docs/FACT_SERVER_MIGRATION.md`；最新文案 / 审核 / 发布验收见 `docs/LISTING_SERVER_MIGRATION.md`。E2E 为隔离测试账户，不共用 Demo 用户；原比赛断言保留。
 
 ## 11. 下一轮最适合 AI 化的三个模块
 
@@ -276,4 +286,4 @@ npm run preview:local
 2. **ReviewProvider**：补充语义风险检查，但保留确定性阻断与人工决定，先测误报 / 漏报。
 3. **RecommendationProvider**：结合可编辑任务与确认事实做排序解释，比较固定评分与模型排序的实际效果。
 
-FactCard / 人工事实现已由服务端保存；开始业务 AI 前仍需把 Listing / Review 的保存与审核授权迁入服务端，并定义结构化输出验证、回退与效果评估。PDF Vision、真实平台发布、真实运费税费和云部署继续留在本轮之外。
+Fact、Listing、Review、Publish 现均已服务端持久化；开始业务 AI 前仍需定义 Provider 输入输出 schema、授权事实引用检查、失败回退与独立效果评估。PDF Vision、真实平台发布、真实运费税费和云部署继续留在本轮之外。

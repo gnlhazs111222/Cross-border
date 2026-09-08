@@ -1,3 +1,4 @@
+import { getWorkflow, getListing, createListing, reviseListing, reviewListing, publishListing, publishedAmazonCsv } from './services/listings';
 import { createV1, factSnapshot, taskFactSnapshots, analyzeFacts, mutateFact, templateFromFacts } from './services/facts';
 import Fastify from 'fastify';
 import cookie from '@fastify/cookie';
@@ -129,11 +130,35 @@ export async function buildApp(config: ServerConfig, db: PrismaClient, options: 
     const input = revisionBody.extend({ platform: z.enum(['amazon', 'shopify']), revision: z.number().int().positive() }).parse(request.body);
     return { data: await templateFromFacts(db, request.user!.id, p.taskId, p.productId, input.platform, input.revision, input.expectedRevision) };
   });
+  const listingVersion = z.object({ expectedVersion: z.number().int().nonnegative().max(1_000_000), expectedFactsRevision: z.number().int().positive() }).strict();
+  app.get(`${factPath}/listings`, protectedRoute, async request => {
+    const p = factParams.parse(request.params); return { data: await getWorkflow(db, request.user!.id, p.taskId, p.productId) };
+  });
+  app.post(`${factPath}/listings`, protectedRoute, async request => {
+    const p = factParams.parse(request.params); const input = listingVersion.extend({ platform: z.enum(['amazon', 'shopify']) }).parse(request.body);
+    return { data: await createListing(db, request.user!.id, p.taskId, p.productId, input) };
+  });
+  const listingParams = z.object({ id: z.string().min(1).max(220) });
+  app.get('/api/listings/:id', protectedRoute, async request => ({ data: await getListing(db, request.user!.id, listingParams.parse(request.params).id) }));
+  app.patch('/api/listings/:id', protectedRoute, async request => {
+    const input = listingVersion.extend({ title: z.string().trim().min(1).max(220), bullets: z.array(z.string().max(1000)).min(1).max(20), description: z.string().trim().min(1).max(10000) }).parse(request.body);
+    return { data: await reviseListing(db, request.user!.id, listingParams.parse(request.params).id, 'edit', input) };
+  });
+  for (const action of ['regenerate', 'apply-suggested-fix', 'review', 'publish'] as const) {
+    app.post(`/api/listings/:id/${action}`, protectedRoute, async request => {
+      const id = listingParams.parse(request.params).id; const input = listingVersion.parse(request.body);
+      return { data: action === 'review' ? await reviewListing(db, request.user!.id, id, input) : action === 'publish' ? await publishListing(db, request.user!.id, id, input) : await reviseListing(db, request.user!.id, id, action === 'regenerate' ? 'regenerate' : 'fix', input) };
+    });
+  }
+  app.get('/api/publish/:id/amazon-csv', protectedRoute, async (request, reply) => {
+    const result = await publishedAmazonCsv(db, request.user!.id, listingParams.parse(request.params).id);
+    return reply.type('text/csv; charset=utf-8').header('Content-Disposition', `attachment; filename="${result.filename}"`).send(result.csv);
+  });
   app.get('/api/capabilities', async () => {
     await db.$queryRaw`SELECT 1`;
     const available = config.AI_LIVE_ENABLED && !!config.BAILIAN_API_KEY;
     const result: Capabilities = { backend: true, database: true, authentication: true,
-      storage: { server: ['User', 'Product', 'LaunchTask', 'TaskSelection', 'FactCard', 'Fact', 'Evidence'], browser: ['ListingDraft', 'ReviewResult', 'PublishResult', 'Language'] },
+      storage: { server: ['User', 'Product', 'LaunchTask', 'TaskSelection', 'FactCard', 'Fact', 'Evidence', 'ListingDraft', 'ReviewResult', 'PublishResult'], browser: ['Language', 'UI preferences', 'Non-authoritative cache'] },
       textModel: { activeProvider: 'mock', liveAvailable: available, configured: !!config.BAILIAN_API_KEY, liveEnabled: config.AI_LIVE_ENABLED, model: config.BAILIAN_TEXT_MODEL, remainingCalls: providers.bailian.remainingCalls },
       recommendation: { activeProvider: 'mock', liveAvailable: available, liveImplemented: false }, evidence: { activeProvider: 'mock', liveAvailable: available, liveImplemented: false },
       listing: { activeProvider: 'template', liveAvailable: available, liveImplemented: false }, review: { activeProvider: 'rules', liveAvailable: available, liveImplemented: false },

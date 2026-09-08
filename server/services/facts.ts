@@ -21,10 +21,13 @@ async function owned(db: DB, userId: string, taskId: string, productId: string) 
   return { task, product };
 }
 export async function invalidateDownstream(db: DB, taskId: string, productId: string) {
-  // Cascades remove associated ReviewResult and PublishResult, including future server-written results.
-  await db.listingDraft.deleteMany({ where: { taskId, productId } });
+  const where = { taskId, productId };
+  const invalidatedAt = new Date();
+  await db.reviewResult.updateMany({ where: { listingDraft: where, invalidatedAt: null }, data: { invalidatedAt } });
+  await db.publishResult.updateMany({ where: { listingDraft: where, invalidatedAt: null }, data: { invalidatedAt } });
+  await db.listingDraft.updateMany({ where: { ...where, status: { not: 'superseded' } }, data: { status: 'stale' } });
 }
-async function snapshot(db: DB, userId: string, taskId: string, productId: string, invalidated = false): Promise<FactSnapshot> {
+export async function factSnapshotTx(db: DB, userId: string, taskId: string, productId: string, invalidated = false): Promise<FactSnapshot> {
   const { task, product } = await owned(db, userId, taskId, productId);
   const cards = await db.factCard.findMany({ where: { userId, taskId: task.id, productId: product.id }, include: { facts: { orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] }, evidence: { orderBy: { createdAt: 'asc' } } }, orderBy: { version: 'asc' } });
   const base = cards.find(c => c.version === 1); const enhanced = cards.find(c => c.version === 2);
@@ -39,14 +42,14 @@ async function snapshot(db: DB, userId: string, taskId: string, productId: strin
     listingReadiness: { ready: !!v2 && pricing.status === 'ready' && !blockedFacts.length && p.duplicateStatus === 'unique' && p.category === task.category, blockedFacts } };
 }
 export function factSnapshot(db: PrismaClient, userId: string, taskId: string, productId: string) {
-  return db.$transaction(tx => snapshot(tx, userId, taskId, productId));
+  return db.$transaction(tx => factSnapshotTx(tx, userId, taskId, productId));
 }
 export async function taskFactSnapshots(db: PrismaClient, userId: string, taskId: string) {
   return db.$transaction(async tx => {
     const task = await tx.launchTask.findFirst({ where: { id: taskId, userId } });
     if (!task) throw new AppError('not_found', 'Task not found.', 404);
     const cards = await tx.factCard.findMany({ where: { taskId: task.id, userId, version: 1 } });
-    return Promise.all(cards.map(c => snapshot(tx, userId, task.id, c.productId)));
+    return Promise.all(cards.map(c => factSnapshotTx(tx, userId, task.id, c.productId)));
   });
 }
 export async function createV1(db: PrismaClient, userId: string, taskId: string, productId: string) {
@@ -60,19 +63,19 @@ export async function createV1(db: PrismaClient, userId: string, taskId: string,
       await tx.factCard.create({ data: { userId, taskId: task.id, productId: product.id, productRevision: product.revision, version: 1,
         facts: { create: card.facts.map(storedFact) }, evidence: { create: productEvidence(p).map(e => ({ kind: e.type, source: e.name, data: json({ ...e, sourceKind: e.type === 'sheet' && p.importSource ? 'supplier' : 'mock', ...(e.type === 'sheet' && p.importSource ? { sourceMetadata: p.importSource } : {}) }) })) } } });
     }
-    return snapshot(tx, userId, task.id, product.id);
+    return factSnapshotTx(tx, userId, task.id, product.id);
   });
 }
 export async function analyzeFacts(db: PrismaClient, userId: string, taskId: string, productId: string, expectedRevision: number) {
   return db.$transaction(async tx => {
-    const before = await snapshot(tx, userId, taskId, productId);
+    const before = await factSnapshotTx(tx, userId, taskId, productId);
     if (before.factsRevision !== expectedRevision) throw new AppError('facts_changed', 'Facts changed. Reload the current facts before retrying.', 409);
     if (before.v2) return before;
     const { task, product } = await owned(tx, userId, taskId, productId);
     const v2 = await domainProviders.evidence.enrich(toProduct(product), before.v1, { id: task.code, platform: task.platform, market: task.market, category: task.category, requirements: task.requirements as string[], minProfit: task.minimumProfit });
     await tx.factCard.create({ data: { userId, taskId: task.id, productId: product.id, productRevision: product.revision, version: 2, revision: before.factsRevision + 1, facts: { create: v2.facts.map(storedFact) } } });
     await invalidateDownstream(tx, task.id, product.id);
-    return snapshot(tx, userId, task.id, product.id, true);
+    return factSnapshotTx(tx, userId, task.id, product.id, true);
   });
 }
 export async function mutateFact(db: PrismaClient, userId: string, factId: string, action: 'edit' | 'confirm' | 'reject', expectedRevision: number, value?: string) {
@@ -80,7 +83,7 @@ export async function mutateFact(db: PrismaClient, userId: string, factId: strin
     const row = await tx.fact.findFirst({ where: { id: factId, factCard: { userId, task: { userId }, product: { userId } } }, include: { factCard: true } });
     if (!row) throw new AppError('not_found', 'Fact not found.', 404);
     const { taskId, productId } = row.factCard;
-    const before = await snapshot(tx, userId, taskId, productId);
+    const before = await factSnapshotTx(tx, userId, taskId, productId);
     if (before.factsRevision !== expectedRevision) throw new AppError('facts_changed', 'Facts changed. Reload the current facts before retrying.', 409);
     let updated: Fact;
     try { updated = reviewFact(readFact(row), action, value); } catch (error) { throw new AppError('invalid_fact', error instanceof Error ? error.message : 'Invalid fact.'); }
@@ -89,7 +92,7 @@ export async function mutateFact(db: PrismaClient, userId: string, factId: strin
     for (const f of rows) await tx.fact.update({ where: { id: f.id }, data: storedFact(updated) });
     await tx.factCard.updateMany({ where: { id: { in: rows.map(f => f.factCardId) } }, data: { revision: before.factsRevision + 1 } });
     await invalidateDownstream(tx, taskId, productId);
-    return snapshot(tx, userId, taskId, productId, true);
+    return factSnapshotTx(tx, userId, taskId, productId, true);
   });
 }
 export async function templateFromFacts(db: PrismaClient, userId: string, taskId: string, productId: string, platform: Platform, revision: number, expectedRevision: number) {
