@@ -7,21 +7,40 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
-    "typecheck": "tsc --noEmit",
-    "build": "npm run typecheck && vite build",
+    "dev": "npm run db:migrate && npm run db:seed && concurrently -k -n web,api \"npm:dev:web\" \"npm:dev:api\"",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.server.json --noEmit",
+    "build": "npm run typecheck && vite build && esbuild server/index.ts --bundle --platform=node --format=esm --packages=external --outfile=dist-server/index.js",
     "preview": "vite preview --host 0.0.0.0",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "dev:web": "vite --host 0.0.0.0 --port 5173",
+    "dev:api": "tsx watch server/index.ts",
+    "dev:local": "vite --mode competition --host 0.0.0.0 --port 5174",
+    "postinstall": "node scripts/generate-prisma.mjs",
+    "db:migrate": "tsx server/scripts/database.ts migrate",
+    "db:seed": "tsx server/scripts/database.ts seed",
+    "build:local": "vite build --mode competition --outDir dist-competition",
+    "start:api": "node dist-server/index.js",
+    "preview:local": "vite preview --outDir dist-competition --host 0.0.0.0 --port 5174",
+    "preview:full": "concurrently -k -n web,api \"npm:preview\" \"npm:start:api\"",
+    "test:server": "NODE_ENV=test AI_LIVE_ENABLED=false BAILIAN_API_KEY= NODE_TLS_REJECT_UNAUTHORIZED=1 node --import tsx --test server/tests/*.test.ts",
+    "ai:smoke": "tsx server/scripts/ai-smoke.ts",
+    "security:check": "node scripts/check-secrets.mjs"
   },
   "dependencies": {
+    "@fastify/cookie": "^11.1.2",
+    "@prisma/client": "6.12.0",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-tabs": "^1.1.13",
     "@tailwindcss/vite": "^4.1.13",
+    "dotenv": "^16.6.1",
+    "fastify": "^5.12.3",
     "lucide-react": "^0.468.0",
+    "openai": "^6.49.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "tailwindcss": "^4.1.13",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
@@ -29,6 +48,10 @@
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^4.7.0",
+    "concurrently": "^9.2.4",
+    "esbuild": "^0.25.12",
+    "prisma": "6.12.0",
+    "tsx": "^4.23.13",
     "typescript": "~5.9.2",
     "vite": "^7.1.5"
   }

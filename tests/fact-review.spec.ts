@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './fixtures';
 import { resolve } from 'node:path';
 
 const HERO = 'LM-KT-BTL-001-BLK-500';

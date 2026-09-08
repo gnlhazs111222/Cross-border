@@ -1,3 +1,5 @@
+import { apiClient, SERVER_MODE } from './apiClient';
+import { enrichProductEvidence, makeTemplateListing, rankProducts, reviewAgainstTemplate } from '../../shared/domain';
 import { demoTask, HERO_SKU, products as builtInProducts } from '../data/mockData';
 import { COPY_FACTS, PRICING_FACTS, REQUIRED_COPY_FACTS, editableFact, factEditor, factNumber, normalizeFactValue } from './factReview';
 import { SUPPLIER_COLUMNS } from '../data/supplierTemplate';
@@ -13,11 +15,12 @@ const initialState = (): DemoState => ({
   listings: {}, reviews: {}, publications: {},
 });
 let storageAvailable = true;
-function hydrate(): DemoState {
+function hydrate(input?: string | null): DemoState {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = input === undefined ? localStorage.getItem(STORAGE_KEY) : input;
     if (!raw) return initialState();
     const s = JSON.parse(raw) as DemoState;
+    if (!SERVER_MODE && s.ownerId) return initialState();
     // Migrate existing v1 browser sessions without discarding their launch progress.
     s.catalog ??= clone(builtInProducts);
     s.datasetSource ??= 'builtin';
@@ -48,10 +51,16 @@ function hydrate(): DemoState {
     return s;
   } catch { return initialState(); }
 }
-let current = hydrate();
+let current = SERVER_MODE ? initialState() : hydrate();
+let serverOwner: string | null = null;
 let pendingImport: ImportPreview | null = null;
 function save() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(current)); storageAvailable = true; }
+  try {
+    const payload = JSON.stringify({ ...current, ...(serverOwner ? { ownerId: serverOwner } : {}) });
+    localStorage.setItem(STORAGE_KEY, payload);
+    if (serverOwner) localStorage.setItem(`${STORAGE_KEY}:${serverOwner}`, payload);
+    storageAvailable = true;
+  }
   catch { storageAvailable = false; }
   return clone(current);
 }
@@ -175,39 +184,31 @@ function changeFact(key: string, action: 'edit' | 'confirm' | 'reject', input?: 
 function safeListing(platform: Platform, revision = 1): Listing {
   if (!current.v2 || current.pricing?.status !== 'ready') throw new Error('Analyze evidence and resolve pricing before generating a listing.');
   if (selected().duplicateStatus !== 'unique' || selected().category !== demoTask.category) throw new Error('Duplicate or out-of-category products cannot generate listings for this task.');
-  const sources = current.v2.facts.filter(f => f.allowed && f.status === 'Confirmed');
-  const value = (key: string) => sources.find(f => f.key === key)?.value;
-  const color = value('color'); const capacity = value('capacity'); const material = value('material');
-  if (!color || !capacity || !material) throw new Error('Required confirmed facts are missing.');
-  const lid = value('lidType'); const includes = value('packageIncludes');
-  return {
-    platform, revision, factRevision: factRevision(current.selectedSku!), riskDemoInjected: false,
-    title: `${color} ${material} Travel Bottle, ${capacity}${lid ? `, ${lid === 'Screw-top lid' ? 'Screw-top Lid' : lid}` : ''}`,
-    bullets: [
-      `${capacity} capacity for your everyday routine.`,
-      `${material} body${value('finish') ? ` with a ${value('finish')!.toLowerCase()} finish` : ''}.`,
-      ...(lid ? [lid === 'Screw-top lid' ? 'Secure screw-top lid designed for everyday carrying.' : `${lid}.`] : []),
-      ...(value('straw') ? value('straw') === 'No straw' ? ['A simple, straw-free design.'] : ['Includes a straw.'] : []),
-      ...(includes ? [`In the box: ${includes}.`] : []),
-    ],
-    description: `Meet your everyday travel bottle. A ${color.toLowerCase()} ${material.toLowerCase()} body holds ${capacity}.${lid ? ` Finished with a ${lid.toLowerCase()}.` : ''}${includes ? ` Includes ${includes.toLowerCase()}.` : ''}`,
-    attributes: Object.fromEntries(sources.filter(f => ['color', 'capacity', 'material', 'straw', 'countryOfOrigin', 'finish', 'lidType'].includes(f.key)).map(f => [f.label, f.value])),
-    sources,
-  };
+  return makeTemplateListing({ factCard: current.v2, pricing: current.pricing!, platform, revision, factRevision: factRevision(current.selectedSku!) });
 }
-function reviewIssues(listing: Listing) {
-  const safe = safeListing(listing.platform, listing.revision);
-  const fields = [listing.title, ...listing.bullets, listing.description];
-  const issues = [];
-  if (fields.some(text => /100%\s*leakproof/i.test(text))) issues.push({ id: 'R001', severity: 'HIGH' as const, title: 'Unsupported performance claim', text: '100% leakproof', reason: 'No verified evidence supports an absolute leakproof claim.' });
-  const expected = [safe.title, ...safe.bullets, safe.description];
-  const hasOtherEdits = fields.some((text, i) => text !== expected[i] && text !== '100% leakproof') || fields.length !== expected.length;
-  if (hasOtherEdits) issues.push({ id: 'R002', severity: 'HIGH' as const, title: 'Unverified edited content', text: 'Text differs from the evidence-backed draft.', reason: 'This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy.' });
-  return issues;
-}
+function reviewIssues(listing: Listing) { return reviewAgainstTemplate(listing, safeListing(listing.platform, listing.revision)); }
 
 export const mockApi = {
   getState: () => clone(current),
+  async connectServer(userId: string) {
+    const [catalog, tasks] = await Promise.all([apiClient.products.list(), apiClient.tasks.list()]);
+    let cached = initialState();
+    try {
+      const active = localStorage.getItem(STORAGE_KEY);
+      // Corrupt active state resets browser-only work; it never rewrites server products/tasks.
+      const activeData = active ? JSON.parse(active) : null;
+      const raw = activeData?.ownerId === userId ? active : localStorage.getItem(`${STORAGE_KEY}:${userId}`);
+      if (raw) { const candidate = JSON.parse(raw); if (candidate.ownerId === userId && candidate.serverRevision === catalog.revision) cached = hydrate(raw); }
+    } catch { cached = initialState(); }
+    serverOwner = userId;
+    const task = tasks[0] ?? null;
+    const selectedSku = cached.selectedSku && task?.selectedSku === cached.selectedSku ? cached.selectedSku : null;
+    const importedCount = catalog.products.filter(p => p.importSource).length;
+    current = { ...cached, catalog: catalog.products, serverRevision: catalog.revision, task, selectedSku, datasetSource: !importedCount ? 'builtin' : importedCount === catalog.products.length ? 'imported' : 'mixed' };
+    if (!selectedSku) { current.v1 = null; current.v2 = null; current.pricing = null; current.listings = {}; current.reviews = {}; current.publications = {}; }
+    synchronizeFacts(); return save();
+  },
+  disconnectServer() { if (serverOwner) { try { localStorage.removeItem(STORAGE_KEY); } catch { /* in-memory logout */ } } serverOwner = null; pendingImport = null; current = initialState(); },
   isStorageAvailable: () => storageAvailable,
   catalog: () => current.catalog.map(productView),
   async getCatalog() { await delay(180); return current.catalog.map(productView); },
@@ -216,8 +217,8 @@ export const mockApi = {
   getTaskTemplate: () => clone(demoTask),
   async ready() { synchronizeFacts(); if (current.pricing && current.selectedSku) current.pricing = pricingFor(selected()); if (current.stage === 'initial') advance('materials_ready'); return save(); },
   navigate(workspace: Workspace) { current.workspace = workspace; return save(); },
-  async reset() { await delay(180); pendingImport = null; current = initialState(); return save(); },
-  async loadBuiltInDataset() { await delay(180); pendingImport = null; current = initialState(); advance('materials_ready'); return save(); },
+  async reset() { await delay(180); const data = serverOwner ? await apiClient.reset() : null; pendingImport = null; current = initialState(); if (data) { current.catalog = data.products; current.serverRevision = data.revision; } return save(); },
+  async loadBuiltInDataset() { await this.reset(); advance('materials_ready'); return save(); },
   getSupplierTemplate: () => [...SUPPLIER_COLUMNS],
   async previewSupplierFile(file: File, mode: ImportMode): Promise<ImportPreview> {
     pendingImport = null;
@@ -233,6 +234,11 @@ export const mockApi = {
     await delay(180);
     const preview = pendingImport;
     if (!preview?.products.length) throw new Error('No valid new products to import. The current dataset is unchanged.');
+    if (serverOwner) {
+      const result = await apiClient.products.import(preview, current.serverRevision!);
+      current = { ...initialState(), catalog: result.products, serverRevision: result.revision, datasetSource: preview.mode === 'append' ? 'mixed' : 'imported', importReport: clone(result.report ?? preview) };
+      advance('materials_ready'); pendingImport = null; return save();
+    }
     const catalog = preview.mode === 'append' ? [...current.catalog, ...preview.products] : preview.products;
     if (new Set(catalog.map(p => p.sku)).size !== catalog.length) throw new Error('The dataset changed. Preview the file again.');
     const { products: importedProducts, ...report } = preview;
@@ -244,22 +250,11 @@ export const mockApi = {
   async createTask() {
     await delay();
     if (current.stage === 'initial') advance('materials_ready');
-    if (!current.task) { current.task = clone(demoTask); advance('task_created'); }
+    if (!current.task) { current.task = serverOwner ? await apiClient.tasks.create(demoTask) : clone(demoTask); advance('task_created'); }
     current.workspace = 'tasks'; return save();
   },
   recommendations(): Recommendation[] {
-    if (!current.task) return [];
-    return current.catalog.map(productView).filter(eligible).map(p => {
-      const reasons: string[] = []; const deductions: string[] = []; let score = 94;
-      if (p.color === 'Black') reasons.push('Black matches requested color');
-      else { score -= 23; deductions.push('Color does not match requested black'); }
-      if (p.capacity === 500) reasons.push('500ml / 16.9 fl oz closely matches target capacity');
-      else { score -= 16; deductions.push(p.capacity === 750 ? 'Capacity too large: 750ml / 25.4 fl oz' : 'Capacity does not match the 500ml target'); }
-      if (!p.straw) reasons.push('No straw');
-      else { score -= 12; deductions.push('Includes straw: does not meet the no-straw preference'); }
-      reasons.push('Packaging information is complete');
-      return { sku: p.sku, score, reasons, deductions };
-    }).sort((a, b) => b.score - a.score || Number(b.sku === HERO_SKU) - Number(a.sku === HERO_SKU)).slice(0, 3);
+    return current.task ? rankProducts(current.catalog.map(productView), current.task) : [];
   },
   exclusionReason(p: Product) {
     if (p.duplicateStatus === 'duplicate') return 'Exact duplicate · excluded from recommendations';
@@ -276,6 +271,7 @@ export const mockApi = {
     if (!current.task) throw new Error('Create a launch task first.');
     const p = current.catalog.find(p => p.sku === sku);
     if (!p || !eligible(productView(p))) throw new Error('This product is not eligible for recommendation. Inspect missing data in Materials.');
+    if (serverOwner) current.task = await apiClient.tasks.select(current.task.recordId ?? current.task.id, sku, 'selected');
     if (current.selectedSku !== sku) {
       current.selectedSku = sku; current.v1 = cardV1(p); current.v2 = null; current.pricing = null;
       current.listings = {}; current.reviews = {}; current.publications = {}; advance('sku_selected');
@@ -286,7 +282,8 @@ export const mockApi = {
     await delay(180);
     const p = current.catalog.find(p => p.sku === sku);
     if (!p) throw new Error('Unknown SKU');
-    if (!current.task) current.task = clone(demoTask);
+    if (!current.task) current.task = serverOwner ? await apiClient.tasks.create(demoTask) : clone(demoTask);
+    if (serverOwner) current.task = await apiClient.tasks.select(current.task.recordId ?? current.task.id, sku, 'fact_review');
     if (current.selectedSku !== sku) {
       current.selectedSku = sku; current.v1 = cardV1(p); current.v2 = null;
       current.listings = {}; current.reviews = {}; current.publications = {};
@@ -312,12 +309,7 @@ export const mockApi = {
     const p = selected();
     if (!current.v1 || !current.task) throw new Error('Select a product and task first.');
     if (!current.v2) {
-      current.v2 = { version: 2, sku: p.sku, taskId: current.task.id, facts: [...clone(current.v1.facts),
-        fact('packageIncludes', 'Package includes', 'Bottle, Lid, Instruction card', p.importSource ? 'Mock Packaging Image' : 'Packaging Image', 'Image 2 · contents', true, p.sku === HERO_SKU),
-        fact('finish', 'Finish', `Matte ${p.color.toLowerCase()}`, p.importSource ? 'Mock Product Image' : 'Product Image', 'Image 1 · exterior', true, p.sku === HERO_SKU),
-        fact('lidType', 'Lid type', 'Screw-top lid', p.importSource ? 'Mock Specification PDF' : 'Specification PDF', 'Page 1 · closure', true, p.sku === HERO_SKU),
-        fact('leakproof', 'Leakproof performance', '100% leakproof', 'Supplier claim', 'Unverified · no supporting test report', false, false),
-      ] };
+      current.v2 = enrichProductEvidence(p, current.v1, current.task);
       synchronizeFacts();
       advance('evidence_analyzed');
       current.pricing = pricingFor(p);

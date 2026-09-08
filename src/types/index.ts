@@ -2,7 +2,7 @@ export type Workspace = 'materials' | 'tasks' | 'evidence' | 'studio' | 'review'
 export type Platform = 'amazon' | 'shopify';
 export type Stage = 'initial' | 'materials_ready' | 'task_created' | 'sku_selected' | 'evidence_analyzed' | 'pricing_ready' | 'listing_generated' | 'review_blocked' | 'review_passed' | 'published';
 export type Product = {
-  sku: string; name: string; category: string; color: string; capacity: number;
+  recordId?: string; sku: string; name: string; category: string; color: string; capacity: number;
   localizedCapacity: string; material: string; straw: boolean; countryOfOrigin: string;
   status: 'search_ready' | 'missing_data'; duplicateStatus: 'unique' | 'duplicate' | 'possible_duplicate';
   packagingWeight?: number; packagingDimensions?: string; supplierCost: number; declaredValue?: number;
@@ -19,7 +19,7 @@ export type Fact = {
 export type FactCard = { version: 1 | 2; sku: string; taskId?: string; facts: Fact[] };
 export type Evidence = { id: string; name: string; type: 'sheet' | 'pdf' | 'image'; file: string; anchor: string; extracted: string[] };
 export type Recommendation = { sku: string; score: number; reasons: string[]; deductions: string[] };
-export type Task = { id: string; platform: string; market: string; category: string; requirements: string[]; minProfit: number };
+export type Task = { recordId?: string; id: string; platform: string; market: string; category: string; requirements: string[]; minProfit: number };
 export type Pricing = { version: string; status: 'ready' | 'blocked'; supplierCost: number; shipping: number; duty: number; platformCost: number; targetProfit: number; suggestedPrice: number | null; missing: string[] };
 export type Listing = { platform: Platform; title: string; bullets: string[]; description: string; attributes: Record<string, string>; sources: Fact[]; revision: number; factRevision?: number; riskDemoInjected: boolean };
 export type Issue = { id: string; severity: 'HIGH'; title: string; text: string; reason: string };
@@ -31,7 +31,7 @@ export type ImportRow = { row: number; sku: string; status: 'ready' | 'missing_d
 export type ImportReport = { fileName: string; mode: ImportMode; processed: number; ready: number; missing: number; duplicates: number; invalid: number; rows: ImportRow[] };
 export type ImportPreview = ImportReport & { products: Product[] };
 export type DemoState = {
-  schemaVersion: 1; workspace: Workspace; stage: Stage; history: Stage[];
+  schemaVersion: 1; serverRevision?: number; ownerId?: string; workspace: Workspace; stage: Stage; history: Stage[];
   catalog: Product[]; datasetSource: 'builtin' | 'imported' | 'mixed'; importReport: ImportReport | null;
   factEdits: Record<string, Record<string, Fact>>;
   task: Task | null; selectedSku: string | null; v1: FactCard | null; v2: FactCard | null;

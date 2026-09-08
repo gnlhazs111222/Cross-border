@@ -1,0 +1,113 @@
+import Fastify from 'fastify';
+import cookie from '@fastify/cookie';
+import { z } from 'zod';
+import type { PrismaClient } from '@prisma/client';
+import type { Capabilities, PublicUser } from '../shared/contracts';
+import type { ServerConfig } from './config';
+import { AppError } from './errors';
+import { credentialsSchema, importSchema, registerSchema, taskSchema } from './validation';
+import { hashPassword, newSessionToken, tokenHash, verifyPassword } from './auth/password';
+import { catalog, importProducts, resetCatalog, seedProducts, toProduct } from './services/catalog';
+import { createTask, selectProduct, tasks } from './services/tasks';
+import { createTextProviders } from './providers/text';
+import { domainProviders } from './providers/domain';
+
+declare module 'fastify' { interface FastifyRequest { user: PublicUser | null } }
+const SESSION_COOKIE = 'prismlaunch_session';
+const publicUser = (user: PublicUser): PublicUser => ({ id: user.id, email: user.email, displayName: user.displayName });
+export async function buildApp(config: ServerConfig, db: PrismaClient, options: { transport?: typeof fetch; logger?: boolean } = {}) {
+  const app = Fastify({ logger: options.logger ?? (config.NODE_ENV === 'development' ? { level: 'info', redact: ['req.headers.authorization', 'req.headers.cookie', 'res.headers["set-cookie"]', 'password', 'apiKey'] } : false), requestTimeout: 35000, connectionTimeout: 35000, bodyLimit: 3 * 1024 * 1024 });
+  const providers = createTextProviders(config, db, options.transport);
+  await app.register(cookie);
+  app.decorateRequest('user', null);
+  app.setErrorHandler((error, request, reply) => {
+    if (error instanceof z.ZodError) return reply.code(400).send({ error: { code: 'validation_error', message: 'Invalid request.', fields: error.issues.map(i => ({ path: i.path.join('.'), message: i.message })) } });
+    if (error instanceof AppError) return reply.code(error.status).send({ error: { code: error.code, message: error.message } });
+    const status = typeof (error as { statusCode?: number }).statusCode === 'number' ? (error as { statusCode: number }).statusCode : 500;
+    request.log.warn({ status, code: 'request_failed' }, 'Request failed');
+    return reply.code(status).send({ error: { code: status >= 500 ? 'internal_error' : 'invalid_request', message: status >= 500 ? 'The request could not be completed.' : 'Invalid request.' } });
+  });
+  app.addHook('onRequest', async (request, reply) => {
+    reply.header('Cache-Control', 'no-store');
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method) && request.headers.origin) {
+      const sameOrigin = new URL(request.headers.origin).host === request.headers.host;
+      if (!sameOrigin && !config.WEB_ORIGINS.split(',').includes(request.headers.origin)) throw new AppError('origin_forbidden', 'Request origin is not allowed.', 403);
+    }
+    const token = request.cookies[SESSION_COOKIE];
+    if (token) {
+      const session = await db.session.findUnique({ where: { tokenHash: tokenHash(token) }, include: { user: true } });
+      if (session && session.expiresAt > new Date()) request.user = publicUser(session.user);
+    }
+  });
+  const requireUser = async (request: import('fastify').FastifyRequest) => { if (!request.user) throw new AppError('unauthenticated', 'Please sign in.', 401); };
+  const protectedRoute = { preHandler: requireUser };
+  const setSession = async (userId: string, reply: import('fastify').FastifyReply) => {
+    const token = newSessionToken(); const expiresAt = new Date(Date.now() + 8 * 60 * 60 * 1000);
+    await db.session.create({ data: { userId, tokenHash: tokenHash(token), expiresAt } });
+    reply.setCookie(SESSION_COOKIE, token, { path: '/', httpOnly: true, sameSite: 'lax', secure: config.NODE_ENV === 'production', expires: expiresAt });
+  };
+  app.get('/api/health', async () => { await db.$queryRaw`SELECT 1`; return { status: 'ok', service: 'prismlaunch-api' }; });
+  app.post('/api/auth/login', async (request, reply) => {
+    const input = credentialsSchema.parse(request.body);
+    const user = await db.user.findUnique({ where: { email: input.email } });
+    if (!user || !await verifyPassword(input.password, user.passwordHash)) throw new AppError('invalid_credentials', 'Email or password is incorrect.', 401);
+    await setSession(user.id, reply); return { data: publicUser(user) };
+  });
+  app.post('/api/auth/register', async (request, reply) => {
+    if (!config.ALLOW_REGISTRATION || config.NODE_ENV === 'production') throw new AppError('registration_disabled', 'Local registration is disabled.', 403);
+    const input = registerSchema.parse(request.body);
+    if (await db.user.findUnique({ where: { email: input.email } })) throw new AppError('email_exists', 'This email is already registered.', 409);
+    const passwordHash = await hashPassword(input.password);
+    const user = await db.$transaction(async tx => { const u = await tx.user.create({ data: { email: input.email, displayName: input.displayName, passwordHash } }); await seedProducts(tx, u.id); return u; });
+    await setSession(user.id, reply); return reply.code(201).send({ data: publicUser(user) });
+  });
+  app.get('/api/auth/me', protectedRoute, async request => ({ data: request.user }));
+  app.post('/api/auth/logout', async (request, reply) => {
+    const token = request.cookies[SESSION_COOKIE]; if (token) await db.session.deleteMany({ where: { tokenHash: tokenHash(token) } });
+    reply.clearCookie(SESSION_COOKIE, { path: '/', httpOnly: true, sameSite: 'lax', secure: config.NODE_ENV === 'production' }); return { data: { ok: true } };
+  });
+  app.get('/api/products', protectedRoute, async request => ({ data: await catalog(db, request.user!.id) }));
+  app.get('/api/products/:id', protectedRoute, async request => {
+    const { id } = z.object({ id: z.string().min(1).max(220) }).parse(request.params);
+    const row = await db.product.findFirst({ where: { userId: request.user!.id, OR: [{ id }, { sku: id }] } });
+    if (!row) throw new AppError('not_found', 'Product not found.', 404); return { data: toProduct(row) };
+  });
+  app.post('/api/products/import', protectedRoute, async request => ({ data: await importProducts(db, request.user!.id, importSchema.parse(request.body)) }));
+  app.post('/api/demo/reset', protectedRoute, async request => {
+    if (!config.ENABLE_DEMO_RESET || config.NODE_ENV === 'production') throw new AppError('demo_reset_disabled', 'Demo reset is disabled.', 403);
+    z.object({}).strict().parse(request.body ?? {}); return { data: await resetCatalog(db, request.user!.id) };
+  });
+  app.post('/api/tasks', protectedRoute, async request => ({ data: await createTask(db, request.user!.id, taskSchema.parse(request.body)) }));
+  app.get('/api/tasks', protectedRoute, async request => ({ data: await tasks(db, request.user!.id) }));
+  app.get('/api/tasks/:id', protectedRoute, async request => {
+    const { id } = z.object({ id: z.string().max(220) }).parse(request.params); const task = (await tasks(db, request.user!.id)).find(t => t.recordId === id || t.id === id);
+    if (!task) throw new AppError('not_found', 'Task not found.', 404); return { data: task };
+  });
+  app.post('/api/tasks/:id/selection', protectedRoute, async request => {
+    const { id } = z.object({ id: z.string().max(220) }).parse(request.params);
+    const input = z.object({ productId: z.string().max(220), purpose: z.enum(['selected', 'fact_review']) }).strict().parse(request.body);
+    return { data: await selectProduct(db, request.user!.id, id, input.productId, input.purpose) };
+  });
+  app.get('/api/tasks/:id/recommendations', protectedRoute, async request => {
+    const { id } = z.object({ id: z.string() }).parse(request.params); const task = (await tasks(db, request.user!.id)).find(t => t.recordId === id || t.id === id);
+    if (!task) throw new AppError('not_found', 'Task not found.', 404);
+    return { data: await domainProviders.recommendation.recommend((await catalog(db, request.user!.id)).products, task) };
+  });
+  app.get('/api/capabilities', async () => {
+    await db.$queryRaw`SELECT 1`;
+    const available = config.AI_LIVE_ENABLED && !!config.BAILIAN_API_KEY;
+    const result: Capabilities = { backend: true, database: true, authentication: true,
+      storage: { server: ['User', 'Product', 'LaunchTask', 'TaskSelection'], browser: ['FactCard', 'Fact edits', 'ListingDraft', 'ReviewResult', 'PublishResult', 'Language'] },
+      textModel: { activeProvider: 'mock', liveAvailable: available, configured: !!config.BAILIAN_API_KEY, liveEnabled: config.AI_LIVE_ENABLED, model: config.BAILIAN_TEXT_MODEL, remainingCalls: providers.bailian.remainingCalls },
+      recommendation: { activeProvider: 'mock', liveAvailable: available, liveImplemented: false }, evidence: { activeProvider: 'mock', liveAvailable: available, liveImplemented: false },
+      listing: { activeProvider: 'template', liveAvailable: available, liveImplemented: false }, review: { activeProvider: 'rules', liveAvailable: available, liveImplemented: false },
+    }; return { data: result };
+  });
+  app.post('/api/ai/smoke-test', protectedRoute, async request => {
+    if (config.NODE_ENV === 'production') throw new AppError('not_found', 'Not found.', 404);
+    const input = z.object({ message: z.string().trim().min(1).max(500), structured: z.boolean().default(false) }).strict().parse(request.body);
+    const result = input.structured ? await providers.bailian.generateStructured({ prompt: input.message, purpose: 'smoke-structured', schema: z.object({ ok: z.literal(true), service: z.literal('prismlaunch') }).strict(), example: { ok: true as const, service: 'prismlaunch' as const } }) : await providers.bailian.generateText({ prompt: input.message, purpose: 'smoke-text' });
+    return { data: result };
+  });
+  return app;
+}

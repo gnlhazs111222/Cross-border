@@ -1,0 +1,72 @@
+import OpenAI from 'openai';
+import type { PrismaClient } from '@prisma/client';
+import type { z } from 'zod';
+import type { ServerConfig } from '../config';
+import { AppError } from '../errors';
+
+export type TextRequest = { prompt: string; purpose: string; mode?: 'text' | 'reasoning' | 'premium' };
+export type TextResult = { provider: 'mock' | 'bailian'; model: string; content: string; latencyMs: number; usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number } };
+export interface TextModelProvider {
+  generateText(request: TextRequest): Promise<TextResult>;
+  generateStructured<T>(request: TextRequest & { schema: z.ZodType<T>; example: T }): Promise<TextResult & { data: T }>;
+}
+export class MockTextModelProvider implements TextModelProvider {
+  async generateText(): Promise<TextResult> { return { provider: 'mock', model: 'mock-text-v1', content: 'Mock response: PrismLaunch is ready.', latencyMs: 0 }; }
+  async generateStructured<T>(request: TextRequest & { schema: z.ZodType<T>; example: T }) { const data = request.schema.parse(request.example); return { ...await this.generateText(), content: JSON.stringify(data), data }; }
+}
+type AuditWriter = (row: { provider: string; model: string; purpose: string; latencyMs: number; success: boolean; errorCode?: string; promptTokens?: number; completionTokens?: number; totalTokens?: number }) => Promise<unknown>;
+export class BailianTextModelProvider implements TextModelProvider {
+  private calls = 0;
+  private client: OpenAI;
+  constructor(private config: ServerConfig, private audit: AuditWriter, transport?: typeof fetch) {
+    this.client = new OpenAI({ apiKey: config.BAILIAN_API_KEY || 'not-configured', baseURL: config.BAILIAN_BASE_URL, organization: null, project: null, logLevel: 'off', timeout: config.BAILIAN_REQUEST_TIMEOUT_MS, maxRetries: 0, ...(transport ? { fetch: transport } : {}) });
+  }
+  get remainingCalls() { return Math.max(0, this.config.AI_MAX_LIVE_CALLS_PER_SESSION - this.calls); }
+  private model(mode: TextRequest['mode']) {
+    if (mode === 'premium' && !this.config.AI_ALLOW_PREMIUM) throw new AppError('premium_disabled', 'Premium models require explicit opt-in.', 403);
+    return mode === 'premium' ? this.config.BAILIAN_PREMIUM_MODEL : mode === 'reasoning' ? this.config.BAILIAN_REASONING_MODEL : this.config.BAILIAN_TEXT_MODEL;
+  }
+  private async call<T>(request: TextRequest, structured?: { schema: z.ZodType<T>; example: T }): Promise<TextResult & { data?: T }> {
+    if (!this.config.AI_LIVE_ENABLED) throw new AppError('live_ai_disabled', 'Live AI is disabled.', 403);
+    if (!this.config.BAILIAN_API_KEY) throw new AppError('bailian_not_configured', 'Bailian is not configured.', 503);
+    if (process.env.NODE_TLS_REJECT_UNAUTHORIZED === '0') throw new AppError('insecure_tls_configuration', 'Enable TLS certificate verification before live AI calls.', 503);
+    if (this.remainingCalls === 0) throw new AppError('live_ai_budget_exhausted', 'The live AI call budget is exhausted.', 429);
+    const model = this.model(request.mode);
+    if (!model.startsWith('qwen')) throw new AppError('unsupported_model', 'Only configured Qwen models are enabled for this release.', 403);
+    if (model === this.config.BAILIAN_PREMIUM_MODEL && request.mode !== 'premium') throw new AppError('premium_disabled', 'Premium models require explicit premium mode.', 403);
+    this.calls++; // Reserve before awaiting: concurrent failures also consume the call budget.
+    const started = Date.now();
+    let usage: TextResult['usage'];
+    try {
+      const response = await this.client.chat.completions.create({
+        model, messages: [
+          { role: 'system', content: structured ? `Return only a JSON object with the same shape as this example: ${JSON.stringify(structured.example)}` : 'Reply briefly.' },
+          { role: 'user', content: request.prompt },
+        ], max_tokens: 128, temperature: 0,
+        ...(structured ? { response_format: { type: 'json_object' as const } } : {}),
+        ...{ enable_thinking: false },
+      });
+      usage = response.usage ? { prompt_tokens: response.usage.prompt_tokens, completion_tokens: response.usage.completion_tokens, total_tokens: response.usage.total_tokens } : undefined;
+      const content = response.choices[0]?.message.content;
+      if (!content) throw new AppError('invalid_ai_response', 'The provider returned no text.', 502);
+      let data: T | undefined;
+      if (structured) {
+        try { data = structured.schema.parse(JSON.parse(content)); }
+        catch { throw new AppError('invalid_ai_json', 'The provider returned invalid structured output.', 502); }
+      }
+      const latencyMs = Date.now() - started;
+      await this.audit({ provider: 'bailian', model, purpose: request.purpose, latencyMs, success: true, promptTokens: usage?.prompt_tokens, completionTokens: usage?.completion_tokens, totalTokens: usage?.total_tokens });
+      return { provider: 'bailian', model, content, latencyMs, usage, ...(structured ? { data } : {}) };
+    } catch (error) {
+      const code = error instanceof AppError ? error.code : error instanceof OpenAI.APIConnectionTimeoutError ? 'bailian_timeout' : error instanceof OpenAI.AuthenticationError ? 'bailian_auth_failed' : error instanceof OpenAI.APIError ? `bailian_http_${error.status ?? 'error'}` : 'bailian_connection_error';
+      await this.audit({ provider: 'bailian', model, purpose: request.purpose, latencyMs: Date.now() - started, success: false, errorCode: code, promptTokens: usage?.prompt_tokens, completionTokens: usage?.completion_tokens, totalTokens: usage?.total_tokens });
+      // Do not return upstream bodies, headers, full request prompts or SDK stack traces.
+      throw new AppError(code, 'Bailian request failed. Check server configuration and the sanitized call log.', 502);
+    }
+  }
+  generateText(request: TextRequest) { return this.call(request); }
+  async generateStructured<T>(request: TextRequest & { schema: z.ZodType<T>; example: T }) { const result = await this.call(request, request); return { ...result, data: result.data! }; }
+}
+export function createTextProviders(config: ServerConfig, db: PrismaClient, transport?: typeof fetch) {
+  return { mock: new MockTextModelProvider(), bailian: new BailianTextModelProvider(config, row => db.aiCall.create({ data: row }), transport) };
+}

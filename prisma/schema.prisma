@@ -1,0 +1,175 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  passwordHash    String
+  displayName     String
+  catalogRevision Int      @default(1)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  sessions        Session[]
+  products        Product[]
+  tasks           LaunchTask[]
+  factCards       FactCard[]
+  listings        ListingDraft[]
+}
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([userId])
+}
+model Product {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sku       String
+  name      String
+  category  String
+  position  Int      @default(0)
+  revision  Int      @default(1)
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  selections TaskSelection[]
+  factCards FactCard[]
+  listings  ListingDraft[]
+  @@unique([userId, sku])
+  @@unique([userId, id])
+}
+model LaunchTask {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code          String
+  platform      String
+  market        String
+  category      String
+  requirements  Json
+  minimumProfit Float
+  revision      Int      @default(1)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  selections    TaskSelection[]
+  factCards     FactCard[]
+  listings      ListingDraft[]
+  @@unique([userId, code])
+  @@unique([userId, id])
+}
+model TaskSelection {
+  id        String     @id @default(cuid())
+  taskId    String     @unique
+  task      LaunchTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  purpose   String
+  revision  Int        @default(1)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+model FactCard {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taskId    String
+  task      LaunchTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  version   Int
+  revision  Int        @default(1)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  facts     Fact[]
+  evidence  Evidence[]
+  @@unique([taskId, productId, version, revision])
+}
+model Fact {
+  id             String   @id @default(cuid())
+  factCardId     String
+  factCard       FactCard @relation(fields: [factCardId], references: [id], onDelete: Cascade)
+  key            String
+  value          String
+  source         String
+  anchor         String
+  status         String
+  listingAllowed Boolean
+  metadata       Json?
+  revision       Int      @default(1)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  @@unique([factCardId, key])
+}
+model Evidence {
+  id         String   @id @default(cuid())
+  factCardId String
+  factCard   FactCard @relation(fields: [factCardId], references: [id], onDelete: Cascade)
+  kind       String
+  source     String
+  data       Json
+  revision   Int      @default(1)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+model ListingDraft {
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taskId       String
+  task         LaunchTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  productId    String
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  platform     String
+  revision     Int
+  factRevision Int
+  data         Json
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  reviews      ReviewResult[]
+  publications PublishResult[]
+  @@unique([taskId, productId, platform, revision])
+}
+model ReviewResult {
+  id             String       @id @default(cuid())
+  listingDraftId String
+  listingDraft   ListingDraft @relation(fields: [listingDraftId], references: [id], onDelete: Cascade)
+  revision       Int
+  status         String
+  issues         Json
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+model PublishResult {
+  id             String       @id @default(cuid())
+  listingDraftId String
+  listingDraft   ListingDraft @relation(fields: [listingDraftId], references: [id], onDelete: Cascade)
+  revision       Int
+  platform       String
+  status         String
+  data           Json
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+model AiCall {
+  id               String   @id @default(cuid())
+  provider         String
+  model            String
+  purpose          String
+  latencyMs        Int
+  success          Boolean
+  errorCode        String?
+  promptTokens     Int?
+  completionTokens Int?
+  totalTokens      Int?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}

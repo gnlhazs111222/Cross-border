@@ -1,104 +1,88 @@
-# PrismLaunch Web Demo
+# PrismLaunch Full Demo
 
-比赛演示材料已整理：[3 分钟 / 5 分钟讲稿](docs/DEMO_SCRIPT.md)、[评委问答](docs/DEMO_QA.md)、[1920×1080 PPT 截图](artifacts/presentation/README.md)、[UX Audit](docs/DEMO_UX_AUDIT.md)。右上角“演示能力说明”集中解释哪些逻辑在本地真实执行、哪些智能和外部数据仍为 Mock。
+当前默认是完整演示模式：**React → Fastify → Prisma / SQLite → Cookie 登录**。商品目录和基础上新任务已由服务端持久化；原有 Fact Review、文案、规则审核和模拟发布继续可用。
 
-现已增加 **Fact Review / 事实人工核对**：商品详情 → 核对事实 → 补齐缺失包装重量 → 保存为待确认 → Confirm → 自动解除定价阻断。事实变更会清除双平台旧文案、审核和发布结果。内置缺重量 SKU 补 `0.42 kg` 后为 USD 19.20，导入样例缺重量 SKU 为 USD 18.90。详见 [人工事实核对说明](FACT_REVIEW.md)。
-
-跨境商品可信上新的本地演示：Materials → Launch Task → Top 3 → Evidence / FactCard V2 → Pricing → Listing → Review Block → Human Fix → Mock Publish。
-
-现已支持真实固定模板 **Excel / CSV 导入**。在 Materials 点击 **Import Supplier File / 导入供应商文件**，选择文件并查看校验预览，再导入有效商品。也可随时点击 **Load Demo Dataset / 载入内置数据** 恢复原来的 10 个 SKU。
-
-示例位于 `public/demo/prismlaunch-supplier-demo.xlsx` 和 `public/demo/prismlaunch-supplier-demo.csv`，页面提供下载链接。默认替换导入后：8 行处理、6 个 Ready、1 个 Missing Data、1 个重复行被跳过，最终 7 个商品。详见 [供应商导入说明](SUPPLIER_IMPORT.md)。
-
-现有项目书、流程图及资源目录完整保留。前端采用 React、Vite、TypeScript、Tailwind CSS，交互组件使用 Radix Dialog / Tabs 和 Lucide 图标。无需后端、账号或 API Key。
+百炼 Qwen 文本 Provider 已完成两次真实连接验证；业务智能仍采用 Mock / 模板 / 规则，默认不会花费模型 API。
 
 ## 启动
 
-需要 Node.js 22.12+。仓库提供 `.nvmrc`。
-
-```bash
-cd /mnt/data/pyc/Create_new_products
-nvm use
-npm ci
-npm run dev -- --port 5173
-```
-
-访问 `http://localhost:5173`。如果当前终端没有加载 nvm，本机可直接运行：
+需要 Node.js 22.12+，本机可使用：
 
 ```bash
 cd /mnt/data/pyc/Create_new_products
 export PATH=/mnt/data/pyc/.nvm/versions/node/v22.23.2/bin:$PATH
-npm run dev -- --port 5173
+cp -n .env.example .env
+chmod 600 .env
+npm ci
+npm run dev
 ```
 
-## 中英文切换
+- Web：`http://localhost:5173`
+- API：`http://127.0.0.1:3001/api/health`
+- 登录邮箱：`demo@prismlaunch.local`
+- 演示密码：`Demo123456`
 
-右上角 **中文 / EN** 即时切换界面。首次访问跟随浏览器语言（中文浏览器显示中文，其他语言显示英文），之后记住上次选择。语言偏好独立保存在 `prismlaunch.language`，刷新和 Reset Demo 均不会清除。
+`npm run dev` 自动执行迁移与 seed，再同时启动 Web / API。重复 seed 不会覆盖已有目录。单独启动使用 `npm run dev:web`、`npm run dev:api`。
 
-五个工作区的导航、按钮、空状态、商品资料、推荐理由、事实字段、证据预览、价格说明、审核风险、发布结果与通知均支持双语。搜索支持中英文商品名、类目、颜色和 SKU，中途切换语言也保留搜索条件。
+## 保留的离线比赛版
 
-**界面语言与上新内容分开**：Amazon US / Shopify US 的消费者文案、英文编辑框和 CSV 保持英文。中文界面会标明该边界。切换语言不改变任务、SKU、FactCard、文案版本、审核通过状态或发布结果，生成过程中也可切换。
-
-翻译字典位于 `src/i18n/zh.json`，语言状态和参数化文案由 `src/i18n/I18nContext.tsx` 管理，无在线翻译请求。
-
-构建及预览：
+登录页可点击“打开离线比赛演示”，也可使用 `http://localhost:5173/?mode=local`。这个模式不需要 API 或登录。
 
 ```bash
-npm run typecheck
-npm run build
-npm run preview -- --port 5173
+npm run dev:local
+# 或构建后预览
+npm run build:local
+npm run preview:local
 ```
 
-## 演示路径（约 3 分钟）
+独立离线模式默认端口 5174。稳定标签 `competition-demo-v1` 指向 `4a2920f`，原 `pyc` 分支保留。
 
-1. 左侧 **Reset Demo**，Materials 显示 10 个 SKU、4 个候选和 6 个被排除商品。点击 SKU 查看资料。
-2. **Create Demo Task**，固定任务 `PL-DEMO-001`，Amazon US / United States / Home & Kitchen，最低单位利润 USD 5。
-3. Top 1 为 `LM-KT-BTL-001-BLK-500`，94 分。Top 2 有吸管扣 12 分；Top 3 容量过大扣 16 分。点击 Top 1 **Select SKU**。
-4. 在 Evidence & Facts 查看三类 Mock Evidence，点击 **Analyze Evidence**。约 700ms 后生成 V2，保留 V1，新增包装内容、表面工艺、瓶盖类型及未证实的防漏宣称。
-5. 展开字段来源与允许状态，查看 **Demo Pricing Snapshot v1 / USD 19.99**。成本合计 USD 14.20，最低利润 USD 5，建议价对应利润 USD 5.79。
-6. **Continue to Listing Studio → Generate Amazon Listing**。展开 **Fact Sources** 检查来源。首次 Amazon 生成故意注入 `100% leakproof`，其余文案来自 V2 允许字段。
-7. **Continue to Review → Run Review**。出现 **R001 / HIGH RISK**，**Publish** 不可点击。
-8. **Apply Suggested Fix** 将违规描述替换为 `Secure screw-top lid designed for everyday carrying.`。此时仍不能发布；再次 **Run Review** 后出现 **Review Passed / High Risk Issues: 0**。
-9. **Publish → Mock Publish Success / Amazon Listing Export Ready → Export Amazon CSV**，下载真实 CSV。
-10. 切换 **Shopify US → Go to Listing Studio → Generate Shopify Listing → Continue to Review → Run Review → Publish**，显示 **Shopify Draft Created / SHOP-DEMO-1042 / Draft**。
+## 数据与模型边界
 
-额外展示：Materials 点击 `LM-KT-BTL-005-BLK-500`，显示 **Pricing Blocked / Missing Fact: Packaging Weight**，不显示建议价。Duplicate / Possible Duplicate 均不能进入推荐。搜索和候选筛选可操作。
+- SQLite 权威保存：User、Session、Product、LaunchTask、TaskSelection、AI 调用元数据。
+- 浏览器仍保存：FactCard、人工修改、文案、审核、模拟发布和语言偏好。
+- 目录 / 任务在浏览器中仅有兼容性缓存；会话初始化从 API 覆盖，清空 localStorage 后仍可恢复服务端商品和任务。
+- XLSX / CSV 继续在浏览器按固定模板解析，服务端再校验并保存；替换 / 追加、重复处理和原始顺序保留。
+- FactCard / Listing / Review 的数据库模型已建立，但本轮未迁移其实际业务写入。
+- Key 只存服务端 `.env`，不提交、不打包到浏览器。默认 `AI_LIVE_ENABLED=false`。
+- 推荐、PDF / 图片补充、业务文案智能、语义审核和平台发布没有全面 AI 化，详情见能力说明弹窗。
 
-## 状态与边界
-
-- 数据统一经 `src/services/mockApi.ts` 访问，Promise 延迟模拟请求。
-- localStorage 键为 `prismlaunch.demo.v1`；刷新保留任务、SKU、事实版本、各平台文案、审核和发布结果。Reset Demo 清除这些进度。
-- Amazon 与 Shopify 的文案、审核、发布结果独立。改文案、重新生成或切换 SKU 都会使对应旧审核失效；发布还会在数据层再次检查当前版本。
-- 商品成本、申报价值、运费与税费不进入消费者文案。只有第一次 Amazon 生成会添加用于风险演示的例外字段。
-- 人工编辑会产生新版本。Mock Review 仅检查已知证据文案、预置风险和其他未确认修改；任意不同文案会触发 R002，修复会恢复已确认措辞。
-- 内置目录固定模拟；用户选择的 Excel / CSV 在浏览器中真实解析、按固定列名校验，并保存为当前目录。默认替换目录，也可仅添加新 SKU；重复和无效行不写入。成功导入会重置旧上新进度。
-- 导入的供应商字段携带实际文件名和行号；补充 PDF / 图片证据仍明确标为 Mock。没有 OCR / LLM、物流 / 汇率 / 税则查询、真实平台发布、账号权限和后台服务。Amazon CSV 是演示格式，不是官方上传模板。
-- 如果浏览器禁用 localStorage，界面显示提醒，并继续支持当前内存会话。
-
-## 验证
+## 检查与构建
 
 ```bash
+npm run db:migrate
+npm run db:seed
 npm run typecheck
 npm run build
-npx playwright install chromium
+npm run test:server
 npm run test:e2e
+npm run security:check
 ```
 
-Playwright 自动执行生产构建，再在端口 4173 启动预览，实际使用 Chromium 点击 UI，覆盖：完整 Amazon 发布与 CSV 下载、缺包装重量和重复排除、Shopify 独立发布、人工修改后的重新审核、移动端完整链路、刷新恢复、Reset、损坏存储恢复和证据弹窗键盘关闭。运行测试时请保持 4173 端口空闲；普通演示使用 5173。
+测试默认强制关闭 live 并清空测试进程中的 Key，E2E 数据库和账户独立。普通 smoke 也是 Mock：
 
-测试截图和下载样本位于 `artifacts/`；HTML 报告在 `playwright-report/`，可使用 `npx playwright show-report` 查看。测试不会调用真实业务 API。
-
-## 目录
-
-```text
-src/
-  components/     通用控件、工作区上下文、定价与文案预览
-  pages/          五个工作区
-  data/           10 个 Mock SKU 和固定任务
-  i18n/           中英文界面字典与独立语言偏好
-  services/       Mock API、状态存储、推荐/审核/发布规则
-  types/          TypeScript 数据契约
-tests/            浏览器验收用例
-public/           本地品牌图标、Excel / CSV 示例
-scripts/          从示例 CSV 生成对应 XLSX
+```bash
+npm run ai:smoke
 ```
+
+真正调用必须显式启用：
+
+```bash
+AI_LIVE_ENABLED=true NODE_TLS_REJECT_UNAUTHORIZED=1 npm run ai:smoke -- --live
+```
+
+本轮已经成功做过两次真实 smoke，不需重复；成功标记存在时命令自动跳过。默认每个 API 进程最多 20 次调用，smoke CLI 更严格地限制为两次，SDK 不自动重试。
+
+## 文档与素材
+
+- [Full Demo 架构、API、持久化、Provider 与真实调用报告](docs/FULL_DEMO.md)
+- [本轮验收记录](artifacts/full-demo/VERIFICATION.md)
+- [供应商导入说明](SUPPLIER_IMPORT.md)
+- [人工事实核对](FACT_REVIEW.md)
+- [比赛版 3 / 5 分钟讲稿](docs/DEMO_SCRIPT.md)
+- [比赛版问答](docs/DEMO_QA.md)
+- [比赛版截图](artifacts/presentation/README.md)
+
+比赛讲稿和旧截图描述的是冻结的离线比赛版；默认 Full Demo 需要先登录，产品 / 任务存储边界以本文件和 Full Demo 文档为准。
+
+示例文件仍位于 `public/demo/prismlaunch-supplier-demo.xlsx`、`public/demo/prismlaunch-supplier-demo.csv`，页面可以下载。
