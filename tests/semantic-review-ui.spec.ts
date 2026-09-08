@@ -9,6 +9,7 @@ for (const scenario of [
   { status: 'running', called: false, heading: 'Review in progress' },
   { status: 'blocked', called: false, heading: 'Review blocked' },
   { status: 'passed', called: true, heading: 'Historical review passed — approval expired', expired: true },
+  { status: 'passed', called: false, heading: 'Review required: approval expired', expired: true, rules: true },
 ] as const) test(`mock UI: ${scenario.status}, modelCalled=${scenario.called}${'expired' in scenario ? ', expired' : ''}`, async ({ page }) => {
   let reviewRequests = 0;
   await page.route('**/api/capabilities', async route => {
@@ -20,7 +21,7 @@ for (const scenario of [
     reviewRequests++;
     const response = await route.fetch(); const body = await response.json();
     body.data.reviews.amazon = {
-      ...body.data.reviews.amazon, status: scenario.status, reviewMode: 'rules_qwen',
+      ...body.data.reviews.amazon, status: scenario.status, reviewMode: 'rules' in scenario ? 'rules' : 'rules_qwen',
       issues: scenario.status === 'blocked' || scenario.status === 'needs_human_review' ? [{ id: 'S001', severity: 'HIGH', title: 'Unsupported claim', text: '100% leakproof', reason: 'No confirmed fact supports this claim.', category: 'unsupported_claim', location: { field: 'bullets', index: 0 }, factKeys: ['lidType'], suggestedFix: 'Remove the unsupported performance claim.', origin: scenario.called ? 'qwen' : 'rules' }] : [],
       metadata: { mode: 'rules_qwen', model: 'fixture-model', promptVersion: 'fixture-prompt-v1', ruleVersion: 'fixture-rule-v1', inputHash: 'fixture-hash', listingRevision: 1, factsRevision: 1, taskRevision: 1, modelCalled: scenario.called, ...(scenario.status === 'failed' ? { errorCode: reviewRequests === 1 ? 'bailian_timeout' : 'unsafe secret / detail' } : {}) },
     };
@@ -38,10 +39,14 @@ for (const scenario of [
   expect(reviewRequests).toBe(0);
   await page.getByRole('button', { name: 'Run Review', exact: true }).click();
   const details = page.getByTestId('semantic-review-details');
-  await expect(details.getByRole('heading', { name: scenario.heading, exact: true })).toBeVisible();
   await expect(page.getByTestId('review-stage-banner')).toContainText('expired' in scenario ? 'Review required: approval expired' : scenario.heading);
+  if ('rules' in scenario) {
+    await expect(details).toHaveCount(0);
+    await expect(page.locator('.review-passed')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Run Review', exact: true })).toBeEnabled();
+  } else await expect(details.getByRole('heading', { name: scenario.heading, exact: true })).toBeVisible();
   if (scenario.status !== 'passed' || 'expired' in scenario) await expect(page.getByRole('button', { name: 'Publish', exact: true })).toBeDisabled();
-  if (!scenario.called) await expect(details).toContainText('model not called');
+  if (!scenario.called && !('rules' in scenario)) await expect(details).toContainText('model not called');
   if (scenario.status === 'failed') {
     await expect(details).toContainText('bailian_timeout');
     await page.getByRole('button', { name: 'Run Review', exact: true }).click();

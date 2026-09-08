@@ -1,6 +1,6 @@
 # PrismLaunch Full Demo
 
-A 线开发分支增加了可编辑任务、共享候选资格过滤、Qwen 推荐与独立评测。范围、启动端口、验收及集成风险见 [A_LINE_RECOMMENDATION.md](docs/A_LINE_RECOMMENDATION.md)。
+当前集成版本包含 A 线（可编辑任务、候选过滤、Qwen 推荐与评测）和 B 线（Qwen 语义审核、版本授权与审核评测）。集成审查与验证见 [A_B_INTEGRATION.md](docs/A_B_INTEGRATION.md)，模块说明见 [A 线](docs/A_LINE_RECOMMENDATION.md) 和 [B 线](docs/B_REVIEW_IMPLEMENTATION.md)。
 
 当前默认是完整演示模式：**React → Fastify → Prisma / SQLite → Cookie 登录**。商品、任务、事实、文案、审核和模拟发布均由服务端持久化。浏览器保留界面偏好与非权威快照。
 
@@ -11,7 +11,7 @@ QwenListingProvider 已真实生成 Amazon / Shopify 文案并通过校验、审
 需要 Node.js 22.12+，本机可使用：
 
 ```bash
-cd /mnt/data/pyc/Create_new_products
+cd /path/to/Projects # 替换为 main 分支的本地目录
 export PATH=/mnt/data/pyc/.nvm/versions/node/v22.23.2/bin:$PATH
 cp -n .env.example .env
 chmod 600 .env
@@ -47,9 +47,9 @@ npm run preview:local
 - XLSX / CSV 继续在浏览器按固定模板解析，服务端再校验并保存；替换 / 追加、重复处理和原始顺序保留。
 - 模板生成、规则审核、发布授权与 CSV 下载全部由后端执行。事实变化使历史结果 stale；文案修改创建新版本并使该平台旧结果失效，保留历史。
 - Key 只存服务端 `.env`，不提交、不打包到浏览器。默认 `AI_LIVE_ENABLED=false`。
-- 推荐与证据补充仍是 Mock，审核仍为规则，发布仍为模拟；仅文案生成支持显式开启的 Qwen。
-- Qwen 使用结构化 JSON、授权字段校验、版本检查、成功结果缓存和模板回退。
-- 配置：`LISTING_PROVIDER=template` 默认；真实生成须 `LISTING_PROVIDER=qwen`、`AI_LIVE_ENABLED=true` 及后端 Key。
+- 推荐默认规则、文案默认模板、审核默认规则；三者均支持单独显式开启 Qwen。证据补充仍为 Mock，发布仍为模拟。
+- Qwen 推荐和生成使用结构化校验、版本检查及缓存，失败时分别回退规则或模板。Qwen 审核先执行本地硬规则，再验证模型结果；失败或歧义不会回退成通过。
+- 配置默认：`RECOMMENDATION_PROVIDER=rule`、`LISTING_PROVIDER=template`、`REVIEW_PROVIDER=rules`。对应模块改为 `qwen`，并开启 `AI_LIVE_ENABLED=true`、配置后端 Key 后才尝试真实调用。查询、刷新、发布和 CSV 下载不会调用模型。
 
 ## 检查与构建
 

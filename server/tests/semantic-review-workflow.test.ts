@@ -100,3 +100,56 @@ test('review mode or model changes cannot reuse an approval, and checks do not c
   await db.reviewResult.update({ where: { id: record.id }, data: { metadata: { ...(record.metadata as object), promptVersion: 'old-review-prompt' } } });
   assert.equal((await call(`${s.base}/listings`)).publishAllowed.shopify, false); assert.equal(calls, baselineCalls);
 });
+
+test('enabling Qwen expires a saved rules approval without making a model call', async () => {
+  const s = await setup(); const before = calls;
+  const rulesApp = await buildApp({ ...config, REVIEW_PROVIDER: 'rules' }, db, { logger: false, transport: async () => { throw new Error('Rules mode must stay offline'); } });
+  try {
+    const fixed = await rulesApp.inject({ url: `/api/listings/${s.id}/apply-suggested-fix`, method: 'POST', headers: { cookie }, payload: s.args });
+    assert.equal(fixed.statusCode, 200, fixed.body);
+    const workflow = fixed.json().data;
+    const id = workflow.listings.shopify.recordId;
+    const args = { expectedVersion: workflow.listings.shopify.revision, expectedFactsRevision: workflow.factsRevision };
+    const reviewed = await rulesApp.inject({ url: `/api/listings/${id}/review`, method: 'POST', headers: { cookie }, payload: args });
+    assert.equal(reviewed.statusCode, 200, reviewed.body);
+    assert.equal(reviewed.json().data.publishAllowed.shopify, true);
+    const changed = await call(`${s.base}/listings`);
+    assert.equal(changed.reviews.shopify.status, 'passed');
+    assert.equal(changed.reviews.shopify.reviewMode, 'rules');
+    assert.equal(changed.publishAllowed.shopify, false);
+    const publish = await app.inject({ url: `/api/listings/${id}/publish`, method: 'POST', headers: { cookie }, payload: args });
+    assert.equal(publish.statusCode, 409);
+    assert.equal(calls, before);
+  } finally { await rulesApp.close(); }
+});
+
+test('semantic Amazon review keeps the hard block and invalidates CSV after failed re-review', async () => {
+  const s = await setup(); const before = calls;
+  let w = await call(`${s.base}/listings`, { platform: 'amazon', expectedVersion: 0, expectedFactsRevision: s.snap.factsRevision });
+  const args = () => ({ expectedVersion: w.listings.amazon.revision, expectedFactsRevision: w.factsRevision });
+  let id = w.listings.amazon.recordId;
+  w = await call(`/api/listings/${id}/review`, args());
+  assert.equal(w.reviews.amazon.status, 'blocked');
+  assert.equal(w.reviews.amazon.metadata.modelCalled, false);
+  assert.equal(w.publishAllowed.amazon, false);
+  assert.equal(calls, before);
+  w = await call(`/api/listings/${id}/apply-suggested-fix`, args());
+  id = w.listings.amazon.recordId;
+  w = await call(`/api/listings/${id}/review`, args());
+  assert.equal(w.publishAllowed.amazon, true);
+  assert.equal(calls, before + 1);
+  w = await call(`/api/listings/${id}/publish`, args());
+  const csvUrl = `/api/publish/${w.publications.amazon.recordId}/amazon-csv`;
+  const csv = await app.inject({ url: csvUrl, headers: { cookie } });
+  assert.equal(csv.statusCode, 200);
+  assert.match(csv.body, /LM-KT-BTL-001-BLK-500/);
+  assert.equal(calls, before + 1);
+  fail = true;
+  try {
+    w = await call(`/api/listings/${id}/review`, args());
+    assert.equal(w.reviews.amazon.status, 'failed');
+    assert.equal(w.publications.amazon, undefined);
+    assert.equal((await app.inject({ url: csvUrl, headers: { cookie } })).statusCode, 409);
+    assert.equal(calls, before + 2);
+  } finally { fail = false; }
+});
