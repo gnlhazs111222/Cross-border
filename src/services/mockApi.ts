@@ -1,3 +1,4 @@
+import { eligibilityReason, type RecommendationSnapshot } from '../../shared/recommendation';
 import { amazonCsv } from '../../shared/csv';
 import { baseFactCard, effectiveProduct, pricingFromFacts, productEvidence, reviewFact } from '../../shared/facts';
 import type { WorkflowSnapshot, FactSnapshot, FactPreview } from '../../shared/contracts';
@@ -6,7 +7,7 @@ import { enrichProductEvidence, makeTemplateListing, rankProducts, reviewAgainst
 import { demoTask, products as builtInProducts } from '../data/mockData';
 import { PRICING_FACTS, REQUIRED_COPY_FACTS, editableFact, factEditor } from './factReview';
 import { SUPPLIER_COLUMNS } from '../data/supplierTemplate';
-import type { DemoState, Evidence, Fact, FactCard, ImportMode, ImportPreview, Listing, Platform, Pricing, Product, Recommendation, Stage, Workspace } from '../types';
+import type { DemoState, Evidence, Fact, FactCard, ImportMode, ImportPreview, Listing, Platform, Pricing, Product, Recommendation, Stage, Task, Workspace } from '../types';
 
 export const STORAGE_KEY = 'prismlaunch.demo.v1';
 const delay = (ms = 420) => new Promise<void>(resolve => setTimeout(resolve, ms));
@@ -59,6 +60,17 @@ let serverOwner: string | null = null;
 let serverPreviews: Record<string, FactPreview> = {};
 let serverSnapshots: Record<string, FactSnapshot> = {};
 let serverWorkflow: WorkflowSnapshot | null = null;
+let serverRecommendation: RecommendationSnapshot | null = null;
+async function refreshRecommendation() {
+  serverRecommendation = serverOwner && current.task ? await apiClient.recommendations.get(current.task.recordId!) : null;
+}
+async function useServerTask(task: Task) {
+  current.task = task; current.platform = task.platform === 'Shopify US' ? 'shopify' : 'amazon'; current.selectedSku = null; current.v1 = null; current.v2 = null; current.pricing = null; current.factsRevision = undefined;
+  current.listings = {}; current.reviews = {}; current.publications = {}; serverWorkflow = null; serverSnapshots = {};
+  for (const snap of await apiClient.facts.list(task.recordId!)) serverSnapshots[snap.product.sku] = snap;
+  await refreshRecommendation(); current.workspace = 'tasks'; advance('task_created'); return save();
+}
+
 function applyWorkflow(workflow: WorkflowSnapshot) {
   serverWorkflow = clone(workflow);
   current.listings = clone(workflow.listings); current.reviews = clone(workflow.reviews); current.publications = clone(workflow.publications);
@@ -102,7 +114,7 @@ async function mutateServerFact(key: string, action: 'edit' | 'confirm' | 'rejec
   try {
     const snap = action === 'edit' ? await apiClient.facts.update(before.recordId!, value ?? '', current.factsRevision!) : await apiClient.facts[action](before.recordId!, current.factsRevision!);
     applySnapshot(snap);
-    await refreshWorkflow();
+    await refreshWorkflow(); await refreshRecommendation();
     advance(snap.pricingReadiness.ready ? 'pricing_ready' : snap.v2 ? 'evidence_analyzed' : 'sku_selected');
     return save();
   } catch (error) { await refreshServerFacts(); throw error; }
@@ -129,6 +141,7 @@ function selected(): Product {
   return product;
 }
 function eligible(p: Product) {
+  if (serverOwner) return !eligibilityReason(p, current.task ?? demoTask);
   return p.status === 'search_ready' && p.duplicateStatus === 'unique' && p.category === demoTask.category;
 }
 function cardV1(p: Product): FactCard {
@@ -176,7 +189,7 @@ function changeFact(key: string, action: 'edit' | 'confirm' | 'reject', input?: 
 }
 function safeListing(platform: Platform, revision = 1): Listing {
   if (!current.v2 || current.pricing?.status !== 'ready') throw new Error('Analyze evidence and resolve pricing before generating a listing.');
-  if (selected().duplicateStatus !== 'unique' || selected().category !== demoTask.category) throw new Error('Duplicate or out-of-category products cannot generate listings for this task.');
+  if (selected().duplicateStatus !== 'unique' || selected().category !== (serverOwner ? current.task?.category : demoTask.category)) throw new Error('Duplicate or out-of-category products cannot generate listings for this task.');
   return makeTemplateListing({ factCard: serverOwner ? serverSnapshots[current.selectedSku!].v2! : current.v2, pricing: current.pricing!, platform, revision, factRevision: factRevision(current.selectedSku!) });
 }
 function reviewIssues(listing: Listing) { return reviewAgainstTemplate(listing, safeListing(listing.platform, listing.revision)); }
@@ -199,7 +212,7 @@ export const mockApi = {
     const selectedSku = corruptActiveCache ? null : task?.selectedSku ?? null;
     serverPreviews = catalog.factPreviews; serverSnapshots = {}; serverWorkflow = null;
     const importedCount = catalog.products.filter(p => p.importSource).length;
-    current = { ...cached, catalog: catalog.products, serverRevision: catalog.revision, task, selectedSku, datasetSource: !importedCount ? 'builtin' : importedCount === catalog.products.length ? 'imported' : 'mixed' };
+    current = { ...cached, catalog: catalog.products, serverRevision: catalog.revision, task, selectedSku, platform: cached.task?.recordId === task?.recordId ? cached.platform : task?.platform === 'Shopify US' ? 'shopify' : 'amazon', datasetSource: !importedCount ? 'builtin' : importedCount === catalog.products.length ? 'imported' : 'mixed' };
     if (!selectedSku) { current.v1 = null; current.v2 = null; current.pricing = null; current.listings = {}; current.reviews = {}; current.publications = {}; }
     current.listings = {}; current.reviews = {}; current.publications = {};
     current.factEdits = {}; current.v1 = null; current.v2 = null; current.pricing = null;
@@ -208,20 +221,21 @@ export const mockApi = {
       for (const snap of snapshots) serverSnapshots[snap.product.sku] = snap;
       if (selectedSku) applySnapshot(serverSnapshots[selectedSku] ?? await apiClient.facts.createV1(task.recordId, selectedSku));
     }
+    await refreshRecommendation();
     if (selectedSku) await refreshWorkflow();
     else advance(task ? 'task_created' : 'materials_ready');
     return save();
   },
-  disconnectServer() { if (serverOwner) { try { localStorage.removeItem(STORAGE_KEY); } catch { /* in-memory logout */ } } serverOwner = null; serverSnapshots = {}; serverWorkflow = null; serverPreviews = {}; pendingImport = null; current = initialState(); },
+  disconnectServer() { if (serverOwner) { try { localStorage.removeItem(STORAGE_KEY); } catch { /* in-memory logout */ } } serverOwner = null; serverRecommendation = null; serverSnapshots = {}; serverWorkflow = null; serverPreviews = {}; pendingImport = null; current = initialState(); },
   isStorageAvailable: () => storageAvailable,
   catalog: () => current.catalog.map(productView),
   async getCatalog() { await delay(180); return current.catalog.map(productView); },
   factEditor, editableFact,
-  listingReady() { return !!current.v2 && !!current.selectedSku && selected().duplicateStatus === 'unique' && selected().category === demoTask.category && current.pricing?.status === 'ready' && REQUIRED_COPY_FACTS.every(key => current.v2!.facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed)); },
+  listingReady() { return !!current.v2 && !!current.selectedSku && selected().duplicateStatus === 'unique' && selected().category === (serverOwner ? current.task?.category : demoTask.category) && current.pricing?.status === 'ready' && REQUIRED_COPY_FACTS.every(key => current.v2!.facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed)); },
   getTaskTemplate: () => clone(demoTask),
   async ready() { synchronizeFacts(); if (current.pricing && current.selectedSku) current.pricing = pricingFor(selected()); if (current.stage === 'initial') advance('materials_ready'); return save(); },
   navigate(workspace: Workspace) { current.workspace = workspace; return save(); },
-  async reset() { await delay(180); const data = serverOwner ? await apiClient.reset() : null; pendingImport = null; current = initialState(); serverSnapshots = {}; serverWorkflow = null; if (data) { serverPreviews = data.factPreviews; current.catalog = data.products; current.serverRevision = data.revision; } return save(); },
+  async reset() { await delay(180); const data = serverOwner ? await apiClient.reset() : null; pendingImport = null; current = initialState(); serverRecommendation = null; serverSnapshots = {}; serverWorkflow = null; if (data) { serverPreviews = data.factPreviews; current.catalog = data.products; current.serverRevision = data.revision; } return save(); },
   async loadBuiltInDataset() { await this.reset(); advance('materials_ready'); return save(); },
   getSupplierTemplate: () => [...SUPPLIER_COLUMNS],
   async previewSupplierFile(file: File, mode: ImportMode): Promise<ImportPreview> {
@@ -240,7 +254,7 @@ export const mockApi = {
     if (!preview?.products.length) throw new Error('No valid new products to import. The current dataset is unchanged.');
     if (serverOwner) {
       const result = await apiClient.products.import(preview, current.serverRevision!);
-      serverSnapshots = {}; serverWorkflow = null; serverPreviews = result.factPreviews;
+      serverSnapshots = {}; serverWorkflow = null; serverRecommendation = null; serverPreviews = result.factPreviews;
       current = { ...initialState(), catalog: result.products, serverRevision: result.revision, datasetSource: preview.mode === 'append' ? 'mixed' : 'imported', importReport: clone(result.report ?? preview) };
       advance('materials_ready'); pendingImport = null; return save();
     }
@@ -256,9 +270,28 @@ export const mockApi = {
     await delay();
     if (current.stage === 'initial') advance('materials_ready');
     if (!current.task) { current.task = serverOwner ? await apiClient.tasks.create(demoTask) : clone(demoTask); advance('task_created'); }
+    if (serverOwner && current.task && !serverRecommendation) serverRecommendation = await apiClient.recommendations.run(current.task.recordId!, current.task.revision!, 'rule');
     current.workspace = 'tasks'; return save();
   },
+  async saveTask(task: Task, editing: boolean) {
+    if (!serverOwner) throw new Error('Task editing requires Full Demo mode.');
+    try { return await useServerTask(editing ? await apiClient.tasks.update(task.recordId!, task, task.revision!) : await apiClient.tasks.create({ ...task, id: `PL-${crypto.randomUUID().slice(0, 8).toUpperCase()}` })); }
+    catch (error) { await this.connectServer(serverOwner); throw error; }
+  },
+  async loadDemoTask() {
+    if (!serverOwner) return this.createTask();
+    const task = await apiClient.tasks.create(demoTask);
+    const restored = await apiClient.tasks.update(task.recordId, demoTask, task.revision!);
+    await useServerTask(restored); serverRecommendation = await apiClient.recommendations.run(restored.recordId, restored.revision!, 'rule'); return save();
+  },
+  async runRecommendation() {
+    if (!serverOwner || !current.task) return save();
+    try { serverRecommendation = await apiClient.recommendations.run(current.task.recordId!, current.task.revision!); return save(); }
+    catch (error) { await this.connectServer(serverOwner); throw error; }
+  },
+  recommendationState: () => serverRecommendation ? clone(serverRecommendation) : null,
   recommendations(): Recommendation[] {
+    if (serverOwner) return serverRecommendation?.status === 'ready' ? clone(serverRecommendation.recommendations) : [];
     return current.task ? rankProducts(current.catalog.map(productView), current.task) : [];
   },
   exclusionReason(p: Product) {

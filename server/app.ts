@@ -1,3 +1,5 @@
+import { getRecommendations, runRecommendations } from './services/recommendations';
+import { createRecommendationRuntime } from './providers/qwenRecommendation';
 import { createListingRuntime } from './providers/qwenListing';
 import { getWorkflow, getListing, createListing, reviseListing, reviewListing, publishListing, publishedAmazonCsv } from './services/listings';
 import { createV1, factSnapshot, taskFactSnapshots, analyzeFacts, mutateFact, templateFromFacts } from './services/facts';
@@ -11,17 +13,17 @@ import { AppError } from './errors';
 import { credentialsSchema, importSchema, registerSchema, taskSchema } from './validation';
 import { hashPassword, newSessionToken, tokenHash, verifyPassword } from './auth/password';
 import { catalog, importProducts, resetCatalog, seedProducts, toProduct } from './services/catalog';
-import { createTask, selectProduct, tasks } from './services/tasks';
+import { createTask, selectProduct, tasks, updateTask } from './services/tasks';
 import { createTextProviders } from './providers/text';
-import { domainProviders } from './providers/domain';
 
 declare module 'fastify' { interface FastifyRequest { user: PublicUser | null } }
 const SESSION_COOKIE = 'prismlaunch_session';
 const publicUser = (user: PublicUser): PublicUser => ({ id: user.id, email: user.email, displayName: user.displayName });
-export async function buildApp(config: ServerConfig, db: PrismaClient, options: { transport?: typeof fetch; logger?: boolean } = {}) {
+export async function buildApp(config: ServerConfig, db: PrismaClient, options: { transport?: typeof fetch; logger?: boolean; recommendationAudit?: import('./providers/qwenRecommendation').RecommendationOptions['auditOutput'] } = {}) {
   const app = Fastify({ logger: options.logger ?? (config.NODE_ENV === 'development' ? { level: 'info', redact: ['req.headers.authorization', 'req.headers.cookie', 'res.headers["set-cookie"]', 'password', 'apiKey'] } : false), requestTimeout: 35000, connectionTimeout: 35000, bodyLimit: 3 * 1024 * 1024 });
   const providers = createTextProviders(config, db, options.transport);
   const listingRuntime = createListingRuntime(config, providers.bailian, (id, errorCode) => db.aiCall.update({ where: { id }, data: { success: false, errorCode } }));
+  const recommendationRuntime = createRecommendationRuntime(config, providers.bailian, (id, errorCode) => db.aiCall.update({ where: { id }, data: { success: false, errorCode } }), options.recommendationAudit);
   await app.register(cookie);
   app.decorateRequest('user', null);
   app.setErrorHandler((error, request, reply) => {
@@ -92,12 +94,19 @@ export async function buildApp(config: ServerConfig, db: PrismaClient, options: 
     const input = z.object({ productId: z.string().max(220), purpose: z.enum(['selected', 'fact_review']) }).strict().parse(request.body);
     return { data: await selectProduct(db, request.user!.id, id, input.productId, input.purpose) };
   });
+  app.patch('/api/tasks/:id', protectedRoute, async request => {
+    const { id } = z.object({ id: z.string().min(1).max(220) }).parse(request.params);
+    const input = taskSchema.omit({ code: true }).extend({ expectedRevision: z.number().int().positive() }).parse(request.body);
+    return { data: await updateTask(db, request.user!.id, id, input) };
+  });
   app.get('/api/tasks/:id/recommendations', protectedRoute, async request => {
-    const { id } = z.object({ id: z.string() }).parse(request.params); const task = (await tasks(db, request.user!.id)).find(t => t.recordId === id || t.id === id);
-    if (!task) throw new AppError('not_found', 'Task not found.', 404);
-    const snapshots = await taskFactSnapshots(db, request.user!.id, task.recordId);
-    const products = (await catalog(db, request.user!.id)).products.map(p => snapshots.find(s => s.product.sku === p.sku)?.product ?? p);
-    return { data: await domainProviders.recommendation.recommend(products, task) };
+    const { id } = z.object({ id: z.string().min(1).max(220) }).parse(request.params);
+    return { data: await getRecommendations(db, request.user!.id, id) };
+  });
+  app.post('/api/tasks/:id/recommendations', protectedRoute, async request => {
+    const { id } = z.object({ id: z.string().min(1).max(220) }).parse(request.params);
+    const input = z.object({ expectedTaskRevision: z.number().int().positive(), mode: z.enum(['configured', 'rule']).default('configured') }).strict().parse(request.body);
+    return { data: await runRecommendations(db, request.user!.id, id, input.expectedTaskRevision, input.mode === 'rule' ? undefined : recommendationRuntime) };
   });
   const factPath = '/api/tasks/:taskId/products/:productId';
   const factParams = z.object({ taskId: z.string().min(1).max(220), productId: z.string().min(1).max(220) });
@@ -163,7 +172,7 @@ export async function buildApp(config: ServerConfig, db: PrismaClient, options: 
     const result: Capabilities = { backend: true, database: true, authentication: true,
       storage: { server: ['User', 'Product', 'LaunchTask', 'TaskSelection', 'FactCard', 'Fact', 'Evidence', 'ListingDraft', 'ReviewResult', 'PublishResult'], browser: ['Language', 'UI preferences', 'Non-authoritative cache'] },
       textModel: { activeProvider: 'mock', liveAvailable: available, configured: !!config.BAILIAN_API_KEY, liveEnabled: config.AI_LIVE_ENABLED, model: config.BAILIAN_TEXT_MODEL, remainingCalls: providers.bailian.remainingCalls },
-      recommendation: { activeProvider: 'mock', liveAvailable: available, liveImplemented: false }, evidence: { activeProvider: 'mock', liveAvailable: available, liveImplemented: false },
+      recommendation: { activeProvider: config.RECOMMENDATION_PROVIDER === 'qwen' && available ? 'qwen' : 'rule', liveAvailable: available, liveImplemented: true, liveModel: config.BAILIAN_TEXT_MODEL }, evidence: { activeProvider: 'mock', liveAvailable: available, liveImplemented: false },
       listing: { activeProvider: config.LISTING_PROVIDER === 'qwen' && available ? 'qwen' : 'template', liveAvailable: available, liveImplemented: true, liveModel: config.BAILIAN_TEXT_MODEL }, review: { activeProvider: 'rules', liveAvailable: available, liveImplemented: false },
     }; return { data: result };
   });

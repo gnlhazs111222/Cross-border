@@ -1,0 +1,1075 @@
+{
+  "date": "2026-09-08T09:17:39.736Z",
+  "provider": "rule",
+  "model": null,
+  "promptVersion": null,
+  "caseCount": 12,
+  "metrics": {
+    "top1Accuracy": 0.8181818181818182,
+    "hitAt3": 1,
+    "ndcgAt3": 0.9490725437345393,
+    "labelledCaseCount": 11,
+    "invalidCandidateRate": 0,
+    "unsupportedReasonRate": 0,
+    "emptyCaseCount": 1,
+    "correctEmptyCaseCount": 1
+  },
+  "pairedRuleMetrics": null,
+  "realCalls": 0,
+  "developmentAttempts": null,
+  "fallbackCases": 0,
+  "disclaimer": "Small synthetic demo evaluation, not a statistical benchmark or sales forecast.",
+  "cases": [
+    {
+      "caseId": "classic-black-500",
+      "task": {
+        "id": "PL-DEMO-001",
+        "platform": "Amazon US",
+        "market": "United States",
+        "category": "Home & Kitchen",
+        "requirements": [
+          "Black",
+          "Minimal commuter style",
+          "Around 16 oz",
+          "No straw",
+          "Prefer complete packaging and accessory information"
+        ],
+        "minProfit": 5,
+        "revision": 1
+      },
+      "expected": {
+        "preferredTop1": [
+          "LM-KT-BTL-001-BLK-500"
+        ],
+        "acceptableTop3": [
+          "LM-KT-BTL-001-BLK-500",
+          "LM-KT-BTL-002-BLK-500",
+          "LM-KT-BTL-003-BLK-750"
+        ],
+        "relevance": {
+          "LM-KT-BTL-001-BLK-500": 3,
+          "LM-KT-BTL-002-BLK-500": 2,
+          "LM-KT-BTL-003-BLK-750": 1,
+          "LM-KT-BTL-004-WHT-500": 0
+        }
+      },
+      "notes": "Exact black 500ml no-straw match wins. Duplicate and incomplete rows are not relevant candidates.",
+      "eligibleCount": 4,
+      "excluded": [
+        {
+          "sku": "LM-KT-BTL-005-BLK-500",
+          "reason": "Missing critical facts"
+        },
+        {
+          "sku": "LM-KT-BTL-006-GRN-500",
+          "reason": "Missing critical facts"
+        },
+        {
+          "sku": "LM-KT-BTL-007-BLK-500",
+          "reason": "Duplicate"
+        },
+        {
+          "sku": "LM-KT-BTL-008-BLK-500",
+          "reason": "Possible Duplicate"
+        },
+        {
+          "sku": "LM-BG-TOT-009-BLK",
+          "reason": "Category mismatch"
+        },
+        {
+          "sku": "LM-EL-LMP-010-BLK",
+          "reason": "Category mismatch"
+        }
+      ],
+      "actual": [
+        {
+          "sku": "LM-KT-BTL-001-BLK-500",
+          "score": 94,
+          "reasons": [
+            "Black matches requested color",
+            "500ml / 16.9 fl oz closely matches target capacity",
+            "No straw",
+            "Packaging information is complete"
+          ],
+          "deductions": []
+        },
+        {
+          "sku": "LM-KT-BTL-002-BLK-500",
+          "score": 82,
+          "reasons": [
+            "Black matches requested color",
+            "500ml / 16.9 fl oz closely matches target capacity",
+            "Packaging information is complete"
+          ],
+          "deductions": [
+            "Includes straw: does not meet the no-straw preference"
+          ]
+        },
+        {
+          "sku": "LM-KT-BTL-003-BLK-750",
+          "score": 78,
+          "reasons": [
+            "Black matches requested color",
+            "No straw",
+            "Packaging information is complete"
+          ],
+          "deductions": [
+            "Capacity too large: 750ml / 25.4 fl oz"
+          ]
+        }
+      ],
+      "metrics": {
+        "top1Accuracy": 1,
+        "hitAt3": 1,
+        "ndcgAt3": 1,
+        "invalidCandidates": 0,
+        "returnedCandidates": 3,
+        "unsupportedReasons": 0,
+        "checkedReasons": 10,
+        "emptyCaseCorrect": null
+      },
+      "latencyMs": 2,
+      "mode": "rule"
+    },
+    {
+      "caseId": "explicit-straw",
+      "task": {
+        "id": "PL-DEMO-001",
+        "platform": "Amazon US",
+        "market": "United States",
+        "category": "Home & Kitchen",
+        "requirements": [
+          "A black 500ml bottle with a straw. A straw is required."
+        ],
+        "minProfit": 5,
+        "revision": 1
+      },
+      "expected": {
+        "preferredTop1": [
+          "LM-KT-BTL-002-BLK-500"
+        ],
+        "acceptableTop3": [
+          "LM-KT-BTL-002-BLK-500",
+          "LM-KT-BTL-001-BLK-500",
+          "LM-KT-BTL-003-BLK-750"
+        ],
+        "relevance": {
+          "LM-KT-BTL-002-BLK-500": 3,
+          "LM-KT-BTL-001-BLK-500": 1,
+          "LM-KT-BTL-003-BLK-750": 1,
+          "LM-KT-BTL-004-WHT-500": 0
+        }
+      },
+      "notes": "The straw preference intentionally reverses the classic winner.",
+      "eligibleCount": 4,
+      "excluded": [
+        {
+          "sku": "LM-KT-BTL-005-BLK-500",
+          "reason": "Missing critical facts"
+        },
+        {
+          "sku": "LM-KT-BTL-006-GRN-500",
+          "reason": "Missing critical facts"
+        },
+        {
+          "sku": "LM-KT-BTL-007-BLK-500",
+          "reason": "Duplicate"
+        },
+        {
+          "sku": "LM-KT-BTL-008-BLK-500",
+          "reason": "Possible Duplicate"
+        },
+        {
+          "sku": "LM-BG-TOT-009-BLK",
+          "reason": "Category mismatch"
+        },
+        {
+          "sku": "LM-EL-LMP-010-BLK",
+          "reason": "Category mismatch"
+        }
+      ],
+      "actual": [
+        {
+          "sku": "LM-KT-BTL-002-BLK-500",
+          "productId": "eval-LM-KT-BTL-002-BLK-500",
+          "score": 94,
+          "reasons": [
+            "Black matches the color preference",
+            "Includes straw as requested",
+            "500ml capacity matches the target",
+            "Packaging information is complete"
+          ],
+          "deductions": []
+        },
+        {
+          "sku": "LM-KT-BTL-001-BLK-500",
+          "productId": "eval-LM-KT-BTL-001-BLK-500",
+          "score": 70,
+          "reasons": [
+            "Black matches the color preference",
+            "500ml capacity matches the target",
+            "Packaging information is complete"
+          ],
+          "deductions": [
+            "No straw; a straw was requested"
+          ]
+        },
+        {
+          "sku": "LM-KT-BTL-003-BLK-750",
+          "productId": "eval-LM-KT-BTL-003-BLK-750",
+          "score": 58,
+          "reasons": [
+            "Black matches the color preference",
+            "Packaging information is complete"
+          ],
+          "deductions": [
+            "No straw; a straw was requested",
+            "Capacity: 750ml; requested about 500ml"
+          ]
+        }
+      ],
+      "metrics": {
+        "top1Accuracy": 1,
+        "hitAt3": 1,
+        "ndcgAt3": 1,
+        "invalidCandidates": 0,
+        "returnedCandidates": 3,
+        "unsupportedReasons": 0,
+        "checkedReasons": 9,
+        "emptyCaseCorrect": null
+      },
+      "latencyMs": 1,
+      "mode": "rule"
+    },
+    {
+      "caseId": "large-capacity",
+      "task": {
+        "id": "PL-DEMO-001",
+        "platform": "Amazon US",
+        "market": "United States",
+        "category": "Home & Kitchen",
+        "requirements": [
+          "Largest capacity preferred; black bottle without a straw."
+        ],
+        "minProfit": 5,
+        "revision": 1
+      },
+      "expected": {
+        "preferredTop1": [
+          "LARGE-1000"
+        ],
+        "acceptableTop3": [
+          "LARGE-1000",
+          "LM-KT-BTL-003-BLK-750",
+          "LM-KT-BTL-001-BLK-500"
+        ],
+        "relevance": {
+          "LARGE-1000": 3,
+          "LM-KT-BTL-003-BLK-750": 2,
+          "LM-KT-BTL-001-BLK-500": 1
+        }
+      },
+      "notes": "Largest complete no-straw bottle is preferred; this is not the fixed 500ml brief.",
+      "eligibleCount": 3,
+      "excluded": [
+        {
+          "sku": "LM-KT-BTL-007-BLK-500",
+          "reason": "Duplicate"
+        }
+      ],
+      "actual": [
+        {
+          "sku": "LARGE-1000",
+          "productId": "eval-LARGE-1000",
+          "score": 94,
+          "reasons": [
+            "Black matches the color preference",
+            "No straw as requested",
+            "1000ml capacity considered for the large capacity preference",
+            "Packaging information is complete"
+          ],
+          "deductions": []
+        },
+        {
+          "sku": "LM-KT-BTL-003-BLK-750",
+          "productId": "eval-LM-KT-BTL-003-BLK-750",
+          "score": 82,
+          "reasons": [
+            "Black matches the color preference",
+            "No straw as requested",
+            "750ml capacity considered for the large capacity preference",
+            "Packaging information is complete"
+          ],
+          "deductions": []
+        },
+        {
+          "sku": "LM-KT-BTL-001-BLK-500",
+          "productId": "eval-LM-KT-BTL-001-BLK-500",
+          "score": 70,
+          "reasons": [
+            "Black matches the color preference",
+            "No straw as requested",
+            "500ml capacity considered for the large capacity preference",
+            "Packaging information is complete"
+          ],
+          "deductions": []
+        }
+      ],
+      "metrics": {
+        "top1Accuracy": 1,
+        "hitAt3": 1,
+        "ndcgAt3": 1,
+        "invalidCandidates": 0,
+        "returnedCandidates": 3,
+        "unsupportedReasons": 0,
+        "checkedReasons": 12,
+        "emptyCaseCorrect": null
+      },
+      "latencyMs": 0,
+      "mode": "rule"
+    },
+    {
+      "caseId": "small-commuter",
+      "task": {
+        "id": "PL-DEMO-001",
+        "platform": "Amazon US",
+        "market": "United States",
+        "category": "Home & Kitchen",
+        "requirements": [
+          "Compact black commuter bottle around 350ml, without a straw."
+        ],
+        "minProfit": 5,
+        "revision": 1
+      },
+      "expected": {
+        "preferredTop1": [
+          "COMMUTER-350"
+        ],
+        "acceptableTop3": [
+          "COMMUTER-350",
+          "SMALL-250",
+          "LM-KT-BTL-001-BLK-500"
+        ],
+        "relevance": {
+          "COMMUTER-350": 3,
+          "SMALL-250": 2,
+          "LM-KT-BTL-001-BLK-500": 1,
+          "LM-KT-BTL-003-BLK-750": 0
+        }
+      },
+      "notes": "350ml is an exact target; 250ml is closer than 500ml and much closer than 750ml.",
+      "eligibleCount": 4,
+      "excluded": [],
+      "actual": [
+        {
+          "sku": "COMMUTER-350",
+          "productId": "eval-COMMUTER-350",
+          "score": 94,
+          "reasons": [
+            "Black matches the color preference",
+            "No straw as requested",
+            "350ml capacity matches the target",
+            "Packaging information is complete"
+          ],
+          "deductions": []
+        },
+        {
+          "sku": "SMALL-250",
+          "productId": "eval-SMALL-250",
+          "score": 87,
+          "reasons": [
+            "Black matches the color preference",
+            "No straw as requested",
+            "Packaging information is complete"
+          ],
+          "deductions": [
+            "Capacity: 250ml; requested about 350ml"
+          ]
+        },
+        {
+          "sku": "LM-KT-BTL-001-BLK-500",
+          "productId": "eval-LM-KT-BTL-001-BLK-500",
+          "score": 84,
+          "reasons": [
+            "Black matches the color preference",
+            "No straw as requested",
+            "Packaging information is complete"
+          ],
+          "deductions": [
+            "Capacity: 500ml; requested about 350ml"
+          ]
+        }
+      ],
+      "metrics": {
+        "top1Accuracy": 1,
+        "hitAt3": 1,
+        "ndcgAt3": 1,
+        "invalidCandidates": 0,
+        "returnedCandidates": 3,
+        "unsupportedReasons": 0,
+        "checkedReasons": 10,
+        "emptyCaseCorrect": null
+      },
+      "latencyMs": 0,
+      "mode": "rule"
+    },
+    {
+      "caseId": "light-color",
+      "task": {
+        "id": "PL-DEMO-001",
+        "platform": "Amazon US",
+        "market": "United States",
+        "category": "Home & Kitchen",
+        "requirements": [
+          "White or light color, 500ml, no straw."
+        ],
+        "minProfit": 5,
+        "revision": 1
+      },
+      "expected": {
+        "preferredTop1": [
+          "LM-KT-BTL-004-WHT-500",
+          "WHITE-500"
+        ],
+        "acceptableTop3": [
+          "LM-KT-BTL-004-WHT-500",
+          "WHITE-500",
+          "LM-KT-BTL-001-BLK-500"
+        ],
+        "relevance": {
+          "LM-KT-BTL-004-WHT-500": 3,
+          "WHITE-500": 3,
+          "LM-KT-BTL-001-BLK-500": 1,
+          "LM-KT-BTL-002-BLK-500": 0
+        }
+      },
+      "notes": "White and ivory are both acceptable light colors; do not invent an exact winner for a tie.",
+      "eligibleCount": 4,
+      "excluded": [],
+      "actual": [
+        {
+          "sku": "LM-KT-BTL-004-WHT-500",
+          "productId": "eval-LM-KT-BTL-004-WHT-500",
+          "score": 94,
+          "reasons": [
+            "Ivory matches the color preference",
+            "No straw as requested",
+            "500ml capacity matches the target",
+            "Packaging information is complete"
+          ],
+          "deductions": []
+        },
+        {
+          "sku": "WHITE-500",
+          "productId": "eval-WHITE-500",
+          "score": 94,
+          "reasons": [
+            "White matches the color preference",
+            "No straw as requested",
+            "500ml capacity matches the target",
+            "Packaging information is complete"
+          ],
+          "deductions": []
+        },
+        {
+          "sku": "LM-KT-BTL-001-BLK-500",
+          "productId": "eval-LM-KT-BTL-001-BLK-500",
+          "score": 71,
+          "reasons": [
+            "No straw as requested",
+            "500ml capacity matches the target",
+            "Packaging information is complete"
+          ],
+          "deductions": [
+            "Color: Black; requested white"
+          ]
+        }
+      ],
+      "metrics": {
+        "top1Accuracy": 1,
+        "hitAt3": 1,
+        "ndcgAt3": 1,
+        "invalidCandidates": 0,
+        "returnedCandidates": 3,
+        "unsupportedReasons": 0,
+        "checkedReasons": 11,
+        "emptyCaseCorrect": null
+      },
+      "latencyMs": 10,
+      "mode": "rule"
+    },
+    {
+      "caseId": "confirmed-package",
+      "task": {
+        "id": "PL-DEMO-001",
+        "platform": "Amazon US",
+        "market": "United States",
+        "category": "Home & Kitchen",
+        "requirements": [
+          "Prioritize complete packaging information and confirmed package contents."
+        ],
+        "minProfit": 5,
+        "revision": 1
+      },
+      "expected": {
+        "preferredTop1": [
+          "PACK-CONFIRMED"
+        ],
+        "acceptableTop3": [
+          "PACK-CONFIRMED",
+          "LM-KT-BTL-001-BLK-500",
+          "PACK-UNKNOWN"
+        ],
+        "relevance": {
+          "PACK-CONFIRMED": 3,
+          "LM-KT-BTL-001-BLK-500": 1,
+          "PACK-UNKNOWN": 1
+        }
+      },
+      "notes": "Known package contents are a soft preference; missing shipping weight is a hard exclusion.",
+      "eligibleCount": 3,
+      "excluded": [
+        {
+          "sku": "LM-KT-BTL-005-BLK-500",
+          "reason": "Missing critical facts"
+        }
+      ],
+      "actual": [
+        {
+          "sku": "PACK-CONFIRMED",
+          "productId": "eval-PACK-CONFIRMED",
+          "score": 98,
+          "reasons": [
+            "Package contents are confirmed",
+            "Packaging information is complete"
+          ],
+          "deductions": []
+        },
+        {
+          "sku": "LM-KT-BTL-001-BLK-500",
+          "productId": "eval-LM-KT-BTL-001-BLK-500",
+          "score": 94,
+          "reasons": [
+            "Packaging information is complete"
+          ],
+          "deductions": []
+        },
+        {
+          "sku": "PACK-UNKNOWN",
+          "productId": "eval-PACK-UNKNOWN",
+          "score": 94,
+          "reasons": [
+            "Packaging information is complete"
+          ],
+          "deductions": []
+        }
+      ],
+      "metrics": {
+        "top1Accuracy": 1,
+        "hitAt3": 1,
+        "ndcgAt3": 1,
+        "invalidCandidates": 0,
+        "returnedCandidates": 3,
+        "unsupportedReasons": 0,
+        "checkedReasons": 4,
+        "emptyCaseCorrect": null
+      },
+      "latencyMs": 0,
+      "mode": "rule"
+    },
+    {
+      "caseId": "glass-material",
+      "task": {
+        "id": "PL-DEMO-001",
+        "platform": "Amazon US",
+        "market": "United States",
+        "category": "Home & Kitchen",
+        "requirements": [
+          "Black 500ml glass bottle without a straw."
+        ],
+        "minProfit": 5,
+        "revision": 1
+      },
+      "expected": {
+        "preferredTop1": [
+          "GLASS-500"
+        ],
+        "acceptableTop3": [
+          "GLASS-500",
+          "LM-KT-BTL-001-BLK-500",
+          "PLASTIC-500"
+        ],
+        "relevance": {
+          "GLASS-500": 3,
+          "LM-KT-BTL-001-BLK-500": 1,
+          "PLASTIC-500": 1
+        }
+      },
+      "notes": "Material preference must affect rank. Possible duplicates never appear in expected Top3.",
+      "eligibleCount": 3,
+      "excluded": [
+        {
+          "sku": "LM-KT-BTL-008-BLK-500",
+          "reason": "Possible Duplicate"
+        }
+      ],
+      "actual": [
+        {
+          "sku": "GLASS-500",
+          "productId": "eval-GLASS-500",
+          "score": 94,
+          "reasons": [
+            "Black matches the color preference",
+            "No straw as requested",
+            "500ml capacity matches the target",
+            "Glass matches the material preference",
+            "Packaging information is complete"
+          ],
+          "deductions": []
+        },
+        {
+          "sku": "LM-KT-BTL-001-BLK-500",
+          "productId": "eval-LM-KT-BTL-001-BLK-500",
+          "score": 70,
+          "reasons": [
+            "Black matches the color preference",
+            "No straw as requested",
+            "500ml capacity matches the target",
+            "Packaging information is complete"
+          ],
+          "deductions": [
+            "Material: Stainless Steel; requested glass"
+          ]
+        },
+        {
+          "sku": "PLASTIC-500",
+          "productId": "eval-PLASTIC-500",
+          "score": 70,
+          "reasons": [
+            "Black matches the color preference",
+            "No straw as requested",
+            "500ml capacity matches the target",
+            "Packaging information is complete"
+          ],
+          "deductions": [
+            "Material: Plastic; requested glass"
+          ]
+        }
+      ],
+      "metrics": {
+        "top1Accuracy": 1,
+        "hitAt3": 1,
+        "ndcgAt3": 1,
+        "invalidCandidates": 0,
+        "returnedCandidates": 3,
+        "unsupportedReasons": 0,
+        "checkedReasons": 13,
+        "emptyCaseCorrect": null
+      },
+      "latencyMs": 0,
+      "mode": "rule"
+    },
+    {
+      "caseId": "priority-conflict",
+      "task": {
+        "id": "PL-DEMO-001",
+        "platform": "Amazon US",
+        "market": "United States",
+        "category": "Home & Kitchen",
+        "requirements": [
+          "Prefer a black 500ml bottle with a straw. Having a straw is more important than exact capacity."
+        ],
+        "minProfit": 5,
+        "revision": 1
+      },
+      "expected": {
+        "preferredTop1": [
+          "STRAW-750"
+        ],
+        "acceptableTop3": [
+          "STRAW-750",
+          "IVORY-STRAW",
+          "LM-KT-BTL-001-BLK-500"
+        ],
+        "relevance": {
+          "STRAW-750": 3,
+          "IVORY-STRAW": 2,
+          "LM-KT-BTL-001-BLK-500": 1
+        }
+      },
+      "notes": "A larger black straw bottle is preferred over no straw; light color is a second tradeoff.",
+      "eligibleCount": 3,
+      "excluded": [
+        {
+          "sku": "LM-KT-BTL-005-BLK-500",
+          "reason": "Missing critical facts"
+        }
+      ],
+      "actual": [
+        {
+          "sku": "STRAW-750",
+          "productId": "eval-STRAW-750",
+          "score": 82,
+          "reasons": [
+            "Black matches the color preference",
+            "Includes straw as requested",
+            "Packaging information is complete"
+          ],
+          "deductions": [
+            "Capacity: 750ml; requested about 500ml"
+          ]
+        },
+        {
+          "sku": "IVORY-STRAW",
+          "productId": "eval-IVORY-STRAW",
+          "score": 71,
+          "reasons": [
+            "Includes straw as requested",
+            "500ml capacity matches the target",
+            "Packaging information is complete"
+          ],
+          "deductions": [
+            "Color: Ivory; requested black"
+          ]
+        },
+        {
+          "sku": "LM-KT-BTL-001-BLK-500",
+          "productId": "eval-LM-KT-BTL-001-BLK-500",
+          "score": 70,
+          "reasons": [
+            "Black matches the color preference",
+            "500ml capacity matches the target",
+            "Packaging information is complete"
+          ],
+          "deductions": [
+            "No straw; a straw was requested"
+          ]
+        }
+      ],
+      "metrics": {
+        "top1Accuracy": 1,
+        "hitAt3": 1,
+        "ndcgAt3": 1,
+        "invalidCandidates": 0,
+        "returnedCandidates": 3,
+        "unsupportedReasons": 0,
+        "checkedReasons": 9,
+        "emptyCaseCorrect": null
+      },
+      "latencyMs": 1,
+      "mode": "rule"
+    },
+    {
+      "caseId": "no-perfect-match",
+      "task": {
+        "id": "PL-DEMO-001",
+        "platform": "Amazon US",
+        "market": "United States",
+        "category": "Home & Kitchen",
+        "requirements": [
+          "Black 350ml glass bottle. Avoid a straw first; black color matters more than material or exact capacity."
+        ],
+        "minProfit": 5,
+        "revision": 1
+      },
+      "expected": {
+        "preferredTop1": [
+          "LM-KT-BTL-001-BLK-500"
+        ],
+        "acceptableTop3": [
+          "LM-KT-BTL-001-BLK-500",
+          "IVORY-350-GLASS",
+          "BLACK-350-STRAW"
+        ],
+        "relevance": {
+          "LM-KT-BTL-001-BLK-500": 3,
+          "IVORY-350-GLASS": 2,
+          "BLACK-350-STRAW": 1
+        }
+      },
+      "notes": "No exact match. The explicit priority ordering favors the black no-straw steel bottle; a shallow scorer may miss the hierarchy.",
+      "eligibleCount": 3,
+      "excluded": [],
+      "actual": [
+        {
+          "sku": "BLACK-350-STRAW",
+          "productId": "eval-BLACK-350-STRAW",
+          "score": 94,
+          "reasons": [
+            "Black matches the color preference",
+            "350ml capacity matches the target",
+            "Glass matches the material preference",
+            "Packaging information is complete"
+          ],
+          "deductions": []
+        },
+        {
+          "sku": "IVORY-350-GLASS",
+          "productId": "eval-IVORY-350-GLASS",
+          "score": 71,
+          "reasons": [
+            "350ml capacity matches the target",
+            "Glass matches the material preference",
+            "Packaging information is complete"
+          ],
+          "deductions": [
+            "Color: Ivory; requested black"
+          ]
+        },
+        {
+          "sku": "LM-KT-BTL-001-BLK-500",
+          "productId": "eval-LM-KT-BTL-001-BLK-500",
+          "score": 60,
+          "reasons": [
+            "Black matches the color preference",
+            "Packaging information is complete"
+          ],
+          "deductions": [
+            "Capacity: 500ml; requested about 350ml",
+            "Material: Stainless Steel; requested glass"
+          ]
+        }
+      ],
+      "metrics": {
+        "top1Accuracy": 0,
+        "hitAt3": 1,
+        "ndcgAt3": 0.6806060567602009,
+        "invalidCandidates": 0,
+        "returnedCandidates": 3,
+        "unsupportedReasons": 0,
+        "checkedReasons": 9,
+        "emptyCaseCorrect": null
+      },
+      "latencyMs": 0,
+      "mode": "rule"
+    },
+    {
+      "caseId": "close-finish-preference",
+      "task": {
+        "id": "PL-DEMO-001",
+        "platform": "Amazon US",
+        "market": "United States",
+        "category": "Home & Kitchen",
+        "requirements": [
+          "Black 500ml without a straw. A matte finish is preferred over a glossy finish."
+        ],
+        "minProfit": 5,
+        "revision": 1
+      },
+      "expected": {
+        "preferredTop1": [
+          "ZZZ-MATTE"
+        ],
+        "acceptableTop3": [
+          "ZZZ-MATTE",
+          "AAA-GLOSS",
+          "LM-KT-BTL-001-BLK-500"
+        ],
+        "relevance": {
+          "ZZZ-MATTE": 3,
+          "AAA-GLOSS": 2,
+          "LM-KT-BTL-001-BLK-500": 1
+        }
+      },
+      "notes": "Closely matched basics; only one has confirmed preferred finish. Unknown finish is not assumed matte.",
+      "eligibleCount": 3,
+      "excluded": [],
+      "actual": [
+        {
+          "sku": "AAA-GLOSS",
+          "productId": "eval-AAA-GLOSS",
+          "score": 94,
+          "reasons": [
+            "Black matches the color preference",
+            "No straw as requested",
+            "500ml capacity matches the target",
+            "Packaging information is complete"
+          ],
+          "deductions": []
+        },
+        {
+          "sku": "LM-KT-BTL-001-BLK-500",
+          "productId": "eval-LM-KT-BTL-001-BLK-500",
+          "score": 94,
+          "reasons": [
+            "Black matches the color preference",
+            "No straw as requested",
+            "500ml capacity matches the target",
+            "Packaging information is complete"
+          ],
+          "deductions": []
+        },
+        {
+          "sku": "ZZZ-MATTE",
+          "productId": "eval-ZZZ-MATTE",
+          "score": 94,
+          "reasons": [
+            "Black matches the color preference",
+            "No straw as requested",
+            "500ml capacity matches the target",
+            "Packaging information is complete"
+          ],
+          "deductions": []
+        }
+      ],
+      "metrics": {
+        "top1Accuracy": 0,
+        "hitAt3": 1,
+        "ndcgAt3": 0.7591919243197319,
+        "invalidCandidates": 0,
+        "returnedCandidates": 3,
+        "unsupportedReasons": 0,
+        "checkedReasons": 12,
+        "emptyCaseCorrect": null
+      },
+      "latencyMs": 0,
+      "mode": "rule"
+    },
+    {
+      "caseId": "no-eligible-products",
+      "task": {
+        "id": "PL-DEMO-001",
+        "platform": "Amazon US",
+        "market": "United States",
+        "category": "Home & Kitchen",
+        "requirements": [
+          "Black 500ml no straw."
+        ],
+        "minProfit": 5,
+        "revision": 1
+      },
+      "expected": {
+        "preferredTop1": [],
+        "acceptableTop3": [],
+        "relevance": {}
+      },
+      "notes": "All candidates are hard excluded. No model call and no invented Top3.",
+      "eligibleCount": 0,
+      "excluded": [
+        {
+          "sku": "LM-KT-BTL-005-BLK-500",
+          "reason": "Missing critical facts"
+        },
+        {
+          "sku": "LM-KT-BTL-007-BLK-500",
+          "reason": "Duplicate"
+        },
+        {
+          "sku": "LM-KT-BTL-008-BLK-500",
+          "reason": "Possible Duplicate"
+        },
+        {
+          "sku": "LM-BG-TOT-009-BLK",
+          "reason": "Category mismatch"
+        }
+      ],
+      "actual": [],
+      "metrics": {
+        "top1Accuracy": null,
+        "hitAt3": null,
+        "ndcgAt3": null,
+        "invalidCandidates": 0,
+        "returnedCandidates": 0,
+        "unsupportedReasons": 0,
+        "checkedReasons": 0,
+        "emptyCaseCorrect": true
+      },
+      "latencyMs": 0,
+      "mode": "rule"
+    },
+    {
+      "caseId": "demo-profit-threshold",
+      "task": {
+        "id": "PL-DEMO-001",
+        "platform": "Amazon US",
+        "market": "United States",
+        "category": "Home & Kitchen",
+        "requirements": [
+          "Black",
+          "Minimal commuter style",
+          "Around 16 oz",
+          "No straw",
+          "Prefer complete packaging and accessory information"
+        ],
+        "minProfit": 5.5,
+        "revision": 1
+      },
+      "expected": {
+        "preferredTop1": [
+          "LM-KT-BTL-001-BLK-500"
+        ],
+        "acceptableTop3": [
+          "LM-KT-BTL-001-BLK-500"
+        ],
+        "relevance": {
+          "LM-KT-BTL-001-BLK-500": 3
+        }
+      },
+      "notes": "Only the demo hero has 5.79 simulated profit; other complete examples have 5.00. No model cost calculation.",
+      "eligibleCount": 1,
+      "excluded": [
+        {
+          "sku": "LM-KT-BTL-002-BLK-500",
+          "reason": "Below demo profit requirement"
+        },
+        {
+          "sku": "LM-KT-BTL-003-BLK-750",
+          "reason": "Below demo profit requirement"
+        },
+        {
+          "sku": "LM-KT-BTL-004-WHT-500",
+          "reason": "Below demo profit requirement"
+        },
+        {
+          "sku": "LM-KT-BTL-005-BLK-500",
+          "reason": "Missing critical facts"
+        },
+        {
+          "sku": "LM-KT-BTL-006-GRN-500",
+          "reason": "Missing critical facts"
+        },
+        {
+          "sku": "LM-KT-BTL-007-BLK-500",
+          "reason": "Duplicate"
+        },
+        {
+          "sku": "LM-KT-BTL-008-BLK-500",
+          "reason": "Possible Duplicate"
+        },
+        {
+          "sku": "LM-BG-TOT-009-BLK",
+          "reason": "Category mismatch"
+        },
+        {
+          "sku": "LM-EL-LMP-010-BLK",
+          "reason": "Category mismatch"
+        }
+      ],
+      "actual": [
+        {
+          "sku": "LM-KT-BTL-001-BLK-500",
+          "score": 94,
+          "reasons": [
+            "Black matches requested color",
+            "500ml / 16.9 fl oz closely matches target capacity",
+            "No straw",
+            "Packaging information is complete"
+          ],
+          "deductions": []
+        }
+      ],
+      "metrics": {
+        "top1Accuracy": 1,
+        "hitAt3": 1,
+        "ndcgAt3": 1,
+        "invalidCandidates": 0,
+        "returnedCandidates": 1,
+        "unsupportedReasons": 0,
+        "checkedReasons": 4,
+        "emptyCaseCorrect": null
+      },
+      "latencyMs": 0,
+      "mode": "rule"
+    }
+  ]
+}

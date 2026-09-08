@@ -1,5 +1,7 @@
 # PrismLaunch Full Demo
 
+A 线开发分支增加了可编辑任务、共享候选资格过滤、Qwen 推荐与独立评测。范围、启动端口、验收及集成风险见 [A_LINE_RECOMMENDATION.md](docs/A_LINE_RECOMMENDATION.md)。
+
 当前默认是完整演示模式：**React → Fastify → Prisma / SQLite → Cookie 登录**。商品、任务、事实、文案、审核和模拟发布均由服务端持久化。浏览器保留界面偏好与非权威快照。
 
 QwenListingProvider 已真实生成 Amazon / Shopify 文案并通过校验、审核与模拟发布。默认仍使用模板，不自动花费模型 API；Qwen 需后端显式开启，失败时回退模板。

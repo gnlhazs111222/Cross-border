@@ -19,4 +19,4 @@ export const importSchema = z.object({
 }).strict();
 export const credentialsSchema = z.object({ email: z.string().email().max(254).transform(v => v.toLowerCase()), password: z.string().min(1).max(128) }).strict();
 export const registerSchema = credentialsSchema.extend({ password: z.string().min(8).max(128), displayName: z.string().trim().min(1).max(80) });
-export const taskSchema = z.object({ code: text, platform: text, market: text, category: text, requirements: z.array(text).min(1).max(20), minimumProfit: z.number().finite().min(0).max(1000000) }).strict();
+export const taskSchema = z.object({ code: text, platform: text, market: text, category: text, requirements: z.array(z.string().trim().min(1).max(1500)).min(1).max(20).refine(rows => rows.join('\n').length <= 5000, 'Keep requirements within 5000 characters.'), minimumProfit: z.number().finite().min(0).max(1000000) }).strict();

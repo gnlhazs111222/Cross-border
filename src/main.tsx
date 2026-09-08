@@ -1,3 +1,4 @@
+import './recommendation.css';
 import './generation.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';

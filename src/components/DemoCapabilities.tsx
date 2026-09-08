@@ -25,7 +25,7 @@ export function DemoCapabilities() {
   ];
   if (capabilities?.listing.activeProvider === 'qwen') local.push(['Listing intelligence', 'Listing supports templates and opt-in Qwen generation with validation and template fallback.']);
   const simulated = [
-    ['Recommendation', 'Fixed demo scoring; 94 is a match score, not model confidence.'],
+    ['Recommendation', capabilities?.recommendation.activeProvider === 'qwen' ? 'Deterministic eligibility checks run first. Qwen ranks only eligible products.' : 'Deterministic ranking follows the saved task; scores are not model confidence.'],
     ['Evidence enrichment', 'Supplemental PDF and image facts are seeded examples, not OCR results.'],
     ['Pricing external data', 'Shipping, tariffs and platform fees use fixed demo assumptions.'],
     ...(capabilities?.listing.activeProvider === 'qwen' ? [] : [['Listing intelligence', 'English copy is assembled from authorized facts using templates, not an LLM.']]),
@@ -41,7 +41,7 @@ export function DemoCapabilities() {
           <p><strong>{t('Browser persisted:')}</strong> {capabilities.storage.browser.join(' · ')}</p>
           <p><strong>{t('Live text connection:')}</strong> {t(capabilities.textModel.liveAvailable ? 'Available for explicit smoke only' : capabilities.textModel.configured ? 'Configured, live calls disabled' : 'Not configured')} · {capabilities.textModel.model}</p>
           <p><strong>{t('Active business providers:')}</strong> {capabilities.recommendation.activeProvider} / {capabilities.evidence.activeProvider} / {capabilities.listing.activeProvider} / {capabilities.review.activeProvider}</p>
-          <small>{t('Qwen Listing is implemented and opt-in. Recommendation and evidence stay mocked; review stays rule-based. Automated tests make no live AI calls.')}</small>
+          <small>{t('Qwen Listing and Recommendation are implemented and opt-in. Evidence stays mocked; review stays rule-based. Automated tests make no live AI calls.')}</small>
         </>}
       </section>}
       <div className="capability-grid">{([{ title: 'REAL / LOCAL', tone: 'green' as const, items: local }, { title: 'DEMO / MOCK', tone: 'amber' as const, items: simulated }]).map(group => <section key={group.title}><Badge tone={group.tone}>{group.title}</Badge>{group.items.map(([label, detail]) => <div className="capability-row" key={label}><h3>{t(label)}</h3><p>{t(detail)}</p></div>)}</section>)}</div>

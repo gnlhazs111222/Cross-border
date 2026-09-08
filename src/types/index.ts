@@ -19,8 +19,8 @@ export type Fact = {
 };
 export type FactCard = { recordId?: string; revision?: number; productRevision?: number; version: 1 | 2; sku: string; taskId?: string; facts: Fact[] };
 export type Evidence = { recordId?: string; sourceKind?: 'supplier' | 'mock' | 'manual'; id: string; name: string; type: 'sheet' | 'pdf' | 'image'; file: string; anchor: string; extracted: string[] };
-export type Recommendation = { sku: string; score: number; reasons: string[]; deductions: string[] };
-export type Task = { recordId?: string; id: string; platform: string; market: string; category: string; requirements: string[]; minProfit: number };
+export type Recommendation = { productId?: string; summary?: string; generation?: import('../../shared/recommendation').RecommendationGeneration; sku: string; score: number; reasons: string[]; deductions: string[] };
+export type Task = { recordId?: string; revision?: number; id: string; platform: string; market: string; category: string; requirements: string[]; minProfit: number };
 export type Pricing = { version: string; status: 'ready' | 'blocked'; supplierCost: number; shipping: number; duty: number; platformCost: number; targetProfit: number; suggestedPrice: number | null; missing: string[] };
 export type GenerationMetadata = { provider: string; model?: string; promptVersion?: string; fallbackReason?: string; aiCallId?: string; inputHash?: string; cacheHit?: boolean };
 export type Listing = { generation?: GenerationMetadata; recordId?: string; status?: string; generationMode?: string; platform: Platform; title: string; bullets: string[]; description: string; attributes: Record<string, string>; sources: Fact[]; revision: number; factRevision?: number; riskDemoInjected: boolean };

@@ -1,3 +1,4 @@
+import type { RecommendationSnapshot } from '../../shared/recommendation';
 import type { WorkflowSnapshot, FactSnapshot, Capabilities, CatalogResponse, PublicUser, ServerProduct, ServerTask } from '../../shared/contracts';
 import type { ImportPreview, Listing, Platform, Task } from '../types';
 
@@ -36,7 +37,12 @@ export const apiClient = {
     list: () => request<ServerTask[]>('/tasks'),
     get: (id: string) => request<ServerTask>(`/tasks/${encodeURIComponent(id)}`),
     create: (task: Task) => request<ServerTask>('/tasks', 'POST', { code: task.id, platform: task.platform, market: task.market, category: task.category, requirements: task.requirements, minimumProfit: task.minProfit }),
+    update: (id: string, task: Task, expectedRevision: number) => request<ServerTask>(`/tasks/${encodeURIComponent(id)}`, 'PATCH', { platform: task.platform, market: task.market, category: task.category, requirements: task.requirements, minimumProfit: task.minProfit, expectedRevision }),
     select: (taskId: string, sku: string, purpose: 'selected' | 'fact_review') => request<ServerTask>(`/tasks/${encodeURIComponent(taskId)}/selection`, 'POST', { productId: sku, purpose }),
+  },
+  recommendations: {
+    get: (taskId: string) => request<RecommendationSnapshot>(`/tasks/${encodeURIComponent(taskId)}/recommendations`),
+    run: (taskId: string, expectedTaskRevision: number, mode: 'configured' | 'rule' = 'configured') => request<RecommendationSnapshot>(`/tasks/${encodeURIComponent(taskId)}/recommendations`, 'POST', { expectedTaskRevision, mode }),
   },
   facts: {
     list: (taskId: string) => request<FactSnapshot[]>(`/tasks/${encodeURIComponent(taskId)}/fact-snapshots`),

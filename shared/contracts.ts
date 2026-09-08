@@ -8,7 +8,7 @@ export type Capabilities = {
   backend: boolean; database: boolean; authentication: boolean;
   storage: { server: string[]; browser: string[] };
   textModel: { activeProvider: 'mock'; liveAvailable: boolean; configured: boolean; liveEnabled: boolean; model: string; remainingCalls: number };
-  recommendation: { activeProvider: 'mock'; liveAvailable: boolean; liveImplemented: false };
+  recommendation: { activeProvider: 'rule' | 'qwen'; liveAvailable: boolean; liveImplemented: true; liveModel: string };
   evidence: { activeProvider: 'mock'; liveAvailable: boolean; liveImplemented: false };
   listing: { activeProvider: 'template' | 'qwen'; liveAvailable: boolean; liveImplemented: true; liveModel: string };
   review: { activeProvider: 'rules'; liveAvailable: boolean; liveImplemented: false };
