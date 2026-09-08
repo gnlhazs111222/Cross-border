@@ -1,3 +1,5 @@
+import { type ListingRuntime, type AuthorizedListing } from '../providers/qwenListing';
+import { validateGeneratedListingAgainstFacts, listingOutputSchema } from '../providers/listingValidation';
 import { Prisma, type PrismaClient, type ListingDraft } from '@prisma/client';
 import type { Listing, Platform } from '../../src/types';
 import type { WorkflowSnapshot, FactSnapshot } from '../../shared/contracts';
@@ -9,7 +11,7 @@ import { factSnapshotTx } from './facts';
 type DB = Prisma.TransactionClient;
 export type VersionInput = { expectedVersion: number; expectedFactsRevision: number };
 const json = (value: unknown): Prisma.InputJsonValue => JSON.parse(JSON.stringify(value));
-const toListing = (row: ListingDraft): Listing => ({ ...(row.data as unknown as Listing), recordId: row.id, revision: row.revision, factRevision: row.factRevision, platform: row.platform as Platform, status: row.status, generationMode: row.generationMode });
+const toListing = (row: ListingDraft): Listing => { const { authorization: _private, ...data } = row.data as unknown as AuthorizedListing; void _private; return { ...data, recordId: row.id, revision: row.revision, factRevision: row.factRevision, platform: row.platform as Platform, status: row.status, generationMode: row.generationMode }; };
 const active = (row: ListingDraft) => !['stale', 'superseded'].includes(row.status);
 async function owned(db: DB, userId: string, id: string) {
   const row = await db.listingDraft.findFirst({ where: { id, userId, task: { userId }, product: { userId } } });
@@ -33,6 +35,22 @@ async function supported(snap: FactSnapshot, platform: Platform, revision: numbe
   if (!snap.listingReadiness.ready) throw new AppError('listing_blocked', 'Confirm required facts and resolve pricing before generating a listing.', 409);
   return domainProviders.listing.generate({ factCard: snap.v2!, pricing: snap.pricing, platform, revision, factRevision: snap.factsRevision });
 }
+const defaultListingRuntime: ListingRuntime = { requested: 'template', provider: domainProviders.listing };
+async function generationInput(db: DB, snap: FactSnapshot, platform: Platform, revision: number) {
+  if (!snap.listingReadiness.ready) throw new AppError('listing_blocked', 'Confirm required facts and resolve pricing before generating a listing.', 409);
+  const task = await db.launchTask.findUniqueOrThrow({ where: { id: snap.taskId } });
+  return { factCard: snap.v2!, pricing: snap.pricing, platform, revision, factRevision: snap.factsRevision,
+    context: { market: task.market, category: task.category, requirements: task.requirements as string[], product: { sku: snap.product.sku, name: snap.product.name } } };
+}
+async function reviewBaseline(snap: FactSnapshot, row: ListingDraft): Promise<Listing> {
+  const data = row.data as unknown as AuthorizedListing;
+  if (row.generationMode === 'qwen' && data.authorization?.factsRevision === snap.factsRevision) {
+    const output = validateGeneratedListingAgainstFacts(listingOutputSchema(row.platform as Platform).parse(data.authorization.output), snap.facts);
+    const { usedFacts: _used, ...copy } = output; void _used;
+    return { ...toListing(row), ...copy, riskDemoInjected: false };
+  }
+  return supported(snap, row.platform as Platform, row.revision);
+}
 async function retire(db: DB, row: ListingDraft) {
   const invalidatedAt = new Date();
   await db.reviewResult.updateMany({ where: { listingDraftId: row.id, invalidatedAt: null }, data: { invalidatedAt } });
@@ -42,7 +60,7 @@ async function retire(db: DB, row: ListingDraft) {
 async function insert(db: DB, userId: string, snap: FactSnapshot, listing: Listing, previous?: ListingDraft | null) {
   if (previous) await retire(db, previous);
   return db.listingDraft.create({ data: { userId, taskId: snap.taskId, productId: snap.productId, platform: listing.platform, revision: listing.revision, factRevision: snap.factsRevision,
-    status: 'review_required', generationMode: 'template', data: json(listing) } });
+    status: 'review_required', generationMode: listing.generationMode ?? 'template', data: json(listing) } });
 }
 // Authorization is always computed from the current DB version and facts, never client flags.
 export async function canPublishListing(db: DB, userId: string, id: string, knownSnapshot?: FactSnapshot): Promise<boolean> {
@@ -52,7 +70,7 @@ export async function canPublishListing(db: DB, userId: string, id: string, know
   if (snap.factsRevision !== row.factRevision || !snap.listingReadiness.ready) return false;
   const review = await db.reviewResult.findFirst({ where: { listingDraftId: row.id, invalidatedAt: null }, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }] });
   if (!review || review.revision !== row.revision || review.status !== 'passed' || review.highRiskCount !== 0 || (review.issues as unknown[]).length !== 0) return false;
-  const issues = await domainProviders.review.review(toListing(row), await supported(snap, row.platform as Platform, row.revision));
+  const issues = await domainProviders.review.review(toListing(row), await reviewBaseline(snap, row));
   return issues.length === 0;
 }
 async function workflow(db: DB, userId: string, taskId: string, productId: string): Promise<WorkflowSnapshot> {
@@ -89,32 +107,44 @@ export async function getListing(db: PrismaClient, userId: string, id: string) {
       publications: await tx.publishResult.findMany({ where: { listingDraftId: id }, orderBy: { createdAt: 'asc' } }), isLatest: (await latest(tx, row))?.id === id, publishAllowed: await canPublishListing(tx, userId, id) };
   });
 }
-export async function createListing(db: PrismaClient, userId: string, taskId: string, productId: string, input: VersionInput & { platform: Platform }) {
+export async function createListing(db: PrismaClient, userId: string, taskId: string, productId: string, input: VersionInput & { platform: Platform }, runtime = defaultListingRuntime) {
+  const prepared = await transaction(db, async tx => {
+    const snap = await factSnapshotTx(tx, userId, taskId, productId); checkFacts(snap, input.expectedFactsRevision);
+    const previous = await latest(tx, { taskId: snap.taskId, productId: snap.productId, platform: input.platform });
+    if ((previous?.revision ?? 0) !== input.expectedVersion) throw new AppError('listing_changed', 'Listing changed. Reload the current version before retrying.', 409);
+    return { snap, previous, providerInput: await generationInput(tx, snap, input.platform, (previous?.revision ?? 0) + 1) };
+  });
+  // Network generation runs outside SQLite transactions. Revalidate both revisions before committing.
+  const listing = await runtime.provider.generate(prepared.providerInput);
+  if (runtime.requested === 'template' && input.platform === 'amazon' && (!prepared.previous || !active(prepared.previous) || prepared.previous.factRevision !== prepared.snap.factsRevision)) { listing.bullets[2] = '100% leakproof'; listing.riskDemoInjected = true; }
   return transaction(db, async tx => {
     const snap = await factSnapshotTx(tx, userId, taskId, productId); checkFacts(snap, input.expectedFactsRevision);
     const previous = await latest(tx, { taskId: snap.taskId, productId: snap.productId, platform: input.platform });
     if ((previous?.revision ?? 0) !== input.expectedVersion) throw new AppError('listing_changed', 'Listing changed. Reload the current version before retrying.', 409);
-    const listing = await supported(snap, input.platform, (previous?.revision ?? 0) + 1);
-    // Match the competition story: the first draft of a fresh fact cycle has an explicit risk fixture.
-    if (input.platform === 'amazon' && (!previous || !active(previous) || previous.factRevision !== snap.factsRevision)) { listing.bullets[2] = '100% leakproof'; listing.riskDemoInjected = true; }
     await insert(tx, userId, snap, listing, previous); return workflow(tx, userId, snap.taskId, snap.productId);
   });
 }
-export async function reviseListing(db: PrismaClient, userId: string, id: string, action: 'edit' | 'regenerate' | 'fix', input: VersionInput & { title?: string; bullets?: string[]; description?: string }) {
+export async function reviseListing(db: PrismaClient, userId: string, id: string, action: 'edit' | 'regenerate' | 'fix' | 'inject-risk', input: VersionInput & { title?: string; bullets?: string[]; description?: string }, runtime = defaultListingRuntime) {
+  if (action === 'regenerate') {
+    const prepared = await transaction(db, async tx => { const { row, snap } = await current(tx, userId, id, input, true); return generationInput(tx, snap, row.platform as Platform, row.revision + 1); });
+    const generated = await runtime.provider.generate(prepared);
+    return transaction(db, async tx => { const { row, snap } = await current(tx, userId, id, input, true); await insert(tx, userId, snap, generated, row); return workflow(tx, userId, row.taskId, row.productId); });
+  }
   return transaction(db, async tx => {
-    const { row, snap } = await current(tx, userId, id, input, action === 'regenerate');
-    let listing: Listing;
-    if (action === 'edit') {
-      const { recordId: _id, status: _status, generationMode: _mode, ...copy } = toListing(row); void _id; void _status; void _mode;
-      listing = { ...copy, title: input.title!, bullets: input.bullets!, description: input.description!, revision: row.revision + 1 };
-    } else listing = await supported(snap, row.platform as Platform, row.revision + 1);
+    const { row, snap } = await current(tx, userId, id, input);
+    let listing: AuthorizedListing;
+    if (action === 'edit' || action === 'inject-risk') {
+      listing = { ...(row.data as unknown as AuthorizedListing), generationMode: row.generationMode, revision: row.revision + 1 };
+      if (action === 'edit') Object.assign(listing, { title: input.title!, bullets: input.bullets!, description: input.description! });
+      else { listing.bullets = [...listing.bullets]; listing.bullets[Math.min(2, listing.bullets.length)] = '100% leakproof'; listing.riskDemoInjected = true; }
+    } else { listing = await supported(snap, row.platform as Platform, row.revision + 1); listing.generationMode = 'template'; }
     await insert(tx, userId, snap, listing, row); return workflow(tx, userId, row.taskId, row.productId);
   });
 }
 export async function reviewListing(db: PrismaClient, userId: string, id: string, input: VersionInput) {
   return transaction(db, async tx => {
     const { row, snap } = await current(tx, userId, id, input);
-    const issues = await domainProviders.review.review(toListing(row), await supported(snap, row.platform as Platform, row.revision));
+    const issues = await domainProviders.review.review(toListing(row), await reviewBaseline(snap, row));
     const invalidatedAt = new Date();
     await tx.reviewResult.updateMany({ where: { listingDraftId: id, invalidatedAt: null }, data: { invalidatedAt } });
     await tx.publishResult.updateMany({ where: { listingDraftId: id, invalidatedAt: null }, data: { invalidatedAt } });

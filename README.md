@@ -2,7 +2,7 @@
 
 当前默认是完整演示模式：**React → Fastify → Prisma / SQLite → Cookie 登录**。商品、任务、事实、文案、审核和模拟发布均由服务端持久化。浏览器保留界面偏好与非权威快照。
 
-百炼 Qwen 文本 Provider 已完成两次真实连接验证；业务智能仍采用 Mock / 模板 / 规则，默认不会花费模型 API。
+QwenListingProvider 已真实生成 Amazon / Shopify 文案并通过校验、审核与模拟发布。默认仍使用模板，不自动花费模型 API；Qwen 需后端显式开启，失败时回退模板。
 
 ## 启动
 
@@ -45,7 +45,9 @@ npm run preview:local
 - XLSX / CSV 继续在浏览器按固定模板解析，服务端再校验并保存；替换 / 追加、重复处理和原始顺序保留。
 - 模板生成、规则审核、发布授权与 CSV 下载全部由后端执行。事实变化使历史结果 stale；文案修改创建新版本并使该平台旧结果失效，保留历史。
 - Key 只存服务端 `.env`，不提交、不打包到浏览器。默认 `AI_LIVE_ENABLED=false`。
-- 推荐、PDF / 图片补充、业务文案智能、语义审核和平台发布没有全面 AI 化，详情见能力说明弹窗。
+- 推荐与证据补充仍是 Mock，审核仍为规则，发布仍为模拟；仅文案生成支持显式开启的 Qwen。
+- Qwen 使用结构化 JSON、授权字段校验、版本检查、成功结果缓存和模板回退。
+- 配置：`LISTING_PROVIDER=template` 默认；真实生成须 `LISTING_PROVIDER=qwen`、`AI_LIVE_ENABLED=true` 及后端 Key。
 
 ## 检查与构建
 
@@ -71,10 +73,14 @@ npm run ai:smoke
 AI_LIVE_ENABLED=true NODE_TLS_REJECT_UNAUTHORIZED=1 npm run ai:smoke -- --live
 ```
 
-上一轮已经成功做过两次真实 smoke，不需重复；成功标记存在时命令自动跳过。默认每个 API 进程最多 20 次调用，smoke CLI 更严格地限制为两次，SDK 不自动重试。
+连接基础轮已经成功做过两次真实 smoke，不需重复；成功标记存在时命令自动跳过。默认每个 API 进程最多 20 次调用，smoke CLI 更严格地限制为两次，SDK 不自动重试。
+
+文案专项验收命令 `npm run ai:listing-smoke` 默认为模板 dry run；显式 Live 用法及成功跳过规则见 Qwen 文档。本轮真实文案调用仅 2 次 / 2311 tokens，后续查看已保存文案无需再次调用。
 
 ## 文档与素材
 
+- [Qwen Listing 本轮实现与使用说明](docs/QWEN_LISTING.md)
+- [Qwen 真实调用验收与截图](artifacts/full-demo/QWEN_LISTING_VERIFICATION.md)
 - [Full Demo 架构、API、持久化、Provider 与真实调用报告](docs/FULL_DEMO.md)
 - [文案 / 审核 / 发布迁移与本轮验收](docs/LISTING_SERVER_MIGRATION.md)
 - [上一轮事实迁移验收](docs/FACT_SERVER_MIGRATION.md)

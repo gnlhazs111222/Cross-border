@@ -24,7 +24,8 @@
     "preview:full": "concurrently -k -n web,api \"npm:preview\" \"npm:start:api\"",
     "test:server": "NODE_ENV=test AI_LIVE_ENABLED=false BAILIAN_API_KEY= NODE_TLS_REJECT_UNAUTHORIZED=1 node --import tsx --test server/tests/*.test.ts",
     "ai:smoke": "tsx server/scripts/ai-smoke.ts",
-    "security:check": "node scripts/check-secrets.mjs"
+    "security:check": "node scripts/check-secrets.mjs",
+    "ai:listing-smoke": "tsx server/scripts/listing-smoke.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",

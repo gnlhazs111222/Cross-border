@@ -168,6 +168,8 @@ model PublishResult {
   updatedAt      DateTime     @updatedAt
 }
 model AiCall {
+  promptVersion    String?
+  inputHash        String?
   id               String   @id @default(cuid())
   provider         String
   model            String

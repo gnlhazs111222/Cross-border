@@ -378,6 +378,11 @@ export const mockApi = {
     delete current.reviews[current.platform]; delete current.publications[current.platform];
     advance('listing_generated'); return save();
   },
+  async injectDemoRisk() {
+    if (!serverOwner) throw new Error('This action requires Full Demo mode.');
+    const l = activeServerListing();
+    return serverAction(() => apiClient.listings.injectDemoRisk(l.recordId!, l.revision, current.factsRevision!));
+  },
   canPublish() {
     if (serverOwner) return !!serverWorkflow?.publishAllowed[current.platform];
     if (!this.listingReady()) return false;

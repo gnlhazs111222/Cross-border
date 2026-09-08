@@ -4,8 +4,8 @@ import type { z } from 'zod';
 import type { ServerConfig } from '../config';
 import { AppError } from '../errors';
 
-export type TextRequest = { prompt: string; purpose: string; mode?: 'text' | 'reasoning' | 'premium' };
-export type TextResult = { provider: 'mock' | 'bailian'; model: string; content: string; latencyMs: number; usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number } };
+export type TextRequest = { prompt: string; purpose: string; systemPrompt?: string; maxTokens?: number; promptVersion?: string; inputHash?: string; mode?: 'text' | 'reasoning' | 'premium' };
+export type TextResult = { aiCallId?: string; provider: 'mock' | 'bailian'; model: string; content: string; latencyMs: number; usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number } };
 export interface TextModelProvider {
   generateText(request: TextRequest): Promise<TextResult>;
   generateStructured<T>(request: TextRequest & { schema: z.ZodType<T>; example: T }): Promise<TextResult & { data: T }>;
@@ -14,7 +14,7 @@ export class MockTextModelProvider implements TextModelProvider {
   async generateText(): Promise<TextResult> { return { provider: 'mock', model: 'mock-text-v1', content: 'Mock response: PrismLaunch is ready.', latencyMs: 0 }; }
   async generateStructured<T>(request: TextRequest & { schema: z.ZodType<T>; example: T }) { const data = request.schema.parse(request.example); return { ...await this.generateText(), content: JSON.stringify(data), data }; }
 }
-type AuditWriter = (row: { provider: string; model: string; purpose: string; latencyMs: number; success: boolean; errorCode?: string; promptTokens?: number; completionTokens?: number; totalTokens?: number }) => Promise<unknown>;
+type AuditWriter = (row: { promptVersion?: string; inputHash?: string; provider: string; model: string; purpose: string; latencyMs: number; success: boolean; errorCode?: string; promptTokens?: number; completionTokens?: number; totalTokens?: number }) => Promise<unknown>;
 export class BailianTextModelProvider implements TextModelProvider {
   private calls = 0;
   private client: OpenAI;
@@ -40,13 +40,14 @@ export class BailianTextModelProvider implements TextModelProvider {
     try {
       const response = await this.client.chat.completions.create({
         model, messages: [
-          { role: 'system', content: structured ? `Return only a JSON object with the same shape as this example: ${JSON.stringify(structured.example)}` : 'Reply briefly.' },
+          { role: 'system', content: request.systemPrompt ?? (structured ? `Return only a JSON object with the same shape as this example: ${JSON.stringify(structured.example)}` : 'Reply briefly.') },
           { role: 'user', content: request.prompt },
-        ], max_tokens: 128, temperature: 0,
+        ], max_tokens: Math.min(3000, Math.max(1, request.maxTokens ?? 128)), temperature: 0,
         ...(structured ? { response_format: { type: 'json_object' as const } } : {}),
         ...{ enable_thinking: false },
       });
       usage = response.usage ? { prompt_tokens: response.usage.prompt_tokens, completion_tokens: response.usage.completion_tokens, total_tokens: response.usage.total_tokens } : undefined;
+      if (response.choices[0]?.finish_reason === 'length') throw new AppError('ai_output_limit', 'The provider reached the output token limit.', 502);
       const content = response.choices[0]?.message.content;
       if (!content) throw new AppError('invalid_ai_response', 'The provider returned no text.', 502);
       let data: T | undefined;
@@ -55,13 +56,15 @@ export class BailianTextModelProvider implements TextModelProvider {
         catch { throw new AppError('invalid_ai_json', 'The provider returned invalid structured output.', 502); }
       }
       const latencyMs = Date.now() - started;
-      await this.audit({ provider: 'bailian', model, purpose: request.purpose, latencyMs, success: true, promptTokens: usage?.prompt_tokens, completionTokens: usage?.completion_tokens, totalTokens: usage?.total_tokens });
-      return { provider: 'bailian', model, content, latencyMs, usage, ...(structured ? { data } : {}) };
+      const audit = await this.audit({ promptVersion: request.promptVersion, inputHash: request.inputHash, provider: 'bailian', model, purpose: request.purpose, latencyMs, success: true, promptTokens: usage?.prompt_tokens, completionTokens: usage?.completion_tokens, totalTokens: usage?.total_tokens });
+      return { aiCallId: audit && typeof audit === 'object' && 'id' in audit ? String(audit.id) : undefined, provider: 'bailian', model, content, latencyMs, usage, ...(structured ? { data } : {}) };
     } catch (error) {
       const code = error instanceof AppError ? error.code : error instanceof OpenAI.APIConnectionTimeoutError ? 'bailian_timeout' : error instanceof OpenAI.AuthenticationError ? 'bailian_auth_failed' : error instanceof OpenAI.APIError ? `bailian_http_${error.status ?? 'error'}` : 'bailian_connection_error';
-      await this.audit({ provider: 'bailian', model, purpose: request.purpose, latencyMs: Date.now() - started, success: false, errorCode: code, promptTokens: usage?.prompt_tokens, completionTokens: usage?.completion_tokens, totalTokens: usage?.total_tokens });
+      const audit = await this.audit({ promptVersion: request.promptVersion, inputHash: request.inputHash, provider: 'bailian', model, purpose: request.purpose, latencyMs: Date.now() - started, success: false, errorCode: code, promptTokens: usage?.prompt_tokens, completionTokens: usage?.completion_tokens, totalTokens: usage?.total_tokens });
       // Do not return upstream bodies, headers, full request prompts or SDK stack traces.
-      throw new AppError(code, 'Bailian request failed. Check server configuration and the sanitized call log.', 502);
+      const failure = new AppError(code, 'Bailian request failed. Check server configuration and the sanitized call log.', 502);
+      if (audit && typeof audit === 'object' && 'id' in audit) failure.aiCallId = String(audit.id);
+      throw failure;
     }
   }
   generateText(request: TextRequest) { return this.call(request); }

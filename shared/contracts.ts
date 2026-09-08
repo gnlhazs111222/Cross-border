@@ -10,7 +10,7 @@ export type Capabilities = {
   textModel: { activeProvider: 'mock'; liveAvailable: boolean; configured: boolean; liveEnabled: boolean; model: string; remainingCalls: number };
   recommendation: { activeProvider: 'mock'; liveAvailable: boolean; liveImplemented: false };
   evidence: { activeProvider: 'mock'; liveAvailable: boolean; liveImplemented: false };
-  listing: { activeProvider: 'template'; liveAvailable: boolean; liveImplemented: false };
+  listing: { activeProvider: 'template' | 'qwen'; liveAvailable: boolean; liveImplemented: true; liveModel: string };
   review: { activeProvider: 'rules'; liveAvailable: boolean; liveImplemented: false };
 };
 

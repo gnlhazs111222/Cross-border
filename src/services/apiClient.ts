@@ -54,6 +54,7 @@ export const apiClient = {
     create: (taskId: string, productId: string, platform: Platform, expectedVersion: number, expectedFactsRevision: number) => request<WorkflowSnapshot>(`${factPath(taskId, productId)}/listings`, 'POST', { platform, expectedVersion, expectedFactsRevision }),
     update: (id: string, edit: Pick<Listing, 'title' | 'bullets' | 'description'>, expectedVersion: number, expectedFactsRevision: number) => request<WorkflowSnapshot>(`/listings/${encodeURIComponent(id)}`, 'PATCH', { ...edit, expectedVersion, expectedFactsRevision }),
     regenerate: (id: string, expectedVersion: number, expectedFactsRevision: number) => request<WorkflowSnapshot>(`/listings/${encodeURIComponent(id)}/regenerate`, 'POST', { expectedVersion, expectedFactsRevision }),
+    injectDemoRisk: (id: string, expectedVersion: number, expectedFactsRevision: number) => request<WorkflowSnapshot>(`/listings/${encodeURIComponent(id)}/inject-demo-risk`, 'POST', { expectedVersion, expectedFactsRevision }),
     applySuggestedFix: (id: string, expectedVersion: number, expectedFactsRevision: number) => request<WorkflowSnapshot>(`/listings/${encodeURIComponent(id)}/apply-suggested-fix`, 'POST', { expectedVersion, expectedFactsRevision }),
   },
   reviews: {

@@ -1,6 +1,6 @@
 # PrismLaunch Full Demo 交付说明
 
-更新：2026-09-08，已完成 ListingDraft / ReviewResult / PublishResult 服务端迁移。当前全部业务状态以 SQLite 为权威来源。本轮详情与验收见 [LISTING_SERVER_MIGRATION.md](LISTING_SERVER_MIGRATION.md)。
+更新：2026-09-08，QwenListingProvider 已实现并完成 Amazon / Shopify 真实验证。全部业务状态以 SQLite 为权威来源；文案默认模板、Qwen 显式开启，失败回退。最新说明见 [QWEN_LISTING.md](QWEN_LISTING.md)。
 
 本轮从比赛版 `4a2920f` 升级后端基础。保留 `competition-demo-v1` 标签、`pyc` 分支、原 fixtures、原业务断言和离线比赛入口；新增工作在 `full-demo` 分支完成。没有 Docker、Redis、云数据库、OAuth、真实平台发布或 Agent 框架。
 
@@ -20,7 +20,7 @@ Offline competition mode
   不依赖 API 或登录，不发百炼请求
 ```
 
-本轮真实完成了 Backend、Auth、数据库、Product Catalog、基础 LaunchTask / Selection、FactCard / Fact / Evidence 持久化、Provider 接口和百炼连接验证。Recommendation / Evidence / Listing / Review 的 Qwen 业务 Prompt 仍未实施。
+本轮真实完成了 Backend、Auth、数据库、Product Catalog、基础 LaunchTask / Selection、FactCard / Fact / Evidence 持久化、Provider 接口和百炼连接验证。Qwen Listing Prompt 已实施；Recommendation / Evidence / Review 的 Qwen 业务能力仍未实施。
 
 ## 2. 目录
 
@@ -35,7 +35,10 @@ server/
   services/facts.ts      V1/V2、人工核对、事实快照、版本和下游失效
   services/listings.ts   文案版本、规则审核、发布授权、历史与 CSV
   providers/text.ts      TextModelProvider、Mock、Bailian、预算与调用记录
-  providers/domain.ts    四类业务 Provider 和明确禁用的 Qwen 预留适配器
+  providers/domain.ts    四类业务 Provider，推荐 / 证据 / 审核的 Qwen 仍预留
+  providers/qwenListing.ts Qwen 文案、缓存、回退
+  providers/listingValidation.ts 结构校验与事实授权
+  prompts/listing-v1.ts 版本化的两平台 Prompt
   scripts/               migrate、seed、显式 AI smoke
   tests/                 后端、权限、Provider 与预算保护测试
 prisma/
@@ -160,6 +163,7 @@ POST /api/listings/:id/regenerate
 POST /api/listings/:id/apply-suggested-fix
 POST /api/listings/:id/review
 POST /api/listings/:id/publish
+POST /api/listings/:id/inject-demo-risk
 GET  /api/publish/:id/amazon-csv
 GET  /api/capabilities
 POST /api/demo/reset
@@ -184,9 +188,9 @@ POST /api/ai/smoke-test
 - ListingProvider / TemplateListingProvider。
 - ReviewProvider / RuleReviewProvider。
 
-QwenRecommendationProvider、QwenEvidenceProvider、QwenListingProvider、QwenReviewProvider 是明确未启用的预留适配器；直接调用会返回未实现错误，不会假装完成真实业务 AI。
+QwenListingProvider 已实现，经 TextModelProvider 调用百炼，以结构化输出、事实授权校验和模板回退接入服务端版本链。QwenRecommendationProvider、QwenEvidenceProvider、QwenReviewProvider 仍是未实现的预留适配器。
 
-Capabilities 同时返回 `liveAvailable` 与 `liveImplemented: false`：前者只表示文本连接的配置和开关满足条件，不能解释成 Qwen 业务 Prompt 已完成。正常工作流仍使用 mock / template / rules。
+Capabilities 的 Listing 已返回 `liveImplemented: true` 和 liveModel；activeProvider 只有在选择 qwen 且配置满足时才为 qwen。其余三个业务 Qwen adapter 仍为 false。默认工作流为 mock / template / rules，Listing 可显式切换 Qwen。
 
 ## 8. 百炼配置和预算
 
@@ -201,6 +205,8 @@ BAILIAN_REQUEST_TIMEOUT_MS=30000
 AI_LIVE_ENABLED=false
 AI_MAX_LIVE_CALLS_PER_SESSION=20
 AI_ALLOW_PREMIUM=false
+LISTING_PROVIDER=template
+BAILIAN_LISTING_MAX_TOKENS=1800
 ```
 
 - Key 只由后端读取，不进入 React、public、前端环境变量、源码或 Git。
@@ -223,9 +229,9 @@ npm run ai:smoke
 AI_LIVE_ENABLED=true NODE_TLS_REJECT_UNAUTHORIZED=1 npm run ai:smoke -- --live
 ```
 
-CLI 通过本地 Fastify 登录和 smoke 路由进行验证，每次运行最多两次补全。本轮成功结果已写入忽略的 `.local/ai-smoke-success.json`；再次执行默认跳过，只有人为加 `--force` 才会重新尝试。本轮成功后没有再次发起真实请求。
+CLI 通过本地 Fastify 登录和 smoke 路由进行验证，每次运行最多两次补全。连接轮成功结果已写入忽略的 `.local/ai-smoke-success.json`；再次执行默认跳过，只有人为加 `--force` 才会重新尝试。连接 smoke 没有重复执行；后续文案调用使用独立的 listing-smoke 命令。
 
-## 9. 上一轮真实连接验证记录（本轮新增调用为 0）
+## 9. 历史连接验证与最新文案调用
 
 仅调用 qwen3.6-flash，共 **2 次**，没有使用 qwen3.7、qwen3.8 或其他供应商模型：
 
@@ -234,7 +240,7 @@ CLI 通过本地 Fastify 登录和 smoke 路由进行验证，每次运行最多
 | 文本连接，输入“你好” | 成功返回简短中文回复 | 515ms | 21 / 8 / 29 |
 | 短 JSON | 成功并验证 `{"ok":true,"service":"prismlaunch"}` | 228ms | 61 / 11 / 72 |
 
-总计 **101 tokens**。SQLite AiCall 中有且仅有这两条真实成功记录；该连接验证轮无真实调用失败或自动重试。这是两次 smoke 的观测，不是性能基准。
+该连接轮共 **101 tokens**。最新 Qwen Listing 轮又成功调用 Amazon / Shopify 各一次，新增 **2311 tokens**；SQLite 当前累计 **4 次 / 2412 tokens**。记录详情见 `artifacts/full-demo/QWEN_LISTING_VERIFICATION.md`。该连接验证轮无真实调用失败或自动重试。这是两次 smoke 的观测，不是性能基准。
 
 ## 10. 启动和验证
 
@@ -280,9 +286,9 @@ npm run preview:local
 
 ## 11. 下一轮最适合 AI 化的三个模块
 
-以下只是后续建议，本轮未实施：
+以下区分已完成能力和后续建议：
 
-1. **ListingProvider**：从已授权事实生成结构化文案，保留模板回退和本地规则。
+1. **ListingProvider 已完成第一版**：下一步用更多独立样例评估事实授权校验和文案质量，不据两次成功就宣称完成通用验证。
 2. **ReviewProvider**：补充语义风险检查，但保留确定性阻断与人工决定，先测误报 / 漏报。
 3. **RecommendationProvider**：结合可编辑任务与确认事实做排序解释，比较固定评分与模型排序的实际效果。
 

@@ -79,7 +79,7 @@ test('capabilities and live-disabled smoke never access the provider', async () 
   const capabilities = (await app.inject('/api/capabilities')).json().data;
   assert.equal(capabilities.database, true); assert.equal(capabilities.authentication, true);
   assert.equal(capabilities.textModel.liveAvailable, false); assert.equal(capabilities.listing.activeProvider, 'template');
-  assert.equal(capabilities.listing.liveImplemented, false);
+  assert.equal(capabilities.listing.liveImplemented, true);
   const response = await app.inject({ method: 'POST', url: '/api/ai/smoke-test', headers: { cookie }, payload: { message: 'Hello' } });
   assert.equal(response.json().error.code, 'live_ai_disabled'); assert.equal(transportCalls, 0);
   assert.equal(await db.aiCall.count(), 0);

@@ -14,6 +14,6 @@ const unavailable = () => new AppError('business_ai_not_implemented', 'Live busi
 // Explicit reserved adapters: never activated or silently substituted for working mock providers.
 export class QwenRecommendationProvider implements RecommendationProvider { async recommend(): Promise<Recommendation[]> { throw unavailable(); } }
 export class QwenEvidenceProvider implements EvidenceProvider { async enrich(): Promise<FactCard> { throw unavailable(); } }
-export class QwenListingProvider implements ListingProvider { async generate(): Promise<Listing> { throw unavailable(); } }
+export { QwenListingProvider } from './qwenListing';
 export class QwenReviewProvider implements ReviewProvider { async review(): Promise<Issue[]> { throw unavailable(); } }
 export const domainProviders = { recommendation: new MockRecommendationProvider(), evidence: new MockEvidenceProvider(), listing: new TemplateListingProvider(), review: new RuleReviewProvider() };
