@@ -1,0 +1,63 @@
+{
+  "caseId": "B-42-hold-bag-load",
+  "split": "holdout",
+  "category": "Backpacks",
+  "risk": "cross-category",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 774,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "Carries a 30kg load without damage.",
+        "reason": "The description claims a specific load capacity (30kg) and durability ('without damage'), but no evidence regarding weight limits or structural integrity is provided in the allowed facts.",
+        "factKeys": [],
+        "suggestedFix": "Remove the unverified load capacity claim.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "3fe08c75269b856aa5159a1f8d5da38950b4565a50bbc4775cbd5c7671982f6e",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr5agq0009qquoq8mqzvgk"
+    }
+  },
+  "audit": {
+    "id": "cmtsr5agq0009qquoq8mqzvgk",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 728,
+    "promptTokens": 1244,
+    "completionTokens": 132,
+    "totalTokens": 1376
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "b6e4884e0c587f93576596febd0e67424b4af52a1d6e1ef0f18a7760f09cc4eb"
+}

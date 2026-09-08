@@ -1,0 +1,66 @@
+{
+  "caseId": "B-08-implicit-leakproof",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "unsupported",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 1278,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "Toss it in your bag without worrying about spills.",
+        "reason": "The copy implies leakproof or spill-proof performance ('without worrying about spills'). The allowed facts only confirm a 'Screw-top lid', which does not objectively guarantee containment performance. Without explicit authorization for leak resistance, this is an unsupported claim.",
+        "factKeys": [
+          "lidType"
+        ],
+        "suggestedFix": "Remove the implication of spill-proofing. For example: 'Features a screw-top lid.' or 'Suitable for daily use.'",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v3",
+      "ruleVersion": "review-hard-v2",
+      "inputHash": "0e8fcc366bb5bcd3866efd943dd99ae0bd1fe75cc26f8cd678fe5c97ad093fc3",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtspsa510008qqkoskhn550v"
+    }
+  },
+  "audit": {
+    "id": "cmtspsa510008qqkoskhn550v",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 1068,
+    "promptTokens": 916,
+    "completionTokens": 181,
+    "totalTokens": 1097
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "23b9f665741c4d95c99e628090c79a4faaac11fc8d8d691332190d2d310ba914"
+}

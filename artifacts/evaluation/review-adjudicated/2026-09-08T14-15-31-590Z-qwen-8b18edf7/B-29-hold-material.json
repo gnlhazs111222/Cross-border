@@ -1,0 +1,81 @@
+{
+  "caseId": "B-29-hold-material",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "contradiction",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 1163,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "Lightweight aluminium body.",
+        "reason": "The bullet claims the body is made of aluminium, which contradicts the authorized fact that the material is Stainless steel.",
+        "factKeys": [
+          "material"
+        ],
+        "suggestedFix": "Replace 'aluminium' with 'stainless steel' to match the authorized material.",
+        "origin": "qwen"
+      },
+      {
+        "id": "B-2",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "Lightweight",
+        "reason": "No weight or comparison basis is supplied to support the claim that the bottle is lightweight.",
+        "factKeys": [],
+        "suggestedFix": "Provide verified weight or remove the adjective 'Lightweight'.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "ccc21da31d70bae10c22001c6daa90ad6a58308d5c2706cc82c8a1161d1a390a",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr53sk000aqqhkcpy6thzu"
+    }
+  },
+  "audit": {
+    "id": "cmtsr53sk000aqqhkcpy6thzu",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 1117,
+    "promptTokens": 1312,
+    "completionTokens": 240,
+    "totalTokens": 1552
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "b27966f2c3c359dd117d0f4b559954898a42f0965b92d1677569969988039267"
+}

@@ -1,0 +1,63 @@
+{
+  "caseId": "B-09-insulation",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "unsupported",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 799,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "Keeps water cold for 24 hours.",
+        "reason": "The copy claims a specific heat retention performance (24 hours) but no insulation or thermal evidence is provided in ALLOWED_FACTS. A screw-top lid does not establish this capability.",
+        "factKeys": [],
+        "suggestedFix": "Remove the unverified heat retention promise.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "11a82353e5ee2c88097c8bcffccd8a595c61f611d5f92bfc1e7300fbf2b37db4",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr4wkj0006qqto5m178b0j"
+    }
+  },
+  "audit": {
+    "id": "cmtsr4wkj0006qqto5m178b0j",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 762,
+    "promptTokens": 1317,
+    "completionTokens": 134,
+    "totalTokens": 1451
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "c78d2366c70a95edf5e073585a8429286392d35351ecb1e8badf0ba9fdcef9e2"
+}

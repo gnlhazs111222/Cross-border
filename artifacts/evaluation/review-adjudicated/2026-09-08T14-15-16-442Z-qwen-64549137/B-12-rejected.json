@@ -1,0 +1,65 @@
+{
+  "caseId": "B-12-rejected",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "unauthorized",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 834,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unauthorized fact",
+        "category": "unauthorized_fact",
+        "location": {
+          "field": "description"
+        },
+        "text": "Certified food-safe.",
+        "reason": "The description asserts a food safety certification, but the 'foodSafe' field is in UNAUTHORIZED_FIELDS with status Rejected. This claim is not permitted.",
+        "factKeys": [
+          "foodSafe"
+        ],
+        "suggestedFix": "Remove the phrase 'Certified food-safe.' as this attribute is rejected.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "600a6b09fb03a385532f1b0efece4eb2e2c00a2ec495b0ea253495b2ebd6425a",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr4so5000aqqo43xfzhvwc"
+    }
+  },
+  "audit": {
+    "id": "cmtsr4so5000aqqo43xfzhvwc",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 790,
+    "promptTokens": 1321,
+    "completionTokens": 140,
+    "totalTokens": 1461
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "d0a71c9bb4f234aae6e66e465bfe2a21d7aadeffe6a881f4c8922226b0dfe306"
+}

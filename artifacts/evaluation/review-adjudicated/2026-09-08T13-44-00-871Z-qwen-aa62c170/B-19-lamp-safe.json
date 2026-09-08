@@ -1,0 +1,48 @@
+{
+  "caseId": "B-19-lamp-safe",
+  "split": "dev",
+  "category": "Lamps",
+  "risk": "cross-category",
+  "expected": "passed",
+  "actual": "passed",
+  "latencyMs": 286,
+  "outcome": {
+    "status": "passed",
+    "issues": [],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v5",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "a36c3fed2a819ba05613be8ef90ce62ade473d50e029a3999a98e853ce295461",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsq0mqm000bqqwgkdl9xom8"
+    }
+  },
+  "audit": {
+    "id": "cmtsq0mqm000bqqwgkdl9xom8",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 251,
+    "promptTokens": 1356,
+    "completionTokens": 8,
+    "totalTokens": 1364
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "d9494260b119993905be4cda157605830440d11a2e654e4b7b55a508dbb1914a"
+}

@@ -22,8 +22,54 @@ class ResponseModel extends MockTextModelProvider {
 }
 const options = { model: 'qwen-test', liveEnabled: true, configured: true };
 
+test('review normalizes only irrelevant null location fields, retaining mandatory location checks', async () => {
+  const i = input(); i.listing.title = '750ml bottle'; i.listing.bullets = ['750ml capacity']; i.listing.attributes.Capacity = '750ml';
+  for (const [location, expected] of [
+    [{ field: 'title', key: null, index: null, occurrence: null }, 'blocked'],
+    [{ field: 'bullets', index: 0, key: null }, 'blocked'],
+    [{ field: 'attributes', key: 'Capacity', index: null }, 'blocked'],
+    [{ field: 'bullets', index: null }, 'failed'],
+    [{ field: 'attributes', key: null }, 'failed'],
+    [{ field: 'title', key: 'Capacity' }, 'failed'],
+    [{ field: 'title', extra: null }, 'failed'],
+  ] as const) {
+    const model = new ResponseModel();
+    model.output = { status: 'blocked', issues: [{ category: 'spec_conflict', location, text: '750ml', reason: 'Capacity is 500ml.', factKeys: ['capacity'], suggestedFix: 'Use 500ml.' }] };
+    const result = await new QwenReviewProvider(model, options).review(i);
+    assert.equal(result.status, expected, JSON.stringify(location));
+    if (result.status === 'blocked') assert.ok(Object.values(result.issues[0].location!).every(v => v !== null));
+  }
+});
+
+test('review rejects invented numeric evidence while retaining supplied conflict values', async () => {
+  const i = input(); i.facts.find(f => f.key === 'capacity')!.value = '750ml';
+  i.listing.title = '900ml bottle';
+  const m = new ResponseModel();
+  const issue = { category: 'spec_conflict', location: { field: 'title' }, text: '900ml', reason: 'The copy says 900ml but the fact is 750ml.', factKeys: ['capacity'], suggestedFix: 'Use 500ml.' };
+  m.output = { status: 'blocked', issues: [issue] };
+  assert.equal((await new QwenReviewProvider(m, options).review(i)).status, 'failed');
+  issue.suggestedFix = 'Use 750ml.';
+  assert.equal((await new QwenReviewProvider(m, options).review(i)).status, 'blocked');
+  issue.reason = 'The confirmed capacity is 600ml.';
+  assert.equal((await new QwenReviewProvider(m, options).review(i)).status, 'failed');
+});
+
+test('review supplies exact copy locations and requires evidence for conflict and authorization issues', async () => {
+  const i = input(); i.listing.attributes.Capacity = '750ml';
+  const p = reviewModelInput(i);
+  assert.ok(p.COPY_FIELDS.some(f => f.location.field === 'attributes' && f.location.key === 'Capacity' && f.text === '750ml'));
+  for (const category of ['spec_conflict', 'unauthorized_fact']) {
+    const m = new ResponseModel();
+    m.output = { status: 'blocked', issues: [{ category, location: { field: 'attributes', key: 'Capacity' }, text: '750ml', reason: 'Contradicts capacity', factKeys: [], suggestedFix: 'Use 500ml.' }] };
+    assert.equal((await new QwenReviewProvider(m, options).review(i)).status, 'failed');
+    (m.output as { issues: { factKeys: string[] }[] }).issues[0].factKeys = ['capacity'];
+    const result = await new QwenReviewProvider(m, options).review(i);
+    assert.equal(result.status, category === 'spec_conflict' ? 'blocked' : 'failed');
+  }
+});
+
 test('review accepts authorized consumer performance but never private keys or nonconfirmed values', () => {
-  for (const key of ['coldRetention', 'dishwasherSafe', 'foodSafe']) {
+  for (const key of ['coldRetention', 'dishwasherSafe', 'foodSafe', 'power', 'supply']) {
     const i = input();
     const f = { key, label: key, value: 'AUTHORIZED_PERFORMANCE', status: 'Confirmed' as const, allowed: true, source: 'private.pdf', anchor: '' };
     i.facts.push(f);

@@ -1,0 +1,65 @@
+{
+  "caseId": "BOUNDARY-12-pending-positive",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "risk-control",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 878,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unauthorized fact",
+        "category": "unauthorized_fact",
+        "location": {
+          "field": "description"
+        },
+        "text": "certified food-safe",
+        "reason": "The copy asserts a food safety certification, but the 'foodSafe' field is in UNAUTHORIZED_FIELDS with status 'Requires Confirmation'. This claim cannot be made without authorized evidence.",
+        "factKeys": [
+          "foodSafe"
+        ],
+        "suggestedFix": "Remove the phrase 'certified food-safe' as this attribute is not authorized for disclosure.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v7",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "e931dc8f24b42add3304c247c902b01141828a4d2ce1d9bcbdd093cc0f7f1897",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr35d4000bqqy05ffx8k5p"
+    }
+  },
+  "audit": {
+    "id": "cmtsr35d4000bqqy05ffx8k5p",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 831,
+    "promptTokens": 1144,
+    "completionTokens": 147,
+    "totalTokens": 1291
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "253594951ae4aa60dc6a286de68e7ed2c8cea37141f31e5f79dba9784e6a6eb4"
+}

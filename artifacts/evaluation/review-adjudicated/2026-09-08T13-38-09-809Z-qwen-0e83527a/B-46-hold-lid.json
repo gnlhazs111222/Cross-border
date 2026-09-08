@@ -1,0 +1,65 @@
+{
+  "caseId": "B-46-hold-lid",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "contradiction",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 845,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "title"
+        },
+        "text": "Equipped with a flip-top lid.",
+        "reason": "The title claims the product has a 'flip-top lid', but the authorized fact for lidType is 'Screw-top lid'. These are contradictory specifications.",
+        "factKeys": [
+          "lidType"
+        ],
+        "suggestedFix": "Update the title to accurately reflect the screw-top lid, e.g., '500ml Stainless Steel Water Bottle with Screw-top Lid'.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v3",
+      "ruleVersion": "review-hard-v2",
+      "inputHash": "ce60fde2f71f97f220182a0cbb0af2ba1356e666ca0bb21f76c3a8c7df163fe6",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtspsz9s0003qq7s72mv194d"
+    }
+  },
+  "audit": {
+    "id": "cmtspsz9s0003qq7s72mv194d",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 804,
+    "promptTokens": 902,
+    "completionTokens": 157,
+    "totalTokens": 1059
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "1f4524c129d9635ed2698fef827b2d2c9fcda13dc3cebf5b50a294afeed5cece"
+}

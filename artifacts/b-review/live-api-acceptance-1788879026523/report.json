@@ -1,0 +1,97 @@
+{
+  "scope": "Real HTTP API through Vite proxy; browser unavailable, not visual UI acceptance",
+  "task": {
+    "id": "B-ACCEPT-1788879026672",
+    "recordId": "cmtssduyf0003qqy054f36fao",
+    "revision": 1,
+    "platform": "shopify",
+    "market": "United States",
+    "category": "Home & Kitchen",
+    "requirements": [
+      "Black",
+      "Minimal commuter style",
+      "Around 16 oz",
+      "No straw",
+      "Prefer complete packaging and accessory information"
+    ],
+    "minProfit": 5,
+    "selectedSku": null,
+    "selectionPurpose": null
+  },
+  "events": [
+    {
+      "step": "safe-reviewed",
+      "listingId": "cmtssdwzg0017qqy02yu77elb",
+      "revision": 2,
+      "factsRevision": 2,
+      "publishAllowed": true,
+      "review": {
+        "recordId": "cmtssdx100019qqy03nqztc6g",
+        "status": "passed",
+        "revision": 2,
+        "issues": [],
+        "highRiskCount": 0,
+        "reviewMode": "rules_qwen",
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v8",
+          "ruleVersion": "review-hard-v5",
+          "inputHash": "ccae20bded1da654adcf6afcf16341b95b50b6249b74e57f275b14fc2e51d8ee",
+          "listingRevision": 2,
+          "factsRevision": 2,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmtssdxbj001aqqy07j8peau0"
+        }
+      }
+    },
+    {
+      "step": "edited-approval-invalidated",
+      "listingId": "cmtssdxep001cqqy0hyy9gb4x",
+      "revision": 3,
+      "factsRevision": 2,
+      "publishAllowed": false,
+      "review": null
+    },
+    {
+      "step": "publish-denied-after-edit",
+      "error": {
+        "code": "publish_blocked",
+        "message": "Publish blocked: the current revision must pass review."
+      }
+    },
+    {
+      "step": "wrong-capacity-reviewed",
+      "listingId": "cmtssdxep001cqqy0hyy9gb4x",
+      "revision": 3,
+      "factsRevision": 2,
+      "publishAllowed": false,
+      "review": {
+        "recordId": "cmtssdxgq001eqqy0js8zi795",
+        "status": "failed",
+        "revision": 3,
+        "issues": [],
+        "highRiskCount": 0,
+        "reviewMode": "rules_qwen",
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v8",
+          "ruleVersion": "review-hard-v5",
+          "inputHash": "4963ea23c75833a665bff8190d7f28a5084715d93f66f96f0e6f3843d25e919f",
+          "listingRevision": 3,
+          "factsRevision": 2,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "errorCode": "invalid_ai_json",
+          "aiCallId": "cmtssdy82001fqqy0xltjsnjm"
+        }
+      }
+    },
+    {
+      "step": "error",
+      "message": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 'failed'\n- 'blocked'\n"
+    }
+  ]
+}

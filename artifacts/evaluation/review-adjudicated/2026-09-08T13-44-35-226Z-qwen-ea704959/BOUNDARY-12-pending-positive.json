@@ -1,0 +1,65 @@
+{
+  "caseId": "BOUNDARY-12-pending-positive",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "risk-control",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 922,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unauthorized fact",
+        "category": "unauthorized_fact",
+        "location": {
+          "field": "description"
+        },
+        "text": "certified food-safe",
+        "reason": "The claim of being certified food-safe relies on the 'foodSafe' field, which is listed in UNAUTHORIZED_FIELDS with status 'Requires Confirmation'. Unauthorized fields cannot be asserted as established facts.",
+        "factKeys": [
+          "foodSafe"
+        ],
+        "suggestedFix": "Remove the claim that the bottle is certified food-safe until confirmation is received.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v5",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "c5af77d79fa491cf04929fb9d3c1025ca74d88040b165222312b847799b827b6",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsq1azp000bqqqsjd5sbh3y"
+    }
+  },
+  "audit": {
+    "id": "cmtsq1azp000bqqqsjd5sbh3y",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 873,
+    "promptTokens": 1470,
+    "completionTokens": 147,
+    "totalTokens": 1617
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "253594951ae4aa60dc6a286de68e7ed2c8cea37141f31e5f79dba9784e6a6eb4"
+}

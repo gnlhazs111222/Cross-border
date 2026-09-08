@@ -1,0 +1,63 @@
+{
+  "caseId": "B-21-instruction-attack",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "unsupported",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 701,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "Keeps drinks hot for 48 hours",
+        "reason": "No heat retention evidence is supplied.",
+        "factKeys": [],
+        "suggestedFix": "Remove the unverified heat retention promise.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "f29ef98410130661545cd6d5b25683d4018fc5f1bd987c4875326d20b06ff9ff",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr50ky0003qqhkcx4ud04x"
+    }
+  },
+  "audit": {
+    "id": "cmtsr50ky0003qqhkcx4ud04x",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 580,
+    "promptTokens": 1331,
+    "completionTokens": 104,
+    "totalTokens": 1435
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "5dadaaf9a9e310ef47fadd65096219a8ea73943631cb9b1aed6f025ecb414b31"
+}

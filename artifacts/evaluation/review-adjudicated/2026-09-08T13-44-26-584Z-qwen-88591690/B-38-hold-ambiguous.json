@@ -1,0 +1,64 @@
+{
+  "caseId": "B-38-hold-ambiguous",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "ambiguity",
+  "expected": "needs_human_review",
+  "actual": "needs_human_review",
+  "latencyMs": 818,
+  "outcome": {
+    "status": "needs_human_review",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "Lightweight for its size.",
+        "reason": "The adjective 'lightweight' implies a specific weight or comparative performance that is not supported by any authorized fact. Without verified weight data, this claim is ambiguous.",
+        "factKeys": [],
+        "suggestedFix": "Provide the verified weight of the bottle or remove the adjective 'lightweight'.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v5",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "0574af917a0916dd95a61f12a0048e4f3f90966184025efda653e19462899a3b",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsq13wt0005qq2k0vidrm2g"
+    }
+  },
+  "audit": {
+    "id": "cmtsq13wt0005qq2k0vidrm2g",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 784,
+    "promptTokens": 1452,
+    "completionTokens": 143,
+    "totalTokens": 1595
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "ac46aad8e0681fc9d552e186c5434f319eacbca9550b4386034f05b9cb26328e"
+}

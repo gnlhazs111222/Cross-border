@@ -1,0 +1,65 @@
+{
+  "caseId": "B-22-straw-conflict",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "contradiction",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 876,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "title"
+        },
+        "text": "Includes a drinking straw.",
+        "reason": "The title claims the product includes a drinking straw, but ALLOWED_FACTS explicitly states 'straw' is 'No straw'. This is a direct contradiction of confirmed facts.",
+        "factKeys": [
+          "straw"
+        ],
+        "suggestedFix": "Remove the claim about the drinking straw or update the fact if a straw is actually included.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v3",
+      "ruleVersion": "review-hard-v2",
+      "inputHash": "53c8a558883db8a3ce19fcc1a92c411a2000389f3c9ad63a7a9b75e9a5e8c564",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtspsmlb0004qqwwm379s9ov"
+    }
+  },
+  "audit": {
+    "id": "cmtspsmlb0004qqwwm379s9ov",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 825,
+    "promptTokens": 899,
+    "completionTokens": 147,
+    "totalTokens": 1046
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "20ece3d9ff74352c5be4c9ceb6583cf30dc7747b8b11ace0c308ce943e0476c3"
+}

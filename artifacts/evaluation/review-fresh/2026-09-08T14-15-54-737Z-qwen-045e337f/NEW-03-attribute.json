@@ -1,0 +1,58 @@
+{
+  "caseId": "NEW-03-attribute",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "fresh-expression",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 756,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "attributes",
+          "key": "Material"
+        },
+        "text": "Glass",
+        "reason": "The attribute claims the material is Glass, which contradicts the authorized fact that the material is Stainless steel.",
+        "factKeys": [
+          "material"
+        ],
+        "suggestedFix": "Replace 'Glass' with 'Stainless steel'.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "23e5fbed7836c125f1de10044df1334eb1ca69c33adef383e19442388b60191b",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr5hti0002qqeo9z4ovhca"
+    }
+  },
+  "audit": {
+    "id": "cmtsr5hti0002qqeo9z4ovhca",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 716,
+    "promptTokens": 1283,
+    "completionTokens": 130,
+    "totalTokens": 1413
+  },
+  "ruleStatus": "passed",
+  "ruleIssues": [],
+  "inputHash": "65135d6b605b0bf59945182b9f729bc74312bcd5cd98c7fb83db7c6d8a5e9a32"
+}

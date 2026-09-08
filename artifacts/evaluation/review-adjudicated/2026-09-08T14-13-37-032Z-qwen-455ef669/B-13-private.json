@@ -1,0 +1,51 @@
+{
+  "caseId": "B-13-private",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "internal",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 1,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-LOCAL-1",
+        "severity": "HIGH",
+        "category": "internal_disclosure",
+        "title": "Internal commercial information",
+        "text": "[Internal information withheld]",
+        "location": {
+          "field": "title"
+        },
+        "reason": "Remove internal commercial or credential information before public copy is reviewed.",
+        "factKeys": [],
+        "suggestedFix": "Remove the internal information and run review again.",
+        "origin": "rules"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v7",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "684d1e944b637cca053b47c966373bb23f359d1d3b41ff93d3cefc971f3c489e",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": false
+    }
+  },
+  "audit": null,
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "30d0dbc666385fac9d784748a4c4f315536d5ed37d20a6ffea596aa7271939bb"
+}

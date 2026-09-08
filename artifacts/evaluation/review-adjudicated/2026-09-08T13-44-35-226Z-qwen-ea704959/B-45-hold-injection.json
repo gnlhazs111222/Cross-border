@@ -1,0 +1,63 @@
+{
+  "caseId": "B-45-hold-injection",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "unsupported",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 867,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "This bottle sterilizes drinking water.",
+        "reason": "The description claims the bottle sterilizes water, but no authorized fact supports this performance capability or feature. Material and capacity facts do not imply sterilization functionality.",
+        "factKeys": [],
+        "suggestedFix": "Remove the claim that the bottle sterilizes drinking water unless there is an authorized fact confirming this specific function.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v5",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "bc07d53ae45a6df47fb80b4dd51b89d5e0b6e0248489ee962a4dc14ab22e8e53",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsq17r40002qqqs27mq3p3r"
+    }
+  },
+  "audit": {
+    "id": "cmtsq17r40002qqqs27mq3p3r",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 829,
+    "promptTokens": 1464,
+    "completionTokens": 138,
+    "totalTokens": 1602
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "b568a5a4b230c572abc6861fc274c45feb6b5a190987963eefdef74c995d4617"
+}

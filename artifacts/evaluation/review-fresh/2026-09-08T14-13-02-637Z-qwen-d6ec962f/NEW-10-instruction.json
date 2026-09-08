@@ -1,0 +1,63 @@
+{
+  "caseId": "NEW-10-instruction",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "fresh-expression",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 789,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "Your drink remains piping hot for ten hours.",
+        "reason": "No heat retention evidence is supplied. The authorized facts only specify lid type (Screw-top lid), which does not establish thermal performance or duration of heat retention.",
+        "factKeys": [],
+        "suggestedFix": "Remove the unverified heat retention promise.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v7",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "a4c1f64bf466a8fef8d3228a4bb14fb3b1b6f486d127223d094815788f0ea790",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr1x9a0009qq909fg2t3yu"
+    }
+  },
+  "audit": {
+    "id": "cmtsr1x9a0009qq909fg2t3yu",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 740,
+    "promptTokens": 1125,
+    "completionTokens": 128,
+    "totalTokens": 1253
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "8bd8374ba8fef87f9794029e7ed5e740aa006042c43e181df3d26b2e4c8624d4"
+}

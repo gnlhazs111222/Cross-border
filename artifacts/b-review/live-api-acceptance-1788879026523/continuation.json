@@ -1,0 +1,125 @@
+{
+  "task": {
+    "id": "B-ACCEPT-1788879026672",
+    "recordId": "cmtssduyf0003qqy054f36fao",
+    "revision": 1,
+    "platform": "shopify",
+    "market": "United States",
+    "category": "Home & Kitchen",
+    "requirements": [
+      "Black",
+      "Minimal commuter style",
+      "Around 16 oz",
+      "No straw",
+      "Prefer complete packaging and accessory information"
+    ],
+    "minProfit": 5,
+    "selectedSku": null,
+    "selectionPurpose": null
+  },
+  "events": [
+    {
+      "step": "failed-review-publish-denied",
+      "error": {
+        "code": "publish_blocked",
+        "message": "Publish blocked: the current revision must pass review."
+      }
+    },
+    {
+      "step": "explicit-retry-wrong-capacity",
+      "listingId": "cmtssdxep001cqqy0hyy9gb4x",
+      "revision": 3,
+      "publishAllowed": false,
+      "review": {
+        "recordId": "cmtsserzt001jqqy0ptjgn85j",
+        "status": "failed",
+        "revision": 3,
+        "issues": [],
+        "highRiskCount": 0,
+        "reviewMode": "rules_qwen",
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v8",
+          "ruleVersion": "review-hard-v5",
+          "inputHash": "4963ea23c75833a665bff8190d7f28a5084715d93f66f96f0e6f3843d25e919f",
+          "listingRevision": 3,
+          "factsRevision": 2,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "errorCode": "invalid_ai_json",
+          "aiCallId": "cmtssesuf001kqqy0turjkdvf"
+        }
+      }
+    },
+    {
+      "step": "retry-result-publish-denied",
+      "error": {
+        "code": "publish_blocked",
+        "message": "Publish blocked: the current revision must pass review."
+      }
+    },
+    {
+      "step": "corrected-before-review",
+      "listingId": "cmtssesyk001mqqy0w4d17qao",
+      "revision": 4,
+      "publishAllowed": false,
+      "review": null
+    },
+    {
+      "step": "corrected-reviewed",
+      "listingId": "cmtssesyk001mqqy0w4d17qao",
+      "revision": 4,
+      "publishAllowed": true,
+      "review": {
+        "recordId": "cmtsset01001oqqy0oq50m2z8",
+        "status": "passed",
+        "revision": 4,
+        "issues": [],
+        "highRiskCount": 0,
+        "reviewMode": "rules_qwen",
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v8",
+          "ruleVersion": "review-hard-v5",
+          "inputHash": "fef99fa0fdbe600068442a5cab4f00d97fda17ee49a776fb981349e1e3e34ac3",
+          "listingRevision": 4,
+          "factsRevision": 2,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmtssetbe001pqqy0qc4lllcd"
+        }
+      }
+    },
+    {
+      "step": "reloaded-from-server",
+      "listingId": "cmtssesyk001mqqy0w4d17qao",
+      "revision": 4,
+      "publishAllowed": true,
+      "review": {
+        "recordId": "cmtsset01001oqqy0oq50m2z8",
+        "status": "passed",
+        "revision": 4,
+        "issues": [],
+        "highRiskCount": 0,
+        "reviewMode": "rules_qwen",
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v8",
+          "ruleVersion": "review-hard-v5",
+          "inputHash": "fef99fa0fdbe600068442a5cab4f00d97fda17ee49a776fb981349e1e3e34ac3",
+          "listingRevision": 4,
+          "factsRevision": 2,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmtssetbe001pqqy0qc4lllcd"
+        }
+      }
+    },
+    {
+      "step": "continuation-complete"
+    }
+  ]
+}

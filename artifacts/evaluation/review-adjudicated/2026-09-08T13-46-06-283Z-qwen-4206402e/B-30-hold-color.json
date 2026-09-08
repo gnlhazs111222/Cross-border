@@ -1,0 +1,65 @@
+{
+  "caseId": "B-30-hold-color",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "contradiction",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 776,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "description"
+        },
+        "text": "White finish.",
+        "reason": "The description claims the bottle has a white finish, but the authorized color is Black.",
+        "factKeys": [
+          "color"
+        ],
+        "suggestedFix": "Change to 'Black finish.' or remove the color claim if not applicable.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v6",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "3535016c32bdd00060dce95ba0a61e6cc85b7936d0c83b653cf5ea8d5aa9cae3",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsq3ab8000bqqw4rm10qpcn"
+    }
+  },
+  "audit": {
+    "id": "cmtsq3ab8000bqqw4rm10qpcn",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 702,
+    "promptTokens": 1071,
+    "completionTokens": 123,
+    "totalTokens": 1194
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "808d7bb7480e483f63aeda3285d11c7956bfde5526357cc5a3b0ca04445f6f09"
+}

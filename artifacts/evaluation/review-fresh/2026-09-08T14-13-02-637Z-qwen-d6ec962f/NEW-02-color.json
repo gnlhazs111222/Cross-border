@@ -1,0 +1,65 @@
+{
+  "caseId": "NEW-02-color",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "fresh-expression",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 878,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "description"
+        },
+        "text": "yellow exterior",
+        "reason": "The description claims the bottle has a yellow exterior, which contradicts the authorized color fact of Blue.",
+        "factKeys": [
+          "color"
+        ],
+        "suggestedFix": "Change 'yellow' to 'blue'.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v7",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "74f275990c8e932855c8a2e72d2d82ed0705db74e9109c2cc7b2179dae9bc261",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr1sk90001qq90ooqezmj2"
+    }
+  },
+  "audit": {
+    "id": "cmtsr1sk90001qq90ooqezmj2",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 792,
+    "promptTokens": 1101,
+    "completionTokens": 120,
+    "totalTokens": 1221
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "c9bb9d448f9a1031a5725745099d3a0e0e653e04b4df724e25928f2eda08dc06"
+}

@@ -1,0 +1,64 @@
+{
+  "caseId": "B-44-hold-lamp-cert",
+  "split": "holdout",
+  "category": "Lamps",
+  "risk": "cross-category",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 832,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "UL-certified for safe use.",
+        "reason": "The claim of UL certification is an objective performance/safety promise with no evidence in ALLOWED_FACTS. The UNAUTHORIZED_FIELDS list is empty, so this is not an unauthorized fact, but rather an unsupported claim.",
+        "factKeys": [],
+        "suggestedFix": "Remove the unverified UL certification claim.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v7",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "11872c26d28c5c37e3d74753534a72998aa8c498d47ae948703d9a23169cd427",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr31bs0001qqy03ptbzk34"
+    }
+  },
+  "audit": {
+    "id": "cmtsr31bs0001qqy03ptbzk34",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 784,
+    "promptTokens": 1055,
+    "completionTokens": 145,
+    "totalTokens": 1200
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "e3a6c0502539d8b239b4266ecd80f89fea870a2b8994b074cd007f3bdeb0c9ef"
+}

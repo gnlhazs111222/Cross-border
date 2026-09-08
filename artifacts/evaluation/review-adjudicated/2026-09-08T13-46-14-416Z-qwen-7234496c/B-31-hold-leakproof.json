@@ -1,0 +1,58 @@
+{
+  "caseId": "B-31-hold-leakproof",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "unsupported",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 0,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-LOCAL-1",
+        "severity": "HIGH",
+        "category": "unsupported_claim",
+        "title": "Unsupported performance claim",
+        "text": "100% leakproof",
+        "location": {
+          "field": "title"
+        },
+        "reason": "The demo does not authorize the absolute leakproof claim.",
+        "factKeys": [],
+        "suggestedFix": "Remove the unsupported performance promise.",
+        "origin": "rules"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v6",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "b21e9bf7d23d25e97b64bf3f1623e1cfe3a41cac1c79e8dea6d6f03c9fddaa83",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": false
+    }
+  },
+  "audit": null,
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R001",
+      "severity": "HIGH",
+      "title": "Unsupported performance claim",
+      "text": "100% leakproof",
+      "reason": "No verified evidence supports an absolute leakproof claim."
+    },
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "3dbae7252eee6e54e09834ad1c102038f0c56ca0a4cd988af2b1a7e4bcc9795c"
+}

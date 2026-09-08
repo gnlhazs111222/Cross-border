@@ -1,0 +1,48 @@
+{
+  "caseId": "BOUNDARY-08-cold-authorized",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "authorized-performance",
+  "expected": "passed",
+  "actual": "passed",
+  "latencyMs": 331,
+  "outcome": {
+    "status": "passed",
+    "issues": [],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "2907cb5803a24157daecdf407dc4d208ef1c1976807b2b02b18576d23b224818",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr4psw0005qqo4h7soev1l"
+    }
+  },
+  "audit": {
+    "id": "cmtsr4psw0005qqo4h7soev1l",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 287,
+    "promptTokens": 1349,
+    "completionTokens": 17,
+    "totalTokens": 1366
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "798c252317851a0be7a72e4df8aa301c8d6dcee8e0197cf0db44eeaf2a9d95ea"
+}

@@ -1,0 +1,63 @@
+{
+  "caseId": "B-42-hold-bag-load",
+  "split": "holdout",
+  "category": "Backpacks",
+  "risk": "cross-category",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 790,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "Carries a 30kg load without damage.",
+        "reason": "The description asserts a specific load capacity (30kg) and durability performance ('without damage') that is not supported by any allowed facts. The allowed facts only confirm material (Nylon) and color (Blue).",
+        "factKeys": [],
+        "suggestedFix": "Remove the specific load capacity claim or verify it against authorized product specifications.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v3",
+      "ruleVersion": "review-hard-v2",
+      "inputHash": "792f785d2335f1ab815cd7918c9d23fc451836ca21bc285373f28187b2143e30",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtspswfl0009qqgcr5dumuwm"
+    }
+  },
+  "audit": {
+    "id": "cmtspswfl0009qqgcr5dumuwm",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 749,
+    "promptTokens": 847,
+    "completionTokens": 148,
+    "totalTokens": 995
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "b6e4884e0c587f93576596febd0e67424b4af52a1d6e1ef0f18a7760f09cc4eb"
+}

@@ -1,0 +1,58 @@
+{
+  "caseId": "B-40-hold-attribute",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "contradiction",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 790,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "attributes",
+          "key": "Capacity"
+        },
+        "text": "1000ml",
+        "reason": "The attribute value '1000ml' contradicts the authorized fact 'capacity' which is '500ml'.",
+        "factKeys": [
+          "capacity"
+        ],
+        "suggestedFix": "Replace with 500ml.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "d0c5eb7a51d621b59422c62c7a19e16049de5adbc60020bfb720c583fd289949",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr59me0007qquo4m2v9pt4"
+    }
+  },
+  "audit": {
+    "id": "cmtsr59me0007qquo4m2v9pt4",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 754,
+    "promptTokens": 1313,
+    "completionTokens": 137,
+    "totalTokens": 1450
+  },
+  "ruleStatus": "passed",
+  "ruleIssues": [],
+  "inputHash": "bcf315d944dbc9dcba0011d7e4ff596e029ed3b11d26a142acfc0de3ad454ebf"
+}

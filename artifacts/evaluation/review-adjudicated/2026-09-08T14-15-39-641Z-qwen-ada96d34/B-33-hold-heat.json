@@ -1,0 +1,63 @@
+{
+  "caseId": "B-33-hold-heat",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "unsupported",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 787,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "Your coffee stays hot from breakfast until bedtime.",
+        "reason": "The copy claims specific heat retention performance ('stays hot from breakfast until bedtime') but no insulation or thermal retention data is provided in ALLOWED_FACTS. A screw-top lid does not prove this capability.",
+        "factKeys": [],
+        "suggestedFix": "Remove the unverified heat retention promise.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "d2c4d71cbfbe0c339513d3b9dc215fe3712b7edf12f85e5bc774e76a7f9a2068",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr56890001qquopot8wcpd"
+    }
+  },
+  "audit": {
+    "id": "cmtsr56890001qquopot8wcpd",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 737,
+    "promptTokens": 1315,
+    "completionTokens": 137,
+    "totalTokens": 1452
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "ec398e7f52102a229ab25b60007f2471f63a6066d277a624e2bd806fd7252839"
+}

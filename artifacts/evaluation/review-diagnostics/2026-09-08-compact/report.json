@@ -1,0 +1,33 @@
+{
+  "prompt": "review-qwen-v8",
+  "rule": "review-hard-v5",
+  "calls": 7,
+  "tokens": 10009,
+  "compactAttempts": 4,
+  "compactExpectedResults": 4,
+  "controls": [
+    {
+      "id": "B-02-paraphrase-holds",
+      "expected": "passed",
+      "actual": "passed"
+    },
+    {
+      "id": "B-04-capacity-wrong",
+      "expected": "blocked",
+      "actual": "blocked"
+    },
+    {
+      "id": "B-16-attribute-conflict",
+      "expected": "blocked",
+      "actual": "blocked"
+    }
+  ],
+  "originalFailureStillRecorded": true,
+  "implementationChanged": false,
+  "rootCause": "Not determined: previous reference failure was not reproduced; current raw responses contain no numeric suggestions or invalid references.",
+  "sourceHashes": {
+    "server/providers/qwenReview.ts": "5703c0b40fa405c9dc64bd73481af2bc5267561a050f1eb72e64311c609bfc9f",
+    "server/prompts/review-v1.ts": "0aac633c2b5b7baf238cd44eb37d7e0eef2365596bd1fb942fddca064a8abcf5",
+    "shared/review.ts": "544d560c695ad39f25b71321182ff803206ce15feefae66f899a4f0520ae8038"
+  }
+}

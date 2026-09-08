@@ -1,0 +1,64 @@
+{
+  "caseId": "B-14-ambiguous-size",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "ambiguity",
+  "expected": "needs_human_review",
+  "actual": "needs_human_review",
+  "latencyMs": 833,
+  "outcome": {
+    "status": "needs_human_review",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "Compact bottle.",
+        "reason": "The term 'compact' implies a specific size or portability advantage, but no dimensions, weight, or comparative size data are provided in the allowed facts to substantiate this claim.",
+        "factKeys": [],
+        "suggestedFix": "Remove the adjective 'Compact' or provide verified dimensions/weight.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v7",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "4595714dc3c72ae8a7435e38feb8bad8d6d3566b270e612f64b10fa0181c0930",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr2ddj0001qqdo4xm3ik7h"
+    }
+  },
+  "audit": {
+    "id": "cmtsr2ddj0001qqdo4xm3ik7h",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 791,
+    "promptTokens": 1120,
+    "completionTokens": 141,
+    "totalTokens": 1261
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "03c80e7ea0b160ba5481effbd86cd1b8da57981c6a5bd77de1419f84003e964f"
+}

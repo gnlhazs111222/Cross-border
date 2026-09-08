@@ -1,0 +1,64 @@
+{
+  "caseId": "B-35-hold-pending",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "unauthorized",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 866,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unauthorized fact",
+        "category": "unauthorized_fact",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "This bottle is dishwasher safe.",
+        "reason": "The claim that the bottle is dishwasher safe relies on the 'dishwasherSafe' field, which is listed in UNAUTHORIZED_FIELDS with status 'Requires Confirmation'. Asserting this property as a fact is not permitted when the field is unauthorized or pending confirmation.",
+        "factKeys": [],
+        "suggestedFix": "Remove the claim about dishwasher safety until it is confirmed and authorized.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v3",
+      "ruleVersion": "review-hard-v2",
+      "inputHash": "88dfbcda00380ee2e17bec5c218ea93f429fc66f92e177e7150b13c2211b87f0",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtspst2k0003qqgcp8vqdh37"
+    }
+  },
+  "audit": {
+    "id": "cmtspst2k0003qqgcp8vqdh37",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 827,
+    "promptTokens": 925,
+    "completionTokens": 157,
+    "totalTokens": 1082
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "5b2698c7c78e88bb0c2106aa28619c272c965cc85dbcc505b6326466f87f2060"
+}

@@ -1,0 +1,65 @@
+{
+  "caseId": "NEW-05-cold-excess",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "fresh-expression",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 734,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "description"
+        },
+        "text": "Maintains cold water for an entire 12-hour shift.",
+        "reason": "The description claims 12-hour cold retention, which contradicts the authorized fact of 8 hours.",
+        "factKeys": [
+          "coldRetention"
+        ],
+        "suggestedFix": "Maintains cold water for up to 8 hours.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v7",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "33badb16547b318c3b465657e87f73817dae3c6beadad94f16e75dd259854739",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr1ui60004qq902oytwn0t"
+    }
+  },
+  "audit": {
+    "id": "cmtsr1ui60004qq902oytwn0t",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 696,
+    "promptTokens": 1139,
+    "completionTokens": 134,
+    "totalTokens": 1273
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "b8f050f712e85382aac4ec80820c69c124545ee08d64f6548424e4e4f639bf9d"
+}

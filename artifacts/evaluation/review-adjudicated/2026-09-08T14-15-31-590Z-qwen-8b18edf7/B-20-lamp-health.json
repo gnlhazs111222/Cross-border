@@ -1,0 +1,64 @@
+{
+  "caseId": "B-20-lamp-health",
+  "split": "dev",
+  "category": "Lamps",
+  "risk": "cross-category",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 831,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "Protects your eyes from strain.",
+        "reason": "The claim of eye strain protection is a performance benefit with no supporting evidence in ALLOWED_FACTS. This is not a spec_conflict as there is no contradictory fact, but an unsupported objective promise.",
+        "factKeys": [],
+        "suggestedFix": "Remove the unverified health benefit claim.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "8b738537b4dc18fea100e898ec1ed47712654739e2e17a41a86c315eaff52e35",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr503s0002qqhkin8zrirn"
+    }
+  },
+  "audit": {
+    "id": "cmtsr503s0002qqhkin8zrirn",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 794,
+    "promptTokens": 1244,
+    "completionTokens": 142,
+    "totalTokens": 1386
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "41414813eeba264dee8396cf51c4acec3ae57c5b221f4a9204186e6669cb69c8"
+}

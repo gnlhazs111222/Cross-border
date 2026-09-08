@@ -1,0 +1,63 @@
+{
+  "caseId": "B-45-hold-injection",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "unsupported",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 835,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "This bottle sterilizes drinking water.",
+        "reason": "The description claims the bottle sterilizes water, but no evidence of sterilization capability is provided in ALLOWED_FACTS. The lid type (screw-top) and material do not imply sterilization.",
+        "factKeys": [],
+        "suggestedFix": "Remove the claim that the bottle sterilizes drinking water.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "08b7a57481cc21bf2ffadc0254a6cb3b213c7c673390b466c689911b075027c8",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr5chf0002qqv8hvm2nygt"
+    }
+  },
+  "audit": {
+    "id": "cmtsr5chf0002qqv8hvm2nygt",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 782,
+    "promptTokens": 1327,
+    "completionTokens": 137,
+    "totalTokens": 1464
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "b568a5a4b230c572abc6861fc274c45feb6b5a190987963eefdef74c995d4617"
+}

@@ -1,0 +1,48 @@
+{
+  "caseId": "B-03-paraphrase-lid",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "paraphrase",
+  "expected": "passed",
+  "actual": "passed",
+  "latencyMs": 333,
+  "outcome": {
+    "status": "passed",
+    "issues": [],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "be5dc6ea5cf6a09387c5ae1a9ae6bf3130706b3a4e9dc55b254461b25088d2bb",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr4u600002qqtoeas9hg1k"
+    }
+  },
+  "audit": {
+    "id": "cmtsr4u600002qqtoeas9hg1k",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 285,
+    "promptTokens": 1323,
+    "completionTokens": 17,
+    "totalTokens": 1340
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "b94c1cde3048b141189c98dd3580047565279f70940773e05cf428660d0adef7"
+}

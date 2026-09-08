@@ -1,0 +1,63 @@
+{
+  "caseId": "B-42-hold-bag-load",
+  "split": "holdout",
+  "category": "Backpacks",
+  "risk": "cross-category",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 767,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "Carries a 30kg load without damage.",
+        "reason": "The copy claims a specific load-bearing capacity (30kg) and durability ('without damage'), but no evidence regarding weight limits or structural integrity is provided in the allowed facts.",
+        "factKeys": [],
+        "suggestedFix": "Remove the unverified load capacity claim.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v7",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "9eed2fb6df00364178e27e5e87c1136ed7ec8d3075e0e62eec169d77887772bf",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr302z0009qqz41ycmsro2"
+    }
+  },
+  "audit": {
+    "id": "cmtsr302z0009qqz41ycmsro2",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 718,
+    "promptTokens": 1055,
+    "completionTokens": 133,
+    "totalTokens": 1188
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "b6e4884e0c587f93576596febd0e67424b4af52a1d6e1ef0f18a7760f09cc4eb"
+}

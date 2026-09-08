@@ -1,0 +1,65 @@
+{
+  "caseId": "B-36-hold-rejected",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "unauthorized",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 800,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unauthorized fact",
+        "category": "unauthorized_fact",
+        "location": {
+          "field": "description"
+        },
+        "text": "Drop-tested to survive a two-metre fall.",
+        "reason": "The copy asserts a drop test result, but the 'dropTest' field is in UNAUTHORIZED_FIELDS with status Rejected. This claim cannot be supported or disclosed.",
+        "factKeys": [
+          "dropTest"
+        ],
+        "suggestedFix": "Remove the statement about drop testing.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v7",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "0cff608c39500b02afd2caf36819189c9c20917832b1813b4b9eb895e5460b4e",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr2xcr0004qqz4m9iluipx"
+    }
+  },
+  "audit": {
+    "id": "cmtsr2xcr0004qqz4m9iluipx",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 751,
+    "promptTokens": 1142,
+    "completionTokens": 139,
+    "totalTokens": 1281
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "55c93fe9ab44b7998cfb071cccc4eccb79e1e1b0a5d6aa4593bcf6a9bd476ad0"
+}

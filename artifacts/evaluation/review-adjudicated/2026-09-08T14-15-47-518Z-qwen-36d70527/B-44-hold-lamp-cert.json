@@ -1,0 +1,64 @@
+{
+  "caseId": "B-44-hold-lamp-cert",
+  "split": "holdout",
+  "category": "Lamps",
+  "risk": "cross-category",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 832,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "UL-certified for safe use.",
+        "reason": "The claim of UL certification is an objective performance/certification promise with no evidence in ALLOWED_FACTS. The allowed facts only specify power and supply type, not safety certifications.",
+        "factKeys": [],
+        "suggestedFix": "Remove the unverified UL certification claim.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "bb01c0e3b619fffc4a907312aab3ac1fba861ea2e9fd560399ab64155e0e29aa",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr5buj0001qqv806ifki34"
+    }
+  },
+  "audit": {
+    "id": "cmtsr5buj0001qqv806ifki34",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 791,
+    "promptTokens": 1244,
+    "completionTokens": 138,
+    "totalTokens": 1382
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "e3a6c0502539d8b239b4266ecd80f89fea870a2b8994b074cd007f3bdeb0c9ef"
+}

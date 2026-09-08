@@ -1,0 +1,400 @@
+[
+  {
+    "capacity": "900ml",
+    "risk": false,
+    "expected": "passed",
+    "input": {
+      "listing": {
+        "platform": "amazon",
+        "title": "Blue stainless steel bottle, 900ml",
+        "bullets": [],
+        "description": "Bring water to work.",
+        "attributes": {}
+      },
+      "facts": [
+        {
+          "key": "capacity",
+          "label": "capacity",
+          "value": "900ml",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fresh probe",
+          "anchor": "capacity"
+        },
+        {
+          "key": "color",
+          "label": "color",
+          "value": "Blue",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fresh probe",
+          "anchor": "color"
+        },
+        {
+          "key": "material",
+          "label": "material",
+          "value": "Stainless steel",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fresh probe",
+          "anchor": "material"
+        },
+        {
+          "key": "lidType",
+          "label": "lidType",
+          "value": "Screw-top lid",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fresh probe",
+          "anchor": "lidType"
+        }
+      ],
+      "context": {
+        "market": "United States",
+        "category": "Water bottles",
+        "taskRevision": 1
+      },
+      "listingRevision": 1,
+      "factsRevision": 1
+    },
+    "outcome": {
+      "status": "passed",
+      "issues": [],
+      "metadata": {
+        "mode": "rules_qwen",
+        "model": "qwen3.6-flash",
+        "promptVersion": "review-qwen-v7",
+        "ruleVersion": "review-hard-v5",
+        "inputHash": "281c9cf7c0d694f0d9ae94e7a60982e32d7b349e0119e29eceaf1ea86b554adc",
+        "listingRevision": 1,
+        "factsRevision": 1,
+        "taskRevision": 1,
+        "modelCalled": true,
+        "aiCallId": "cmtsr31xh0000qqxokqq9msr1"
+      }
+    },
+    "audit": {
+      "promptVersion": "review-qwen-v7",
+      "inputHash": "281c9cf7c0d694f0d9ae94e7a60982e32d7b349e0119e29eceaf1ea86b554adc",
+      "id": "cmtsr31xh0000qqxokqq9msr1",
+      "provider": "bailian",
+      "model": "qwen3.6-flash",
+      "purpose": "listing_review",
+      "latencyMs": 440,
+      "success": true,
+      "errorCode": null,
+      "promptTokens": 1097,
+      "completionTokens": 17,
+      "totalTokens": 1114,
+      "createdAt": "2026-09-08T14:14:02.886Z",
+      "updatedAt": "2026-09-08T14:14:02.886Z"
+    }
+  },
+  {
+    "capacity": "900ml",
+    "risk": true,
+    "expected": "blocked",
+    "input": {
+      "listing": {
+        "platform": "amazon",
+        "title": "Blue stainless steel bottle, 900ml",
+        "bullets": [],
+        "description": "No leak tests are available. Nevertheless, your notebook remains dry when packed alongside the bottle.",
+        "attributes": {}
+      },
+      "facts": [
+        {
+          "key": "capacity",
+          "label": "capacity",
+          "value": "900ml",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fresh probe",
+          "anchor": "capacity"
+        },
+        {
+          "key": "color",
+          "label": "color",
+          "value": "Blue",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fresh probe",
+          "anchor": "color"
+        },
+        {
+          "key": "material",
+          "label": "material",
+          "value": "Stainless steel",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fresh probe",
+          "anchor": "material"
+        },
+        {
+          "key": "lidType",
+          "label": "lidType",
+          "value": "Screw-top lid",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fresh probe",
+          "anchor": "lidType"
+        }
+      ],
+      "context": {
+        "market": "United States",
+        "category": "Water bottles",
+        "taskRevision": 1
+      },
+      "listingRevision": 1,
+      "factsRevision": 1
+    },
+    "outcome": {
+      "status": "blocked",
+      "issues": [
+        {
+          "id": "B-1",
+          "severity": "HIGH",
+          "title": "unsupported claim",
+          "category": "unsupported_claim",
+          "location": {
+            "field": "description"
+          },
+          "text": "your notebook remains dry when packed alongside the bottle",
+          "reason": "The copy asserts a specific performance outcome (keeping a notebook dry) without evidence of leak resistance. The preceding disclaimer ('No leak tests are available') explicitly negates the basis for this claim, and a screw-top lid alone does not prove containment.",
+          "factKeys": [
+            "lidType"
+          ],
+          "suggestedFix": "Remove the claim about keeping the notebook dry as no leak resistance is verified.",
+          "origin": "qwen"
+        }
+      ],
+      "metadata": {
+        "mode": "rules_qwen",
+        "model": "qwen3.6-flash",
+        "promptVersion": "review-qwen-v7",
+        "ruleVersion": "review-hard-v5",
+        "inputHash": "84b38f23a10847abe725355c9a663ffc25652118fe87e17777cbcc6f71d22359",
+        "listingRevision": 1,
+        "factsRevision": 1,
+        "taskRevision": 1,
+        "modelCalled": true,
+        "aiCallId": "cmtsr32ox0001qqxoo8dojgqh"
+      }
+    },
+    "audit": {
+      "promptVersion": "review-qwen-v7",
+      "inputHash": "84b38f23a10847abe725355c9a663ffc25652118fe87e17777cbcc6f71d22359",
+      "id": "cmtsr32ox0001qqxoo8dojgqh",
+      "provider": "bailian",
+      "model": "qwen3.6-flash",
+      "purpose": "listing_review",
+      "latencyMs": 918,
+      "success": true,
+      "errorCode": null,
+      "promptTokens": 1123,
+      "completionTokens": 162,
+      "totalTokens": 1285,
+      "createdAt": "2026-09-08T14:14:03.873Z",
+      "updatedAt": "2026-09-08T14:14:03.873Z"
+    }
+  },
+  {
+    "capacity": "1200ml",
+    "risk": false,
+    "expected": "passed",
+    "input": {
+      "listing": {
+        "platform": "amazon",
+        "title": "Blue stainless steel bottle, 1200ml",
+        "bullets": [],
+        "description": "Bring water to work.",
+        "attributes": {}
+      },
+      "facts": [
+        {
+          "key": "capacity",
+          "label": "capacity",
+          "value": "1200ml",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fresh probe",
+          "anchor": "capacity"
+        },
+        {
+          "key": "color",
+          "label": "color",
+          "value": "Blue",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fresh probe",
+          "anchor": "color"
+        },
+        {
+          "key": "material",
+          "label": "material",
+          "value": "Stainless steel",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fresh probe",
+          "anchor": "material"
+        },
+        {
+          "key": "lidType",
+          "label": "lidType",
+          "value": "Screw-top lid",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fresh probe",
+          "anchor": "lidType"
+        }
+      ],
+      "context": {
+        "market": "United States",
+        "category": "Water bottles",
+        "taskRevision": 1
+      },
+      "listingRevision": 1,
+      "factsRevision": 1
+    },
+    "outcome": {
+      "status": "passed",
+      "issues": [],
+      "metadata": {
+        "mode": "rules_qwen",
+        "model": "qwen3.6-flash",
+        "promptVersion": "review-qwen-v7",
+        "ruleVersion": "review-hard-v5",
+        "inputHash": "80a2763ab29fd07e0321056e0acf26ac43a67d1dd598fcbc3fc841a01ce31163",
+        "listingRevision": 1,
+        "factsRevision": 1,
+        "taskRevision": 1,
+        "modelCalled": true,
+        "aiCallId": "cmtsr32xn0002qqxopbwd0nsh"
+      }
+    },
+    "audit": {
+      "promptVersion": "review-qwen-v7",
+      "inputHash": "80a2763ab29fd07e0321056e0acf26ac43a67d1dd598fcbc3fc841a01ce31163",
+      "id": "cmtsr32xn0002qqxopbwd0nsh",
+      "provider": "bailian",
+      "model": "qwen3.6-flash",
+      "purpose": "listing_review",
+      "latencyMs": 276,
+      "success": true,
+      "errorCode": null,
+      "promptTokens": 1100,
+      "completionTokens": 17,
+      "totalTokens": 1117,
+      "createdAt": "2026-09-08T14:14:04.187Z",
+      "updatedAt": "2026-09-08T14:14:04.187Z"
+    }
+  },
+  {
+    "capacity": "1200ml",
+    "risk": true,
+    "expected": "blocked",
+    "input": {
+      "listing": {
+        "platform": "amazon",
+        "title": "Blue stainless steel bottle, 1200ml",
+        "bullets": [],
+        "description": "No leak tests are available. Nevertheless, your notebook remains dry when packed alongside the bottle.",
+        "attributes": {}
+      },
+      "facts": [
+        {
+          "key": "capacity",
+          "label": "capacity",
+          "value": "1200ml",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fresh probe",
+          "anchor": "capacity"
+        },
+        {
+          "key": "color",
+          "label": "color",
+          "value": "Blue",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fresh probe",
+          "anchor": "color"
+        },
+        {
+          "key": "material",
+          "label": "material",
+          "value": "Stainless steel",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fresh probe",
+          "anchor": "material"
+        },
+        {
+          "key": "lidType",
+          "label": "lidType",
+          "value": "Screw-top lid",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fresh probe",
+          "anchor": "lidType"
+        }
+      ],
+      "context": {
+        "market": "United States",
+        "category": "Water bottles",
+        "taskRevision": 1
+      },
+      "listingRevision": 1,
+      "factsRevision": 1
+    },
+    "outcome": {
+      "status": "blocked",
+      "issues": [
+        {
+          "id": "B-1",
+          "severity": "HIGH",
+          "title": "unsupported claim",
+          "category": "unsupported_claim",
+          "location": {
+            "field": "description"
+          },
+          "text": "your notebook remains dry when packed alongside the bottle",
+          "reason": "The copy asserts a specific containment performance (keeping items dry) without evidence. The presence of a screw-top lid and the disclaimer about missing leak tests do not establish that the bottle is leak-proof.",
+          "factKeys": [
+            "lidType"
+          ],
+          "suggestedFix": "Remove the claim that belongings remain dry, as no leak resistance testing or guarantee is provided.",
+          "origin": "qwen"
+        }
+      ],
+      "metadata": {
+        "mode": "rules_qwen",
+        "model": "qwen3.6-flash",
+        "promptVersion": "review-qwen-v7",
+        "ruleVersion": "review-hard-v5",
+        "inputHash": "040608c69ea531d1b6a0ff02f795fe58e065951430110c336eb2df2301e9e06d",
+        "listingRevision": 1,
+        "factsRevision": 1,
+        "taskRevision": 1,
+        "modelCalled": true,
+        "aiCallId": "cmtsr33nm0003qqxo56sg0qtn"
+      }
+    },
+    "audit": {
+      "promptVersion": "review-qwen-v7",
+      "inputHash": "040608c69ea531d1b6a0ff02f795fe58e065951430110c336eb2df2301e9e06d",
+      "id": "cmtsr33nm0003qqxo56sg0qtn",
+      "provider": "bailian",
+      "model": "qwen3.6-flash",
+      "purpose": "listing_review",
+      "latencyMs": 900,
+      "success": true,
+      "errorCode": null,
+      "promptTokens": 1126,
+      "completionTokens": 155,
+      "totalTokens": 1281,
+      "createdAt": "2026-09-08T14:14:05.123Z",
+      "updatedAt": "2026-09-08T14:14:05.123Z"
+    }
+  }
+]

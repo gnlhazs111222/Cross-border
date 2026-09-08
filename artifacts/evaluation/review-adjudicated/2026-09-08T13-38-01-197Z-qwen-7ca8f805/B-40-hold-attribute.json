@@ -1,0 +1,74 @@
+{
+  "caseId": "B-40-hold-attribute",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "contradiction",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 1710,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "title"
+        },
+        "text": "500ml.",
+        "reason": "The title states the capacity is 500ml, which conflicts with the attribute value of 1000ml. Additionally, the allowed facts confirm the capacity is 500ml, making the attribute incorrect.",
+        "factKeys": [
+          "capacity"
+        ],
+        "suggestedFix": "Update the attributes to reflect the correct capacity of 500ml or remove the conflicting attribute.",
+        "origin": "qwen"
+      },
+      {
+        "id": "B-2",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "attributes",
+          "key": "Capacity"
+        },
+        "text": "1000ml",
+        "reason": "The attribute lists the capacity as 1000ml, but the allowed facts and title specify the capacity is 500ml.",
+        "factKeys": [
+          "capacity"
+        ],
+        "suggestedFix": "Change the Capacity attribute to 500ml to match the allowed facts and title.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v3",
+      "ruleVersion": "review-hard-v2",
+      "inputHash": "43f4d2d4b4859ee95ad15884283513c7c7265cd8890a38b1c3f2c64c2f808442",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtspsvmh0007qqgc83elig22"
+    }
+  },
+  "audit": {
+    "id": "cmtspsvmh0007qqgc83elig22",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 1678,
+    "promptTokens": 911,
+    "completionTokens": 288,
+    "totalTokens": 1199
+  },
+  "ruleStatus": "passed",
+  "ruleIssues": [],
+  "inputHash": "bcf315d944dbc9dcba0011d7e4ff596e029ed3b11d26a142acfc0de3ad454ebf"
+}

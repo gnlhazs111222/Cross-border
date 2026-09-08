@@ -1,0 +1,63 @@
+{
+  "caseId": "B-09-insulation",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "unsupported",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 799,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "Keeps water cold for 24 hours.",
+        "reason": "The copy claims a specific heat retention performance (24 hours) but no insulation or thermal data is provided in ALLOWED_FACTS. A screw-top lid does not establish leak resistance or thermal properties.",
+        "factKeys": [],
+        "suggestedFix": "Remove the unverified heat retention claim.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v7",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "d790713a1f54c9685c06b3ae33ab4b998f481f9c4642fe681559bd4f0ffa7c61",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr2lba0006qqtgf2i1cd47"
+    }
+  },
+  "audit": {
+    "id": "cmtsr2lba0006qqtgf2i1cd47",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 747,
+    "promptTokens": 1128,
+    "completionTokens": 137,
+    "totalTokens": 1265
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "c78d2366c70a95edf5e073585a8429286392d35351ecb1e8badf0ba9fdcef9e2"
+}

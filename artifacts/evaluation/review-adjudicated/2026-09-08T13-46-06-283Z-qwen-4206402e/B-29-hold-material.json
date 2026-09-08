@@ -1,0 +1,81 @@
+{
+  "caseId": "B-29-hold-material",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "contradiction",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 1112,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "aluminium body",
+        "reason": "The bullet claims the body is aluminium, but the authorized material is Stainless steel.",
+        "factKeys": [
+          "material"
+        ],
+        "suggestedFix": "Change to 'stainless steel body'.",
+        "origin": "qwen"
+      },
+      {
+        "id": "B-2",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "Lightweight",
+        "reason": "No weight or comparison basis is supplied to support the lightweight claim.",
+        "factKeys": [],
+        "suggestedFix": "Provide verified weight or remove the adjective.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v6",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "ddf267a2c25e3e03724e5824a3df9891392756f0b307554b4277f3a70572332a",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsq39qa000aqqw47krn3az0"
+    }
+  },
+  "audit": {
+    "id": "cmtsq39qa000aqqw47krn3az0",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 1060,
+    "promptTokens": 1079,
+    "completionTokens": 216,
+    "totalTokens": 1295
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "b27966f2c3c359dd117d0f4b559954898a42f0965b92d1677569969988039267"
+}

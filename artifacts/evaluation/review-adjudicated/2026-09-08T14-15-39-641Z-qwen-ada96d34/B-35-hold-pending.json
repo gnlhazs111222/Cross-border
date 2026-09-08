@@ -1,0 +1,66 @@
+{
+  "caseId": "B-35-hold-pending",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "unauthorized",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 864,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unauthorized fact",
+        "category": "unauthorized_fact",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "dishwasher safe",
+        "reason": "The copy asserts dishwasher safety, but the 'dishwasherSafe' field is in UNAUTHORIZED_FIELDS with status 'Requires Confirmation' and allowed:false. This claim cannot be made without authorized confirmation.",
+        "factKeys": [
+          "dishwasherSafe"
+        ],
+        "suggestedFix": "Remove the claim that the bottle is dishwasher safe.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "9d2ba67f141d6ef894c8a869acff1febb3e86abfc8b9966511709febfafed7cd",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr57h90003qquokjushz4j"
+    }
+  },
+  "audit": {
+    "id": "cmtsr57h90003qquokjushz4j",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 809,
+    "promptTokens": 1329,
+    "completionTokens": 150,
+    "totalTokens": 1479
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "5b2698c7c78e88bb0c2106aa28619c272c965cc85dbcc505b6326466f87f2060"
+}

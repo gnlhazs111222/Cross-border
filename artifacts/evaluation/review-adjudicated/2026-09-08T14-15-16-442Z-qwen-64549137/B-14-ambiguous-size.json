@@ -1,0 +1,49 @@
+{
+  "caseId": "B-14-ambiguous-size",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "ambiguity",
+  "expected": "needs_human_review",
+  "actual": "failed",
+  "latencyMs": 1089,
+  "outcome": {
+    "status": "failed",
+    "issues": [],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "46bce1f1f70590c3fe3e2eab65cebac451fb72fbe4193a9dc4dd0038e084e25a",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr4ofn0001qqo4ns3lhtcx",
+      "errorCode": "invalid_review_reference"
+    }
+  },
+  "audit": {
+    "id": "cmtsr4ofn0001qqo4ns3lhtcx",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": false,
+    "errorCode": "invalid_review_reference",
+    "latencyMs": 1016,
+    "promptTokens": 1309,
+    "completionTokens": 163,
+    "totalTokens": 1472
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "03c80e7ea0b160ba5481effbd86cd1b8da57981c6a5bd77de1419f84003e964f"
+}

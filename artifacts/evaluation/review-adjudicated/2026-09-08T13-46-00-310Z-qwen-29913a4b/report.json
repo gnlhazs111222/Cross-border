@@ -1,0 +1,851 @@
+{
+  "runId": "2026-09-08T13-46-00-310Z-qwen-29913a4b",
+  "datasetHash": "0b4177b3d89838a654278335ad568a4e9949d5b703c2d6331c9acd23b4c1397b",
+  "labelHash": "e312571dfb4c7160ac249c58b4ae46a906858ff55d299e8b60ef60f83e2bbd0e",
+  "labelVersion": "user-authorized-ai-review-v1",
+  "batch": 2,
+  "datasetVersion": 1,
+  "labelProvenance": "User-authorized AI secondary adjudication; NOT independent human labels",
+  "independentEvaluationMeaning": "Separate fixed expected labels and runner; not an independent human benchmark. Holdout fixtures are visible in this repository.",
+  "provider": "qwen",
+  "model": "qwen3.6-flash",
+  "split": "all",
+  "requestedCount": 12,
+  "completedCount": 12,
+  "metrics": {
+    "total": 12,
+    "confusion": {
+      "tp": 8,
+      "tn": 4,
+      "fp": 0,
+      "fn": 0
+    },
+    "failed": 0,
+    "abstained": 0,
+    "ambiguousExpected": 0,
+    "ambiguousPassed": 0,
+    "binaryCoverage": 1,
+    "exactStatusAccuracy": 1,
+    "precision": 1,
+    "recall": 1,
+    "falsePositiveRate": 0,
+    "falseNegativeRate": 0
+  },
+  "pairedRuleMetrics": {
+    "total": 12,
+    "confusion": {
+      "tp": 7,
+      "tn": 1,
+      "fp": 3,
+      "fn": 1
+    },
+    "failed": 0,
+    "abstained": 0,
+    "ambiguousExpected": 0,
+    "ambiguousPassed": 0,
+    "binaryCoverage": 1,
+    "exactStatusAccuracy": 0.6666666666666666,
+    "precision": 0.7,
+    "recall": 0.875,
+    "falsePositiveRate": 0.75,
+    "falseNegativeRate": 0.125
+  },
+  "groups": {
+    "supported": {
+      "total": 1,
+      "confusion": {
+        "tp": 0,
+        "tn": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "failed": 0,
+      "abstained": 0,
+      "ambiguousExpected": 0,
+      "ambiguousPassed": 0,
+      "binaryCoverage": 1,
+      "exactStatusAccuracy": 1,
+      "precision": null,
+      "recall": null,
+      "falsePositiveRate": 0,
+      "falseNegativeRate": null
+    },
+    "paraphrase": {
+      "total": 2,
+      "confusion": {
+        "tp": 0,
+        "tn": 2,
+        "fp": 0,
+        "fn": 0
+      },
+      "failed": 0,
+      "abstained": 0,
+      "ambiguousExpected": 0,
+      "ambiguousPassed": 0,
+      "binaryCoverage": 1,
+      "exactStatusAccuracy": 1,
+      "precision": null,
+      "recall": null,
+      "falsePositiveRate": 0,
+      "falseNegativeRate": null
+    },
+    "contradiction": {
+      "total": 4,
+      "confusion": {
+        "tp": 4,
+        "tn": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      "failed": 0,
+      "abstained": 0,
+      "ambiguousExpected": 0,
+      "ambiguousPassed": 0,
+      "binaryCoverage": 1,
+      "exactStatusAccuracy": 1,
+      "precision": 1,
+      "recall": 1,
+      "falsePositiveRate": null,
+      "falseNegativeRate": 0
+    },
+    "unsupported": {
+      "total": 3,
+      "confusion": {
+        "tp": 3,
+        "tn": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      "failed": 0,
+      "abstained": 0,
+      "ambiguousExpected": 0,
+      "ambiguousPassed": 0,
+      "binaryCoverage": 1,
+      "exactStatusAccuracy": 1,
+      "precision": 1,
+      "recall": 1,
+      "falsePositiveRate": null,
+      "falseNegativeRate": 0
+    },
+    "internal": {
+      "total": 1,
+      "confusion": {
+        "tp": 1,
+        "tn": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      "failed": 0,
+      "abstained": 0,
+      "ambiguousExpected": 0,
+      "ambiguousPassed": 0,
+      "binaryCoverage": 1,
+      "exactStatusAccuracy": 1,
+      "precision": 1,
+      "recall": 1,
+      "falsePositiveRate": null,
+      "falseNegativeRate": 0
+    },
+    "omission": {
+      "total": 1,
+      "confusion": {
+        "tp": 0,
+        "tn": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "failed": 0,
+      "abstained": 0,
+      "ambiguousExpected": 0,
+      "ambiguousPassed": 0,
+      "binaryCoverage": 1,
+      "exactStatusAccuracy": 1,
+      "precision": null,
+      "recall": null,
+      "falsePositiveRate": 0,
+      "falseNegativeRate": null
+    }
+  },
+  "limitations": [
+    "Synthetic labels require human review.",
+    "Small samples do not establish population accuracy.",
+    "Errors and abstentions are excluded from binary confusion rates; inspect coverage and exact-status accuracy.",
+    "Baseline compares to a frozen safe draft, and does not inspect attributes.",
+    "No automatic retries or live claim is made by offline results."
+  ],
+  "rows": [
+    {
+      "caseId": "B-01-exact-copy",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "supported",
+      "expected": "passed",
+      "actual": "passed",
+      "latencyMs": 452,
+      "outcome": {
+        "status": "passed",
+        "issues": [],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v6",
+          "ruleVersion": "review-hard-v4",
+          "inputHash": "b0223eb94c621d0a1f021ef22afe9a2e5663d6328097feac32c8f9e9c624d6f1",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmtsq302b0000qqp0rdac6pvg"
+        }
+      },
+      "audit": {
+        "id": "cmtsq302b0000qqp0rdac6pvg",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "success": true,
+        "errorCode": null,
+        "latencyMs": 403,
+        "promptTokens": 1055,
+        "completionTokens": 17,
+        "totalTokens": 1072
+      },
+      "ruleStatus": "passed",
+      "ruleIssues": [],
+      "inputHash": "f89e705a243fdeae92068b0f01f6e6472e841dd25cee73cd9783058391a53712"
+    },
+    {
+      "caseId": "B-02-paraphrase-holds",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "paraphrase",
+      "expected": "passed",
+      "actual": "passed",
+      "latencyMs": 321,
+      "outcome": {
+        "status": "passed",
+        "issues": [],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v6",
+          "ruleVersion": "review-hard-v4",
+          "inputHash": "b672481f56c73dcae859bea15df6d14c63ce20705128573cea93fad1c74ebe19",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmtsq30b50001qqp05fkissal"
+        }
+      },
+      "audit": {
+        "id": "cmtsq30b50001qqp05fkissal",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "success": true,
+        "errorCode": null,
+        "latencyMs": 273,
+        "promptTokens": 1102,
+        "completionTokens": 17,
+        "totalTokens": 1119
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "e5184c739c58aded15b398deb83a72813eb196c0a094e71651fe1e784b7ee2b6"
+    },
+    {
+      "caseId": "B-03-paraphrase-lid",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "paraphrase",
+      "expected": "passed",
+      "actual": "passed",
+      "latencyMs": 311,
+      "outcome": {
+        "status": "passed",
+        "issues": [],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v6",
+          "ruleVersion": "review-hard-v4",
+          "inputHash": "41564963d011aeb3058456c5e4b0e0a8e35c6024aa641f8b6ab4bce632892aef",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmtsq30jv0002qqp0sctzoj99"
+        }
+      },
+      "audit": {
+        "id": "cmtsq30jv0002qqp0sctzoj99",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "success": true,
+        "errorCode": null,
+        "latencyMs": 266,
+        "promptTokens": 1090,
+        "completionTokens": 17,
+        "totalTokens": 1107
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "b94c1cde3048b141189c98dd3580047565279f70940773e05cf428660d0adef7"
+    },
+    {
+      "caseId": "B-04-capacity-wrong",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "contradiction",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 712,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "spec conflict",
+            "category": "spec_conflict",
+            "location": {
+              "field": "title"
+            },
+            "text": "750ml capacity",
+            "reason": "The title claims a capacity of 750ml, but the authorized fact specifies the capacity is 500ml.",
+            "factKeys": [
+              "capacity"
+            ],
+            "suggestedFix": "A generous 500ml capacity.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v6",
+          "ruleVersion": "review-hard-v4",
+          "inputHash": "19575cfae9f8b1efeab51d56d72fcb8c1c6012348fee7f44923768fb3bd5877c",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmtsq313n0003qqp0rspk5dy9"
+        }
+      },
+      "audit": {
+        "id": "cmtsq313n0003qqp0rspk5dy9",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "success": true,
+        "errorCode": null,
+        "latencyMs": 667,
+        "promptTokens": 1052,
+        "completionTokens": 129,
+        "totalTokens": 1181
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "79db4892d56aebb9cd7d4de7122ea1cc51f984476e1bca2f2d8aa0a3b8d6734b"
+    },
+    {
+      "caseId": "B-05-material-wrong",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "contradiction",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 733,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "spec conflict",
+            "category": "spec_conflict",
+            "location": {
+              "field": "bullets",
+              "index": 0
+            },
+            "text": "Made from glass.",
+            "reason": "The bullet claims the material is glass, but the authorized fact for material is Stainless steel.",
+            "factKeys": [
+              "material"
+            ],
+            "suggestedFix": "Change to 'Made from stainless steel.' or remove the claim.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v6",
+          "ruleVersion": "review-hard-v4",
+          "inputHash": "2fb52a4a02f3d9f04d506696a6277db23edc9890b5fc100ac9aac6ad730de37a",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmtsq31o10004qqp0mgurjsw8"
+        }
+      },
+      "audit": {
+        "id": "cmtsq31o10004qqp0mgurjsw8",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "success": true,
+        "errorCode": null,
+        "latencyMs": 689,
+        "promptTokens": 1077,
+        "completionTokens": 131,
+        "totalTokens": 1208
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "9424ade901d7ac6693870a94d4788eccb3647071adf621f1689b1aa2709f1040"
+    },
+    {
+      "caseId": "B-06-color-wrong",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "contradiction",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 688,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "spec conflict",
+            "category": "spec_conflict",
+            "location": {
+              "field": "description"
+            },
+            "text": "A bright red bottle.",
+            "reason": "The description claims the bottle is red, but the authorized color is Black.",
+            "factKeys": [
+              "color"
+            ],
+            "suggestedFix": "Change 'red' to 'black'.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v6",
+          "ruleVersion": "review-hard-v4",
+          "inputHash": "1e3295c4d7bf002fe060064e5dc4c11c3639e987fbbec1e825c1928f94eb7917",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmtsq327b0005qqp0dz0k2ekw"
+        }
+      },
+      "audit": {
+        "id": "cmtsq327b0005qqp0dz0k2ekw",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "success": true,
+        "errorCode": null,
+        "latencyMs": 649,
+        "promptTokens": 1075,
+        "completionTokens": 117,
+        "totalTokens": 1192
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "6c7a17370b0f4b02e1a05e836281395dc7e7a7b129a4636909974c545752507f"
+    },
+    {
+      "caseId": "B-07-absolute-leakproof",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "unsupported",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-LOCAL-1",
+            "severity": "HIGH",
+            "category": "unsupported_claim",
+            "title": "Unsupported performance claim",
+            "text": "100% leakproof",
+            "location": {
+              "field": "title"
+            },
+            "reason": "The demo does not authorize the absolute leakproof claim.",
+            "factKeys": [],
+            "suggestedFix": "Remove the unsupported performance promise.",
+            "origin": "rules"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v6",
+          "ruleVersion": "review-hard-v4",
+          "inputHash": "0587e5e3f09a3450d5aac5a477e21e73d0c868d960c509fd0b7406d871089720",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": false
+        }
+      },
+      "audit": null,
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R001",
+          "severity": "HIGH",
+          "title": "Unsupported performance claim",
+          "text": "100% leakproof",
+          "reason": "No verified evidence supports an absolute leakproof claim."
+        },
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "ab4c3e4415338b988da805560525c20aefbb5d81330856235caccae7e4048326"
+    },
+    {
+      "caseId": "B-09-insulation",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "unsupported",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 599,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "unsupported claim",
+            "category": "unsupported_claim",
+            "location": {
+              "field": "description"
+            },
+            "text": "Keeps water cold for 24 hours.",
+            "reason": "No heat retention evidence is supplied.",
+            "factKeys": [],
+            "suggestedFix": "Remove the unverified heat retention promise.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v6",
+          "ruleVersion": "review-hard-v4",
+          "inputHash": "f9ff8deeeee1a6814a8ae1f06cf1995d36fc09e0a3ab63127c26c81045db2b4a",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmtsq32no0006qqp0squygm8q"
+        }
+      },
+      "audit": {
+        "id": "cmtsq32no0006qqp0squygm8q",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "success": true,
+        "errorCode": null,
+        "latencyMs": 548,
+        "promptTokens": 1084,
+        "completionTokens": 104,
+        "totalTokens": 1188
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "c78d2366c70a95edf5e073585a8429286392d35351ecb1e8badf0ba9fdcef9e2"
+    },
+    {
+      "caseId": "B-10-dishwasher",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "unsupported",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 778,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "unsupported claim",
+            "category": "unsupported_claim",
+            "location": {
+              "field": "title"
+            },
+            "text": "Safe to clean in any dishwasher.",
+            "reason": "No evidence is supplied regarding dishwasher safety or compatibility. Material (Stainless steel) does not automatically confirm dishwasher safety for the entire product including lids/seals.",
+            "factKeys": [],
+            "suggestedFix": "Remove the unverified dishwasher safety claim.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v6",
+          "ruleVersion": "review-hard-v4",
+          "inputHash": "a0a524fffe1d04595d60a7b27cef024277fc87258cab49f59c6984791d703be4",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmtsq339l0007qqp0fiqw038k"
+        }
+      },
+      "audit": {
+        "id": "cmtsq339l0007qqp0fiqw038k",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "success": true,
+        "errorCode": null,
+        "latencyMs": 738,
+        "promptTokens": 1048,
+        "completionTokens": 125,
+        "totalTokens": 1173
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "cca55d3a9606fa43b959f43950ad03534c3a46d0dc20c210592599427f486a3c"
+    },
+    {
+      "caseId": "B-13-private",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "internal",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 0,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-LOCAL-1",
+            "severity": "HIGH",
+            "category": "internal_disclosure",
+            "title": "Internal commercial information",
+            "text": "[Internal information withheld]",
+            "location": {
+              "field": "title"
+            },
+            "reason": "Remove internal commercial or credential information before public copy is reviewed.",
+            "factKeys": [],
+            "suggestedFix": "Remove the internal information and run review again.",
+            "origin": "rules"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v6",
+          "ruleVersion": "review-hard-v4",
+          "inputHash": "bae129c1f1a3a6cf52ff4c0a8aca81cd79aa98efef4953f6eded4b95febc5102",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": false
+        }
+      },
+      "audit": null,
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "30d0dbc666385fac9d784748a4c4f315536d5ed37d20a6ffea596aa7271939bb"
+    },
+    {
+      "caseId": "B-15-safe-omission",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "omission",
+      "expected": "passed",
+      "actual": "passed",
+      "latencyMs": 310,
+      "outcome": {
+        "status": "passed",
+        "issues": [],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v6",
+          "ruleVersion": "review-hard-v4",
+          "inputHash": "d0497beeaa891910b210ed7293c41a41412eee9b9c670caa35e2caeba7fb325e",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmtsq33i70008qqp0b5lpu63t"
+        }
+      },
+      "audit": {
+        "id": "cmtsq33i70008qqp0b5lpu63t",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "success": true,
+        "errorCode": null,
+        "latencyMs": 269,
+        "promptTokens": 1070,
+        "completionTokens": 17,
+        "totalTokens": 1087
+      },
+      "ruleStatus": "blocked",
+      "ruleIssues": [
+        {
+          "id": "R002",
+          "severity": "HIGH",
+          "title": "Unverified edited content",
+          "text": "Text differs from the evidence-backed draft.",
+          "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+        }
+      ],
+      "inputHash": "386ebc70125757df7cb43ce9fc121afcff5337202d6198478e4befe9c564e2b4"
+    },
+    {
+      "caseId": "B-16-attribute-conflict",
+      "split": "dev",
+      "category": "Water bottles",
+      "risk": "contradiction",
+      "expected": "blocked",
+      "actual": "blocked",
+      "latencyMs": 757,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "spec conflict",
+            "category": "spec_conflict",
+            "location": {
+              "field": "attributes",
+              "key": "Capacity"
+            },
+            "text": "750ml",
+            "reason": "The attribute states the capacity is 750ml, but the authorized fact confirms the capacity is 500ml.",
+            "factKeys": [
+              "capacity"
+            ],
+            "suggestedFix": "Change Capacity to 500ml.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v6",
+          "ruleVersion": "review-hard-v4",
+          "inputHash": "622c7e93d94f6f62fc86b20be758146a3c1a64359356e7010dc00fa09dad301a",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmtsq34360009qqp09xa27v0g"
+        }
+      },
+      "audit": {
+        "id": "cmtsq34360009qqp09xa27v0g",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "success": true,
+        "errorCode": null,
+        "latencyMs": 713,
+        "promptTokens": 1078,
+        "completionTokens": 136,
+        "totalTokens": 1214
+      },
+      "ruleStatus": "passed",
+      "ruleIssues": [],
+      "inputHash": "2de3330977e462c120b34486a070c7c0cedea73c081a50581f47c4938c7c5c61"
+    }
+  ]
+}

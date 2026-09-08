@@ -7,8 +7,17 @@ import { REVIEW_SYSTEM_PROMPT } from '../prompts/review-v1';
 import { AppError } from '../errors';
 import type { ServerConfig } from '../config';
 
+const locationSchema = z.preprocess(value => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
+  const location = { ...value } as Record<string, unknown>;
+  // Models may serialize unused optional members as null. Never erase required members or unknown keys.
+  if (location.field !== 'bullets' && location.index === null) delete location.index;
+  if (location.field !== 'attributes' && location.key === null) delete location.key;
+  if (location.occurrence === null) delete location.occurrence;
+  return location;
+}, z.object({ field: z.enum(['title', 'bullets', 'description', 'attributes']), index: z.number().int().min(0).optional(), key: z.string().min(1).max(220).optional(), occurrence: z.number().int().min(0).max(100).optional() }).strict());
 const issueSchema = z.object({ category: z.enum(['spec_conflict', 'unsupported_claim', 'unauthorized_fact', 'internal_disclosure']),
-  location: z.object({ field: z.enum(['title', 'bullets', 'description', 'attributes']), index: z.number().int().min(0).optional(), key: z.string().min(1).max(220).optional(), occurrence: z.number().int().min(0).max(100).optional() }).strict(),
+  location: locationSchema,
   text: z.string().min(1).max(1500), reason: z.string().min(1).max(900), factKeys: z.array(z.string().min(1).max(80)).max(20), suggestedFix: z.string().min(1).max(600),
 }).strict();
 export const reviewOutputSchema = z.object({ status: z.enum(['passed', 'blocked', 'needs_human_review']), issues: z.array(issueSchema).max(12) }).strict()
@@ -31,10 +40,11 @@ export function hardReviewIssues(input: ReviewInput): Issue[] {
 export function reviewModelInput(input: ReviewInput) {
   // Review has its own consumer-field scope; generation's narrower whitelist must not erase valid review evidence.
   const publicKeys = new Set(['leakproof', 'color', 'capacity', 'material', 'straw', 'countryOfOrigin', 'packageIncludes', 'finish', 'lidType',
-    'bpaFree', 'foodSafe', 'dishwasherSafe', 'coldRetention', 'heatRetention', 'dropTest']);
+    'bpaFree', 'foodSafe', 'dishwasherSafe', 'coldRetention', 'heatRetention', 'dropTest', 'power', 'supply']);
   const allowed = input.facts.filter(f => publicKeys.has(f.key) && f.status === 'Confirmed' && f.allowed);
   return { platform: input.listing.platform, market: input.context.market, category: input.context.category,
     COPY: { title: input.listing.title, bullets: input.listing.bullets, description: input.listing.description, attributes: input.listing.attributes },
+    COPY_FIELDS: reviewFields(input).filter(f => f.text.length > 0),
     ALLOWED_FACTS: allowed.map(f => ({ field: f.key, label: f.label, value: f.value, sourceKind: f.sourceKind ?? 'supplier' })),
     UNAUTHORIZED_FIELDS: input.facts.filter(f => publicKeys.has(f.key) && !allowed.some(a => a.key === f.key)).map(f => ({ field: f.key, status: f.status, allowed: false })),
   };
@@ -66,6 +76,14 @@ export class QwenReviewProvider {
         const occurrences = field?.text.split(i.text).length ?? 0;
         if (!field || occurrences - 1 <= (loc.occurrence ?? 0)) throw new AppError('invalid_review_quote', 'Bad quote');
         if (i.factKeys.some(k => !keys.has(k)) || new Set(i.factKeys).size !== i.factKeys.length) throw new AppError('invalid_review_reference', 'Bad fact reference');
+        if (i.category === 'spec_conflict' && !i.factKeys.some(k => payload.ALLOWED_FACTS.some(f => f.field === k))) throw new AppError('invalid_review_reference', 'Conflict requires authorized evidence');
+        if (i.category === 'unauthorized_fact' && !i.factKeys.some(k => payload.UNAUTHORIZED_FIELDS.some(f => f.field === k))) throw new AppError('invalid_review_reference', 'Authorization issue requires unauthorized field');
+        // Prevent example quantities from becoming invented evidence/corrections.
+        // This is a numeric provenance check, not proof of semantic entailment or unit conversion.
+        const numbers = (s: string) => [...s.matchAll(/\d+(?:\.\d+)?/g)].map(m => Number(m[0]));
+        const evidenceText = payload.ALLOWED_FACTS.filter(f => i.factKeys.includes(f.field)).map(f => f.value).join(' ');
+        const knownNumbers = new Set(numbers(i.text + ' ' + evidenceText));
+        if (numbers(i.reason + ' ' + i.suggestedFix).some(n => !knownNumbers.has(n))) throw new AppError('invalid_review_reference', 'Unsubstantiated numeric explanation');
         if (/<[^>]+>|https?:\/\/|sk-[a-zA-Z0-9_-]{12,}/i.test(i.reason + i.suggestedFix)) throw new AppError('invalid_review_output', 'Unsafe explanation');
         return { id: `B-${index + 1}`, severity: 'HIGH', title: i.category.replaceAll('_', ' '), ...i, origin: 'qwen' };
       });

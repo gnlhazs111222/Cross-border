@@ -1,0 +1,66 @@
+{
+  "caseId": "B-11-pending",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "unauthorized",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 887,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unauthorized fact",
+        "category": "unauthorized_fact",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "BPA-free bottle.",
+        "reason": "The copy asserts the product is BPA-free, but the bpaFree field is in UNAUTHORIZED_FIELDS with status 'Requires Confirmation' and allowed:false. This positive claim cannot be supported by pending or rejected data.",
+        "factKeys": [
+          "bpaFree"
+        ],
+        "suggestedFix": "Remove the 'BPA-free' claim from the bullet point.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "4f74b37d1b979d372119db1730e232967c5c10088a80772169b3e430c5f3865b",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr4rzs0009qqo4mx4psu0u"
+    }
+  },
+  "audit": {
+    "id": "cmtsr4rzs0009qqo4mx4psu0u",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 803,
+    "promptTokens": 1327,
+    "completionTokens": 159,
+    "totalTokens": 1486
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "7be6c0c23d0c5de3a4d4435d0a72491afd2acbd1330ac5f1534d5888d088bf47"
+}

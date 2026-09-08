@@ -1,0 +1,66 @@
+{
+  "caseId": "B-32-hold-implicit",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "unsupported",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 1210,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "Carry it beside your laptop with no risk of water escaping.",
+        "reason": "The copy asserts a specific containment performance ('no risk of water escaping') which is not supported by the allowed facts. While a screw-top lid is confirmed, this alone does not verify leakproof or spill-proof capabilities. Implied outcomes regarding liquid containment require explicit authorization.",
+        "factKeys": [
+          "lidType"
+        ],
+        "suggestedFix": "Remove the claim about water escaping or replace it with a neutral description such as 'Features a screw-top lid for easy drinking.'",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v3",
+      "ruleVersion": "review-hard-v2",
+      "inputHash": "21ffe8cf8c722fe971671e720f793df71361cd88f52e660dd0c6360595e5cc9c",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtspsqym0000qqgcgf8n92su"
+    }
+  },
+  "audit": {
+    "id": "cmtspsqym0000qqgcgf8n92su",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 1168,
+    "promptTokens": 918,
+    "completionTokens": 187,
+    "totalTokens": 1105
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "ad510e79d3c699780a73551ba6c26578ee243a6d104ecb2a9c81b9d716ecda9e"
+}

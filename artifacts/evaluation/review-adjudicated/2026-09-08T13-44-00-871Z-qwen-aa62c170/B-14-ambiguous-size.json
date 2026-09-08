@@ -1,0 +1,64 @@
+{
+  "caseId": "B-14-ambiguous-size",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "ambiguity",
+  "expected": "needs_human_review",
+  "actual": "needs_human_review",
+  "latencyMs": 1110,
+  "outcome": {
+    "status": "needs_human_review",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "Compact bottle.",
+        "reason": "The adjective 'compact' implies a specific size characteristic that is not defined or supported by the allowed facts. Without evidence defining what constitutes 'compact' for this product, it is treated as an ambiguous physical claim.",
+        "factKeys": [],
+        "suggestedFix": "Remove the adjective 'compact' or replace it with verified dimensions (e.g., height/width) if available.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v5",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "10f56b5ba6dc05b8e9f7172f538c81f3913615b250de7c1b824396f4d610f22d",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsq0hfo0001qqwgv9jramyb"
+    }
+  },
+  "audit": {
+    "id": "cmtsq0hfo0001qqwgv9jramyb",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 1072,
+    "promptTokens": 1446,
+    "completionTokens": 157,
+    "totalTokens": 1603
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "03c80e7ea0b160ba5481effbd86cd1b8da57981c6a5bd77de1419f84003e964f"
+}

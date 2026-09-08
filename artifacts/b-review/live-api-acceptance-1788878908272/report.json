@@ -1,0 +1,9 @@
+{
+  "scope": "Real localhost HTTP API workflow; browser unavailable, not visual UI acceptance",
+  "events": [
+    {
+      "step": "error",
+      "message": "Unexpected token '<', \"<!doctype \"... is not valid JSON"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "caseId": "B-48-hold-sturdy",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "ambiguity",
+  "expected": "needs_human_review",
+  "actual": "needs_human_review",
+  "latencyMs": 667,
+  "outcome": {
+    "status": "needs_human_review",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "sturdy",
+        "reason": "No strength or durability evidence is supplied to support the claim of being sturdy.",
+        "factKeys": [],
+        "suggestedFix": "Remove the adjective 'sturdy' or provide verified durability data.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v6",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "eba0a45a686990c8fa9f693a068715e41e90dd2bb5b6bb3f30ab62f1798ec386",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsq2vob0002qqeo9xpqf62j"
+    }
+  },
+  "audit": {
+    "id": "cmtsq2vob0002qqeo9xpqf62j",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 619,
+    "promptTokens": 1075,
+    "completionTokens": 112,
+    "totalTokens": 1187
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "b1bae0ac9c2d436eb27eda77e8e4efb160cc0e9f478e636c5dc7817ea5e5a9f4"
+}

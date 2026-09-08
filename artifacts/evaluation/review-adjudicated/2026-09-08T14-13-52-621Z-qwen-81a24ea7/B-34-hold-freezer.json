@@ -1,0 +1,63 @@
+{
+  "caseId": "B-34-hold-freezer",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "unsupported",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 756,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "title"
+        },
+        "text": "Freezer-safe construction.",
+        "reason": "The title claims the product is freezer-safe, but no evidence regarding temperature resistance or material suitability for freezing is provided in the allowed facts.",
+        "factKeys": [],
+        "suggestedFix": "Remove the claim that the product is freezer-safe.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v7",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "4a4f4cff7a1f57b76fee9e1379319d2bd457d1b1db0ad9e8b44613a2ed5ce433",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr2w3q0002qqz4vvrvd9qi"
+    }
+  },
+  "audit": {
+    "id": "cmtsr2w3q0002qqz4vvrvd9qi",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 709,
+    "promptTokens": 1088,
+    "completionTokens": 121,
+    "totalTokens": 1209
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "339d99a75b75cda09aa71612fe8176907a2bcfdded0d8123abfbf70843a94a75"
+}

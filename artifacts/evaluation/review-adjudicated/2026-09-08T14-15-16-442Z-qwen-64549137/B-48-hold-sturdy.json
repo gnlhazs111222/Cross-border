@@ -1,0 +1,63 @@
+{
+  "caseId": "B-48-hold-sturdy",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "ambiguity",
+  "expected": "needs_human_review",
+  "actual": "needs_human_review",
+  "latencyMs": 758,
+  "outcome": {
+    "status": "needs_human_review",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "sturdy",
+        "reason": "The adjective 'sturdy' implies strength or durability, but no evidence regarding material thickness, impact resistance, or structural integrity is provided in the allowed facts.",
+        "factKeys": [],
+        "suggestedFix": "Remove the subjective adjective 'sturdy' or provide verified data on durability.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "8d7d57d3e5f12b6f3270ec7bbef79002e2e34789d370361153a43f9a9b31226f",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr4p1d0002qqo49hevdf0v"
+    }
+  },
+  "audit": {
+    "id": "cmtsr4p1d0002qqo49hevdf0v",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 709,
+    "promptTokens": 1308,
+    "completionTokens": 130,
+    "totalTokens": 1438
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "b1bae0ac9c2d436eb27eda77e8e4efb160cc0e9f478e636c5dc7817ea5e5a9f4"
+}

@@ -1,0 +1,63 @@
+{
+  "caseId": "B-18-bag-waterproof",
+  "split": "dev",
+  "category": "Backpacks",
+  "risk": "cross-category",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 1122,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "Your belongings stay dry in heavy rain.",
+        "reason": "The copy asserts a specific performance outcome (keeping belongings dry in heavy rain) which implies waterproof or water-resistant containment properties. The allowed facts only confirm the material is polyester and the color is black. Material type alone does not establish that the backpack provides protection against heavy rain, as this depends on construction, seams, zippers, and coatings which are not authorized.",
+        "factKeys": [],
+        "suggestedFix": "Remove the claim about keeping belongings dry in heavy rain unless there is authorized evidence of waterproofing or water resistance.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v3",
+      "ruleVersion": "review-hard-v2",
+      "inputHash": "4d38767154562ed3f903e32098e49ce0dbefb245f14847d8a58cf77d9a29b164",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtspsj8k0001qqww1v08mril"
+    }
+  },
+  "audit": {
+    "id": "cmtspsj8k0001qqww1v08mril",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 1080,
+    "promptTokens": 844,
+    "completionTokens": 181,
+    "totalTokens": 1025
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "2e30c1024a79801d0e6faa856200707c2351ea247ccc1fd394de129658a0fec5"
+}

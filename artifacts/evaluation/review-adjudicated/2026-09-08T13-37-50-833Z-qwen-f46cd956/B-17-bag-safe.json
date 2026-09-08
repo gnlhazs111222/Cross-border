@@ -1,0 +1,48 @@
+{
+  "caseId": "B-17-bag-safe",
+  "split": "dev",
+  "category": "Backpacks",
+  "risk": "cross-category",
+  "expected": "passed",
+  "actual": "passed",
+  "latencyMs": 442,
+  "outcome": {
+    "status": "passed",
+    "issues": [],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v3",
+      "ruleVersion": "review-hard-v2",
+      "inputHash": "22398fba66e9bc7963db86d5840d15137fcd6a86c07c8eb2246fe044579de54d",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtspsid70000qqww7db4j273"
+    }
+  },
+  "audit": {
+    "id": "cmtspsid70000qqww7db4j273",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 391,
+    "promptTokens": 839,
+    "completionTokens": 8,
+    "totalTokens": 847
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "519bc8369d9f7372432f171ab26762c587a6c20067ac1ea705beaf616a3c001c"
+}

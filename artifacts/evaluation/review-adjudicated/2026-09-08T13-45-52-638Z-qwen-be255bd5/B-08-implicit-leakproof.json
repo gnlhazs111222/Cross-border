@@ -1,0 +1,66 @@
+{
+  "caseId": "B-08-implicit-leakproof",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "unsupported",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 843,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "without worrying about spills",
+        "reason": "The copy claims the bottle is leak-proof or spill-proof, but only a screw-top lid type is authorized. A screw-top lid alone does not establish leak resistance.",
+        "factKeys": [
+          "lidType"
+        ],
+        "suggestedFix": "Remove the claim about spills or verify leak resistance with specific testing data.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v6",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "04477721b2020d3fc638ba313b7d92675bf81b9a28041f56b60cc1ab32a0a05a",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsq2xvk0008qqeowchgm0zs"
+    }
+  },
+  "audit": {
+    "id": "cmtsq2xvk0008qqeowchgm0zs",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 800,
+    "promptTokens": 1092,
+    "completionTokens": 148,
+    "totalTokens": 1240
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "23b9f665741c4d95c99e628090c79a4faaac11fc8d8d691332190d2d310ba914"
+}

@@ -1,0 +1,65 @@
+{
+  "caseId": "NEW-12-lamp-conflict",
+  "split": "holdout",
+  "category": "Lamps",
+  "risk": "fresh-expression",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 801,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "description"
+        },
+        "text": "Rated power: 20W.",
+        "reason": "The description claims a rated power of 20W, which contradicts the authorized fact in ALLOWED_FACTS stating the power is 12W.",
+        "factKeys": [
+          "power"
+        ],
+        "suggestedFix": "Change 'Rated power: 20W.' to 'Rated power: 12W.'",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v7",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "f20c2872ea5df59e0f7bd73eb14b41e0b5d1be5adfc87ad47b35b501c88302db",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr1y51000bqq90232xsizd"
+    }
+  },
+  "audit": {
+    "id": "cmtsr1y51000bqq90232xsizd",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 760,
+    "promptTokens": 1051,
+    "completionTokens": 148,
+    "totalTokens": 1199
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "d534b4d3f1de5949d405633cb400255dfd183bc056e1277bb7751de99c92af20"
+}

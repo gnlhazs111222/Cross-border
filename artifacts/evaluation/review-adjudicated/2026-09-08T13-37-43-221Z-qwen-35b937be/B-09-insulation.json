@@ -1,0 +1,63 @@
+{
+  "caseId": "B-09-insulation",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "unsupported",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 831,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "Keeps water cold for 24 hours.",
+        "reason": "The description asserts a specific temperature retention performance (24 hours) which is not supported by any fact in ALLOWED_FACTS. Material and capacity alone do not confirm insulation capabilities or duration.",
+        "factKeys": [],
+        "suggestedFix": "Remove the specific time claim or verify if this performance metric is authorized.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v3",
+      "ruleVersion": "review-hard-v2",
+      "inputHash": "cbaa9253a7e1ac3293abc67d93ad583503306aaab5b6a7407fce90967e9c556c",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtspsfy90006qqz0xqqybtg0"
+    }
+  },
+  "audit": {
+    "id": "cmtspsfy90006qqz0xqqybtg0",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 766,
+    "promptTokens": 914,
+    "completionTokens": 126,
+    "totalTokens": 1040
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "c78d2366c70a95edf5e073585a8429286392d35351ecb1e8badf0ba9fdcef9e2"
+}

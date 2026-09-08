@@ -1,0 +1,671 @@
+[
+  {
+    "caseId": "B-14-ambiguous-size",
+    "expected": "needs_human_review",
+    "input": {
+      "listing": {
+        "platform": "shopify",
+        "title": "Black stainless steel bottle, 500ml.",
+        "bullets": [
+          "Compact bottle."
+        ],
+        "description": "",
+        "attributes": {}
+      },
+      "facts": [
+        {
+          "key": "capacity",
+          "label": "capacity",
+          "value": "500ml",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "capacity",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "material",
+          "label": "material",
+          "value": "Stainless steel",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "material",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "color",
+          "label": "color",
+          "value": "Black",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "color",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "lidType",
+          "label": "lidType",
+          "value": "Screw-top lid",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "lidType",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "straw",
+          "label": "straw",
+          "value": "No straw",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "straw",
+          "sourceKind": "manual"
+        }
+      ],
+      "context": {
+        "market": "United States",
+        "category": "Water bottles",
+        "taskRevision": 1
+      },
+      "listingRevision": 1,
+      "factsRevision": 1
+    },
+    "result": {
+      "status": "needs_human_review",
+      "issues": [
+        {
+          "id": "B-1",
+          "severity": "HIGH",
+          "title": "unsupported claim",
+          "category": "unsupported_claim",
+          "location": {
+            "field": "bullets",
+            "index": 0
+          },
+          "text": "Compact bottle.",
+          "reason": "The adjective 'compact' implies a specific size relative to other products, but no comparative size data or dimensions are provided in the authorized facts to verify this claim.",
+          "factKeys": [],
+          "suggestedFix": "Remove the subjective term 'Compact' or provide verified dimensions for comparison.",
+          "origin": "qwen"
+        }
+      ],
+      "metadata": {
+        "mode": "rules_qwen",
+        "model": "qwen3.6-flash",
+        "promptVersion": "review-qwen-v8",
+        "ruleVersion": "review-hard-v5",
+        "inputHash": "46bce1f1f70590c3fe3e2eab65cebac451fb72fbe4193a9dc4dd0038e084e25a",
+        "listingRevision": 1,
+        "factsRevision": 1,
+        "taskRevision": 1,
+        "modelCalled": true,
+        "aiCallId": "cmtsrzkrq0000qqng3uq8rf54"
+      }
+    },
+    "response": {
+      "content": "{\n  \"status\": \"needs_human_review\",\n  \"issues\": [\n    {\n      \"category\": \"unsupported_claim\",\n      \"location\": {\n        \"field\": \"bullets\",\n        \"index\": 0\n      },\n      \"text\": \"Compact bottle.\",\n      \"reason\": \"The adjective 'compact' implies a specific size relative to other products, but no comparative size data or dimensions are provided in the authorized facts to verify this claim.\",\n      \"factKeys\": [],\n      \"suggestedFix\": \"Remove the subjective term 'Compact' or provide verified dimensions for comparison.\"\n    }\n  ]\n}",
+      "usage": {
+        "prompt_tokens": 1309,
+        "total_tokens": 1447,
+        "completion_tokens": 138
+      }
+    }
+  },
+  {
+    "caseId": "B-14-ambiguous-size",
+    "expected": "needs_human_review",
+    "input": {
+      "listing": {
+        "platform": "shopify",
+        "title": "Black stainless steel bottle, 500ml.",
+        "bullets": [
+          "Compact bottle."
+        ],
+        "description": "",
+        "attributes": {}
+      },
+      "facts": [
+        {
+          "key": "capacity",
+          "label": "capacity",
+          "value": "500ml",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "capacity",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "material",
+          "label": "material",
+          "value": "Stainless steel",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "material",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "color",
+          "label": "color",
+          "value": "Black",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "color",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "lidType",
+          "label": "lidType",
+          "value": "Screw-top lid",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "lidType",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "straw",
+          "label": "straw",
+          "value": "No straw",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "straw",
+          "sourceKind": "manual"
+        }
+      ],
+      "context": {
+        "market": "United States",
+        "category": "Water bottles",
+        "taskRevision": 1
+      },
+      "listingRevision": 1,
+      "factsRevision": 1
+    },
+    "result": {
+      "status": "needs_human_review",
+      "issues": [
+        {
+          "id": "B-1",
+          "severity": "HIGH",
+          "title": "unsupported claim",
+          "category": "unsupported_claim",
+          "location": {
+            "field": "bullets",
+            "index": 0
+          },
+          "text": "Compact bottle.",
+          "reason": "The adjective 'compact' implies a specific size relative to other products, but no comparative size data or dimensions are provided in the authorized facts to verify this claim.",
+          "factKeys": [],
+          "suggestedFix": "Remove the subjective term 'Compact' or provide specific dimensions for verification.",
+          "origin": "qwen"
+        }
+      ],
+      "metadata": {
+        "mode": "rules_qwen",
+        "model": "qwen3.6-flash",
+        "promptVersion": "review-qwen-v8",
+        "ruleVersion": "review-hard-v5",
+        "inputHash": "46bce1f1f70590c3fe3e2eab65cebac451fb72fbe4193a9dc4dd0038e084e25a",
+        "listingRevision": 1,
+        "factsRevision": 1,
+        "taskRevision": 1,
+        "modelCalled": true,
+        "aiCallId": "cmtsrzlg00001qqngyeelys5h"
+      }
+    },
+    "response": {
+      "content": "{\n  \"status\": \"needs_human_review\",\n  \"issues\": [\n    {\n      \"category\": \"unsupported_claim\",\n      \"location\": {\n        \"field\": \"bullets\",\n        \"index\": 0\n      },\n      \"text\": \"Compact bottle.\",\n      \"reason\": \"The adjective 'compact' implies a specific size relative to other products, but no comparative size data or dimensions are provided in the authorized facts to verify this claim.\",\n      \"factKeys\": [],\n      \"suggestedFix\": \"Remove the subjective term 'Compact' or provide specific dimensions for verification.\"\n    }\n  ]\n}",
+      "usage": {
+        "prompt_tokens": 1309,
+        "total_tokens": 1447,
+        "completion_tokens": 138
+      }
+    }
+  },
+  {
+    "caseId": "B-14-ambiguous-size",
+    "expected": "needs_human_review",
+    "input": {
+      "listing": {
+        "platform": "shopify",
+        "title": "Black stainless steel bottle, 500ml.",
+        "bullets": [
+          "Compact bottle."
+        ],
+        "description": "",
+        "attributes": {}
+      },
+      "facts": [
+        {
+          "key": "capacity",
+          "label": "capacity",
+          "value": "500ml",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "capacity",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "material",
+          "label": "material",
+          "value": "Stainless steel",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "material",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "color",
+          "label": "color",
+          "value": "Black",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "color",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "lidType",
+          "label": "lidType",
+          "value": "Screw-top lid",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "lidType",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "straw",
+          "label": "straw",
+          "value": "No straw",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "straw",
+          "sourceKind": "manual"
+        }
+      ],
+      "context": {
+        "market": "United States",
+        "category": "Water bottles",
+        "taskRevision": 1
+      },
+      "listingRevision": 1,
+      "factsRevision": 1
+    },
+    "result": {
+      "status": "needs_human_review",
+      "issues": [
+        {
+          "id": "B-1",
+          "severity": "HIGH",
+          "title": "unsupported claim",
+          "category": "unsupported_claim",
+          "location": {
+            "field": "bullets",
+            "index": 0
+          },
+          "text": "Compact bottle.",
+          "reason": "The adjective 'compact' implies a specific size relative to other products, but no comparative size data or dimensions are provided in the authorized facts to verify this claim.",
+          "factKeys": [],
+          "suggestedFix": "Remove the subjective term 'Compact' or provide specific dimensions for verification.",
+          "origin": "qwen"
+        }
+      ],
+      "metadata": {
+        "mode": "rules_qwen",
+        "model": "qwen3.6-flash",
+        "promptVersion": "review-qwen-v8",
+        "ruleVersion": "review-hard-v5",
+        "inputHash": "46bce1f1f70590c3fe3e2eab65cebac451fb72fbe4193a9dc4dd0038e084e25a",
+        "listingRevision": 1,
+        "factsRevision": 1,
+        "taskRevision": 1,
+        "modelCalled": true,
+        "aiCallId": "cmtsrzm4g0002qqngwdykew4u"
+      }
+    },
+    "response": {
+      "content": "{\n  \"status\": \"needs_human_review\",\n  \"issues\": [\n    {\n      \"category\": \"unsupported_claim\",\n      \"location\": {\n        \"field\": \"bullets\",\n        \"index\": 0\n      },\n      \"text\": \"Compact bottle.\",\n      \"reason\": \"The adjective 'compact' implies a specific size relative to other products, but no comparative size data or dimensions are provided in the authorized facts to verify this claim.\",\n      \"factKeys\": [],\n      \"suggestedFix\": \"Remove the subjective term 'Compact' or provide specific dimensions for verification.\"\n    }\n  ]\n}",
+      "usage": {
+        "prompt_tokens": 1309,
+        "total_tokens": 1447,
+        "completion_tokens": 138
+      }
+    }
+  },
+  {
+    "caseId": "B-02-paraphrase-holds",
+    "expected": "passed",
+    "input": {
+      "listing": {
+        "platform": "shopify",
+        "title": "Black stainless steel bottle, 500ml.",
+        "bullets": [
+          "This black bottle holds 500ml and is made of stainless steel."
+        ],
+        "description": "",
+        "attributes": {}
+      },
+      "facts": [
+        {
+          "key": "capacity",
+          "label": "capacity",
+          "value": "500ml",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "capacity",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "material",
+          "label": "material",
+          "value": "Stainless steel",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "material",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "color",
+          "label": "color",
+          "value": "Black",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "color",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "lidType",
+          "label": "lidType",
+          "value": "Screw-top lid",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "lidType",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "straw",
+          "label": "straw",
+          "value": "No straw",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "straw",
+          "sourceKind": "manual"
+        }
+      ],
+      "context": {
+        "market": "United States",
+        "category": "Water bottles",
+        "taskRevision": 1
+      },
+      "listingRevision": 1,
+      "factsRevision": 1
+    },
+    "result": {
+      "status": "passed",
+      "issues": [],
+      "metadata": {
+        "mode": "rules_qwen",
+        "model": "qwen3.6-flash",
+        "promptVersion": "review-qwen-v8",
+        "ruleVersion": "review-hard-v5",
+        "inputHash": "15940bee10a29928439a09b74ce18932ce0ac830813977f5eabef0e7cd3789d6",
+        "listingRevision": 1,
+        "factsRevision": 1,
+        "taskRevision": 1,
+        "modelCalled": true,
+        "aiCallId": "cmtsrzmec0003qqngqqqrqv3i"
+      }
+    },
+    "response": {
+      "content": "{\n  \"status\": \"passed\",\n  \"issues\": []\n}",
+      "usage": {
+        "prompt_tokens": 1335,
+        "total_tokens": 1352,
+        "completion_tokens": 17
+      }
+    }
+  },
+  {
+    "caseId": "B-04-capacity-wrong",
+    "expected": "blocked",
+    "input": {
+      "listing": {
+        "platform": "shopify",
+        "title": "A generous 750ml capacity.",
+        "bullets": [],
+        "description": "",
+        "attributes": {}
+      },
+      "facts": [
+        {
+          "key": "capacity",
+          "label": "capacity",
+          "value": "500ml",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "capacity",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "material",
+          "label": "material",
+          "value": "Stainless steel",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "material",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "color",
+          "label": "color",
+          "value": "Black",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "color",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "lidType",
+          "label": "lidType",
+          "value": "Screw-top lid",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "lidType",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "straw",
+          "label": "straw",
+          "value": "No straw",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "straw",
+          "sourceKind": "manual"
+        }
+      ],
+      "context": {
+        "market": "United States",
+        "category": "Water bottles",
+        "taskRevision": 1
+      },
+      "listingRevision": 1,
+      "factsRevision": 1
+    },
+    "result": {
+      "status": "blocked",
+      "issues": [
+        {
+          "id": "B-1",
+          "severity": "HIGH",
+          "title": "spec conflict",
+          "category": "spec_conflict",
+          "location": {
+            "field": "title"
+          },
+          "text": "750ml capacity",
+          "reason": "The title claims a 750ml capacity, which contradicts the authorized fact of 500ml.",
+          "factKeys": [
+            "capacity"
+          ],
+          "suggestedFix": "Replace '750ml' with '500ml' to match the authorized capacity.",
+          "origin": "qwen"
+        }
+      ],
+      "metadata": {
+        "mode": "rules_qwen",
+        "model": "qwen3.6-flash",
+        "promptVersion": "review-qwen-v8",
+        "ruleVersion": "review-hard-v5",
+        "inputHash": "09b5e26dbc9a30d6c00d2e0171731b7dce0a80f92b7b30510aaae1f4516df4bc",
+        "listingRevision": 1,
+        "factsRevision": 1,
+        "taskRevision": 1,
+        "modelCalled": true,
+        "aiCallId": "cmtsrzn0d0004qqngijt5hp7w"
+      }
+    },
+    "response": {
+      "content": "{\n  \"status\": \"blocked\",\n  \"issues\": [\n    {\n      \"category\": \"spec_conflict\",\n      \"location\": {\n        \"field\": \"title\"\n      },\n      \"text\": \"750ml capacity\",\n      \"reason\": \"The title claims a 750ml capacity, which contradicts the authorized fact of 500ml.\",\n      \"factKeys\": [\n        \"capacity\"\n      ],\n      \"suggestedFix\": \"Replace '750ml' with '500ml' to match the authorized capacity.\"\n    }\n  ]\n}",
+      "usage": {
+        "prompt_tokens": 1285,
+        "total_tokens": 1423,
+        "completion_tokens": 138
+      }
+    }
+  },
+  {
+    "caseId": "B-16-attribute-conflict",
+    "expected": "blocked",
+    "input": {
+      "listing": {
+        "platform": "shopify",
+        "title": "Black stainless steel bottle, 500ml.",
+        "bullets": [],
+        "description": "",
+        "attributes": {
+          "Capacity": "750ml"
+        }
+      },
+      "facts": [
+        {
+          "key": "capacity",
+          "label": "capacity",
+          "value": "500ml",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "capacity",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "material",
+          "label": "material",
+          "value": "Stainless steel",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "material",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "color",
+          "label": "color",
+          "value": "Black",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "color",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "lidType",
+          "label": "lidType",
+          "value": "Screw-top lid",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "lidType",
+          "sourceKind": "manual"
+        },
+        {
+          "key": "straw",
+          "label": "straw",
+          "value": "No straw",
+          "status": "Confirmed",
+          "allowed": true,
+          "source": "Synthetic fixture; not real evidence",
+          "anchor": "straw",
+          "sourceKind": "manual"
+        }
+      ],
+      "context": {
+        "market": "United States",
+        "category": "Water bottles",
+        "taskRevision": 1
+      },
+      "listingRevision": 1,
+      "factsRevision": 1
+    },
+    "result": {
+      "status": "blocked",
+      "issues": [
+        {
+          "id": "B-1",
+          "severity": "HIGH",
+          "title": "spec conflict",
+          "category": "spec_conflict",
+          "location": {
+            "field": "attributes",
+            "key": "Capacity"
+          },
+          "text": "750ml",
+          "reason": "The attribute value '750ml' contradicts the authorized fact 'capacity' which is '500ml'.",
+          "factKeys": [
+            "capacity"
+          ],
+          "suggestedFix": "Replace with 500ml.",
+          "origin": "qwen"
+        }
+      ],
+      "metadata": {
+        "mode": "rules_qwen",
+        "model": "qwen3.6-flash",
+        "promptVersion": "review-qwen-v8",
+        "ruleVersion": "review-hard-v5",
+        "inputHash": "f50cb824c24f076c6a7220be334eca79b35884d2d8f3cbd536e6535590b218ef",
+        "listingRevision": 1,
+        "factsRevision": 1,
+        "taskRevision": 1,
+        "modelCalled": true,
+        "aiCallId": "cmtsrznmp0005qqngszovtsfm"
+      }
+    },
+    "response": {
+      "content": "{\n  \"status\": \"blocked\",\n  \"issues\": [\n    {\n      \"category\": \"spec_conflict\",\n      \"location\": {\n        \"field\": \"attributes\",\n        \"key\": \"Capacity\"\n      },\n      \"text\": \"750ml\",\n      \"reason\": \"The attribute value '750ml' contradicts the authorized fact 'capacity' which is '500ml'.\",\n      \"factKeys\": [\n        \"capacity\"\n      ],\n      \"suggestedFix\": \"Replace with 500ml.\"\n    }\n  ]\n}",
+      "usage": {
+        "prompt_tokens": 1311,
+        "total_tokens": 1446,
+        "completion_tokens": 135
+      }
+    }
+  }
+]

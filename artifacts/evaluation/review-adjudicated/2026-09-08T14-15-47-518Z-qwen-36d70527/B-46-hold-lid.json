@@ -1,0 +1,65 @@
+{
+  "caseId": "B-46-hold-lid",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "contradiction",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 767,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "title"
+        },
+        "text": "flip-top lid",
+        "reason": "The title claims the product has a flip-top lid, but the authorized fact specifies it has a screw-top lid.",
+        "factKeys": [
+          "lidType"
+        ],
+        "suggestedFix": "Replace 'flip-top lid' with 'Screw-top lid'.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "9ac9ba27b33be79c817eb5f32084c81de2d3683da29b2c50a3b99d9ebe01e0da",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr5d2r0003qqv80x0dc8zs"
+    }
+  },
+  "audit": {
+    "id": "cmtsr5d2r0003qqv80x0dc8zs",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 715,
+    "promptTokens": 1283,
+    "completionTokens": 130,
+    "totalTokens": 1413
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "1f4524c129d9635ed2698fef827b2d2c9fcda13dc3cebf5b50a294afeed5cece"
+}

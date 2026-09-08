@@ -1,0 +1,79 @@
+{
+  "caseId": "NEW-07-mixed-promise",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "fresh-expression",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 1145,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "title"
+        },
+        "text": "750ml",
+        "reason": "The title states the capacity is 750ml, which contradicts the allowed fact for capacity.",
+        "factKeys": [
+          "capacity"
+        ],
+        "suggestedFix": "Use 500ml.",
+        "origin": "qwen"
+      },
+      {
+        "id": "B-2",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "your notebook remains dry when packed alongside the bottle",
+        "reason": "No evidence of leak resistance or containment performance is supplied to support the claim that contents remain dry.",
+        "factKeys": [],
+        "suggestedFix": "Remove the unverified performance claim regarding keeping items dry.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v6",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "6b0615816fa2c7411415d4c0cce1195dc3af9bd795268962fc3739f54a234bba",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsqj0420006qqdozddm4jjw"
+    }
+  },
+  "audit": {
+    "id": "cmtsqj0420006qqdozddm4jjw",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 1085,
+    "promptTokens": 1079,
+    "completionTokens": 220,
+    "totalTokens": 1299
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "89053c4ef3c382d7e1b074251eef1e33136f287554859b8f17d1191527bf54a2"
+}

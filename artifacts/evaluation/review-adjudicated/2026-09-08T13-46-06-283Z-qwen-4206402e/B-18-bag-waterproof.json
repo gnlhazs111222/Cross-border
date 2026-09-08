@@ -1,0 +1,63 @@
+{
+  "caseId": "B-18-bag-waterproof",
+  "split": "dev",
+  "category": "Backpacks",
+  "risk": "cross-category",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 698,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "Your belongings stay dry in heavy rain.",
+        "reason": "No evidence of water resistance or containment performance is supplied to support the claim that belongings stay dry.",
+        "factKeys": [],
+        "suggestedFix": "Remove the unverified performance promise.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v6",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "480c280bddfdb45f4b4590924b51c067a6c14653b3f761e5f5380b850cfa2569",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsq35900001qqw4ydc14x0e"
+    }
+  },
+  "audit": {
+    "id": "cmtsq35900001qqw4ydc14x0e",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 658,
+    "promptTokens": 1005,
+    "completionTokens": 113,
+    "totalTokens": 1118
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "2e30c1024a79801d0e6faa856200707c2351ea247ccc1fd394de129658a0fec5"
+}

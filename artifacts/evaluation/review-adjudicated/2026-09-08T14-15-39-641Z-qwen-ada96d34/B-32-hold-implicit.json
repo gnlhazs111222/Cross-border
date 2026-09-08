@@ -1,0 +1,66 @@
+{
+  "caseId": "B-32-hold-implicit",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "unsupported",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 1160,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "no risk of water escaping",
+        "reason": "The copy claims leak resistance ('no risk of water escaping'), but the only evidence is a 'Screw-top lid' (lidType). A screw-top lid alone does not establish leak resistance, and no other containment or leak-proof certification is provided.",
+        "factKeys": [
+          "lidType"
+        ],
+        "suggestedFix": "Remove the claim about water escaping. The product has a screw-top lid.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "f08be750baa124c866c58552e9b2199024a914b5c2459c1ca3209d54f5f8a068",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr55mh0000qquombytkjuw"
+    }
+  },
+  "audit": {
+    "id": "cmtsr55mh0000qquombytkjuw",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 1110,
+    "promptTokens": 1329,
+    "completionTokens": 167,
+    "totalTokens": 1496
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "ad510e79d3c699780a73551ba6c26578ee243a6d104ecb2a9c81b9d716ecda9e"
+}

@@ -1,0 +1,66 @@
+{
+  "caseId": "B-11-pending",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "unauthorized",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 1155,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unauthorized fact",
+        "category": "unauthorized_fact",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "BPA-free bottle.",
+        "reason": "The claim that the bottle is BPA-free relies on the 'bpaFree' field, which is listed in UNAUTHORIZED_FIELDS with status 'Requires Confirmation'. Unauthorized fields cannot be asserted as established facts.",
+        "factKeys": [
+          "bpaFree"
+        ],
+        "suggestedFix": "Remove the 'BPA-free' claim until the bpaFree field is authorized or confirmed.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v5",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "55b79c414c877ec9209d4467f3a336c982ef95f0d4c2c1fe03d52a52e4335274",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsq0lr40009qqwgkmztwz6c"
+    }
+  },
+  "audit": {
+    "id": "cmtsq0lr40009qqwgkmztwz6c",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 1074,
+    "promptTokens": 1464,
+    "completionTokens": 163,
+    "totalTokens": 1627
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "7be6c0c23d0c5de3a4d4435d0a72491afd2acbd1330ac5f1534d5888d088bf47"
+}

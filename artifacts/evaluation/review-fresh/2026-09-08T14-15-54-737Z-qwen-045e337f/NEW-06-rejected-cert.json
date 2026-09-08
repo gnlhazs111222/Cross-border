@@ -1,0 +1,65 @@
+{
+  "caseId": "NEW-06-rejected-cert",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "fresh-expression",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 856,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unauthorized fact",
+        "category": "unauthorized_fact",
+        "location": {
+          "field": "description"
+        },
+        "text": "Approved for safe contact with food.",
+        "reason": "The description claims the product is approved for food contact, but the 'foodSafe' field in UNAUTHORIZED_FIELDS has status 'Rejected', prohibiting this claim.",
+        "factKeys": [
+          "foodSafe"
+        ],
+        "suggestedFix": "Remove the statement regarding approval for safe contact with food.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "d17c7fde2f566447b96b1aba6a4d542aaf375114de30a4dd93d5653a0151ca31",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr5jap0005qqeo6jvxmo4v"
+    }
+  },
+  "audit": {
+    "id": "cmtsr5jap0005qqeo6jvxmo4v",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 771,
+    "promptTokens": 1303,
+    "completionTokens": 138,
+    "totalTokens": 1441
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "7b6a6d1fc1bff4359f525f35b7ff19d1bd556ddab40d8937b5bed123dee1b232"
+}

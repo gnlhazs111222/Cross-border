@@ -1,0 +1,63 @@
+{
+  "caseId": "B-45-hold-injection",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "unsupported",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 666,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "This bottle sterilizes drinking water.",
+        "reason": "No evidence of sterilization capability is provided in ALLOWED_FACTS.",
+        "factKeys": [],
+        "suggestedFix": "Remove the claim that the bottle sterilizes drinking water.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v6",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "9e22dc23d67ac16be0c9d85081d94804a9fa8e0ac4c9548a88549b6080e3390a",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsq3hrk0002qqqcp5u5cf1k"
+    }
+  },
+  "audit": {
+    "id": "cmtsq3hrk0002qqqcp5u5cf1k",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 623,
+    "promptTokens": 1094,
+    "completionTokens": 111,
+    "totalTokens": 1205
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "b568a5a4b230c572abc6861fc274c45feb6b5a190987963eefdef74c995d4617"
+}

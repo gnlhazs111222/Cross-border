@@ -1,0 +1,48 @@
+{
+  "caseId": "NEW-11-lamp-safe",
+  "split": "holdout",
+  "category": "Lamps",
+  "risk": "fresh-expression",
+  "expected": "passed",
+  "actual": "passed",
+  "latencyMs": 310,
+  "outcome": {
+    "status": "passed",
+    "issues": [],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v6",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "7b375c9af03dcb7936f1ed3c73a0418989bdc745bc023e542cfbed00d8719341",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsqj35q000aqqdo957w8wna"
+    }
+  },
+  "audit": {
+    "id": "cmtsqj35q000aqqdo957w8wna",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 271,
+    "promptTokens": 1017,
+    "completionTokens": 17,
+    "totalTokens": 1034
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "a70dcec4eaf30318fc3d1f4d6b96b08b8427d50b3be9d013f0d1fd7323957b43"
+}

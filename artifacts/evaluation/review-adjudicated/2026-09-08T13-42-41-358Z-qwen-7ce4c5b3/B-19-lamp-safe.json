@@ -1,0 +1,63 @@
+{
+  "caseId": "B-19-lamp-safe",
+  "split": "dev",
+  "category": "Lamps",
+  "risk": "cross-category",
+  "expected": "passed",
+  "actual": "blocked",
+  "latencyMs": 611,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "title"
+        },
+        "text": "A 5W USB-powered lamp.",
+        "reason": "The power consumption (5W) is a specific performance specification not supported by any allowed facts.",
+        "factKeys": [],
+        "suggestedFix": "Remove the specific wattage claim or provide authorized evidence for the power rating.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v4",
+      "ruleVersion": "review-hard-v3",
+      "inputHash": "d3702ba417b7fb5ae42ad8a159ae3ec55443e5f2d9630c615147072f08224eb4",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtspywce000bqqpshsc3km2l"
+    }
+  },
+  "audit": {
+    "id": "cmtspywce000bqqpshsc3km2l",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 564,
+    "promptTokens": 1215,
+    "completionTokens": 74,
+    "totalTokens": 1289
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "d9494260b119993905be4cda157605830440d11a2e654e4b7b55a508dbb1914a"
+}

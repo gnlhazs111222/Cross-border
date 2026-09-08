@@ -1,0 +1,66 @@
+{
+  "caseId": "B-05-material-wrong",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "contradiction",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 844,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "Made from glass.",
+        "reason": "The bullet claims the material is glass, which directly contradicts the authorized fact that the material is Stainless steel.",
+        "factKeys": [
+          "material"
+        ],
+        "suggestedFix": "Remove the claim 'Made from glass.' or correct it to 'Made from stainless steel' if accurate.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v7",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "fbd142c2704e3b3a6bd8c5f9ef7471ac9115d28216f9a0e008409d1dd4d7b377",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr2k3q0004qqtg952uf65y"
+    }
+  },
+  "audit": {
+    "id": "cmtsr2k3q0004qqtg952uf65y",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 801,
+    "promptTokens": 1121,
+    "completionTokens": 143,
+    "totalTokens": 1264
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "9424ade901d7ac6693870a94d4788eccb3647071adf621f1689b1aa2709f1040"
+}

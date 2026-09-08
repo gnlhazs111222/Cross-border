@@ -1,0 +1,63 @@
+{
+  "caseId": "B-10-dishwasher",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "unsupported",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 778,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "title"
+        },
+        "text": "Safe to clean in any dishwasher.",
+        "reason": "No evidence is supplied regarding dishwasher safety or compatibility. Material (Stainless steel) does not automatically confirm dishwasher safety for the entire product including lids/seals.",
+        "factKeys": [],
+        "suggestedFix": "Remove the unverified dishwasher safety claim.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v6",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "a0a524fffe1d04595d60a7b27cef024277fc87258cab49f59c6984791d703be4",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsq339l0007qqp0fiqw038k"
+    }
+  },
+  "audit": {
+    "id": "cmtsq339l0007qqp0fiqw038k",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 738,
+    "promptTokens": 1048,
+    "completionTokens": 125,
+    "totalTokens": 1173
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "cca55d3a9606fa43b959f43950ad03534c3a46d0dc20c210592599427f486a3c"
+}

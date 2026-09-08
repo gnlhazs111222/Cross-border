@@ -1,0 +1,64 @@
+{
+  "caseId": "B-44-hold-lamp-cert",
+  "split": "holdout",
+  "category": "Lamps",
+  "risk": "cross-category",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 677,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "UL-certified for safe use.",
+        "reason": "No evidence of UL certification is provided in the allowed facts.",
+        "factKeys": [],
+        "suggestedFix": "Remove the claim or provide proof of UL certification.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v6",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "b20f54b42f8a20f093b4ffb0bcede2e20bca51333fca3e972e6e07e1ee9e4314",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsq3h900001qqqc44gsbapf"
+    }
+  },
+  "audit": {
+    "id": "cmtsq3h900001qqqc44gsbapf",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 633,
+    "promptTokens": 1011,
+    "completionTokens": 116,
+    "totalTokens": 1127
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "e3a6c0502539d8b239b4266ecd80f89fea870a2b8994b074cd007f3bdeb0c9ef"
+}

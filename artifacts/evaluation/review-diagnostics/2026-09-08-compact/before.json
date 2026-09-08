@@ -1,0 +1,42 @@
+{
+  "response": {
+    "content": "{\n  \"status\": \"needs_human_review\",\n  \"issues\": [\n    {\n      \"category\": \"unsupported_claim\",\n      \"location\": {\n        \"field\": \"bullets\",\n        \"index\": 0\n      },\n      \"text\": \"Compact bottle.\",\n      \"reason\": \"The adjective 'compact' implies a specific size relative to other products, but no comparative size data or dimensions are provided in the authorized facts to verify this claim.\",\n      \"factKeys\": [],\n      \"suggestedFix\": \"Remove the subjective term 'Compact' or provide specific dimensions for verification.\"\n    }\n  ]\n}",
+    "usage": {
+      "prompt_tokens": 1309,
+      "total_tokens": 1447,
+      "completion_tokens": 138
+    }
+  },
+  "result": {
+    "status": "needs_human_review",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "Compact bottle.",
+        "reason": "The adjective 'compact' implies a specific size relative to other products, but no comparative size data or dimensions are provided in the authorized facts to verify this claim.",
+        "factKeys": [],
+        "suggestedFix": "Remove the subjective term 'Compact' or provide specific dimensions for verification.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "46bce1f1f70590c3fe3e2eab65cebac451fb72fbe4193a9dc4dd0038e084e25a",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsrywoc0000qqfs1p8ku1f3"
+    }
+  }
+}

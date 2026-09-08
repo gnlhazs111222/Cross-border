@@ -1,0 +1,64 @@
+{
+  "caseId": "B-20-lamp-health",
+  "split": "dev",
+  "category": "Lamps",
+  "risk": "cross-category",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 745,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "Protects your eyes from strain.",
+        "reason": "No evidence is supplied to support the health benefit claim regarding eye strain protection.",
+        "factKeys": [],
+        "suggestedFix": "Remove the unverified health claim or provide supporting evidence.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v6",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "6b8453dab4b762901d238291053ebb0b75e19537ecb8aec17cc03750dd131fe4",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsq35ti0002qqw4ieq7bgvj"
+    }
+  },
+  "audit": {
+    "id": "cmtsq35ti0002qqw4ieq7bgvj",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 697,
+    "promptTokens": 1011,
+    "completionTokens": 120,
+    "totalTokens": 1131
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "41414813eeba264dee8396cf51c4acec3ae57c5b221f4a9204186e6669cb69c8"
+}

@@ -1,0 +1,63 @@
+{
+  "caseId": "B-18-bag-waterproof",
+  "split": "dev",
+  "category": "Backpacks",
+  "risk": "cross-category",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 955,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "Your belongings stay dry in heavy rain.",
+        "reason": "The claim that belongings stay dry implies water resistance or waterproof performance, which is not supported by the allowed facts (only material and color are confirmed). Material name alone does not establish containment or weather protection.",
+        "factKeys": [],
+        "suggestedFix": "Remove the performance claim or provide authorized evidence of water resistance/waterproofing.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v5",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "f53d4e1864eded9dee71231040fa0f5718155e84993b7776a22b42b904b57f8c",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsq0t770001qqj0qel4b9hg"
+    }
+  },
+  "audit": {
+    "id": "cmtsq0t770001qqj0qel4b9hg",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 909,
+    "promptTokens": 1375,
+    "completionTokens": 143,
+    "totalTokens": 1518
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "2e30c1024a79801d0e6faa856200707c2351ea247ccc1fd394de129658a0fec5"
+}

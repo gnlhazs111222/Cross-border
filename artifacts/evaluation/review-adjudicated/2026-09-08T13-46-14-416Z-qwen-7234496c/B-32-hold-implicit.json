@@ -1,0 +1,66 @@
+{
+  "caseId": "B-32-hold-implicit",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "unsupported",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 1120,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "with no risk of water escaping",
+        "reason": "The copy claims absolute leak resistance ('no risk'), but the only evidence is a 'Screw-top lid', which does not prove leak resistance. No other containment or testing facts are provided.",
+        "factKeys": [
+          "lidType"
+        ],
+        "suggestedFix": "Remove the claim of zero risk, e.g., change to 'Carry it beside your laptop with a screw-top lid.'",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v6",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "32de9bb5a0a235ed2a3db2cc518ebb5eeff6985fd7e9cf8d13418510ac6f825d",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsq3blo0000qqy41mjrsvl5"
+    }
+  },
+  "audit": {
+    "id": "cmtsq3blo0000qqy41mjrsvl5",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 1070,
+    "promptTokens": 1096,
+    "completionTokens": 166,
+    "totalTokens": 1262
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "ad510e79d3c699780a73551ba6c26578ee243a6d104ecb2a9c81b9d716ecda9e"
+}

@@ -1,0 +1,65 @@
+{
+  "caseId": "B-06-color-wrong",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "contradiction",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 777,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "description"
+        },
+        "text": "A bright red bottle.",
+        "reason": "The description claims the bottle is 'red', which directly contradicts the authorized fact in ALLOWED_FACTS where color is specified as 'Black'.",
+        "factKeys": [
+          "color"
+        ],
+        "suggestedFix": "Change to: A black bottle.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v7",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "54f95f07300e289c3d652c2ca014a0fc155bc2f4c6086f846d402f85dc44749a",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr2kpe0005qqtgegmh3dut"
+    }
+  },
+  "audit": {
+    "id": "cmtsr2kpe0005qqtgegmh3dut",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 737,
+    "promptTokens": 1119,
+    "completionTokens": 130,
+    "totalTokens": 1249
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "6c7a17370b0f4b02e1a05e836281395dc7e7a7b129a4636909974c545752507f"
+}

@@ -1,0 +1,63 @@
+{
+  "caseId": "B-24-ambiguous-secure",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "ambiguity",
+  "expected": "needs_human_review",
+  "actual": "needs_human_review",
+  "latencyMs": 1057,
+  "outcome": {
+    "status": "needs_human_review",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "Secure lid for travel.",
+        "reason": "The term 'secure' implies a reliability or strength of the closure that is not established by the authorized fact (Screw-top lid). Without evidence of leak resistance or locking mechanism, this adjective is ambiguous.",
+        "factKeys": [],
+        "suggestedFix": "Remove 'Secure' or provide evidence of leak resistance/locking capability.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v6",
+      "ruleVersion": "review-hard-v4",
+      "inputHash": "ac93b2f289ec982ad41eeb1060f170192cf08d07061c44f27b931344d5493b78",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsq2umc0000qqeo6mrnr3on"
+    }
+  },
+  "audit": {
+    "id": "cmtsq2umc0000qqeo6mrnr3on",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 1004,
+    "promptTokens": 1075,
+    "completionTokens": 141,
+    "totalTokens": 1216
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "1e73289b39e85c0218989097208b7ceffe2ee942b4f5f108358eddce5ef8cf84"
+}

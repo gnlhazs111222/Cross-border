@@ -1,0 +1,65 @@
+{
+  "caseId": "NEW-06-rejected-cert",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "fresh-expression",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 788,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unauthorized fact",
+        "category": "unauthorized_fact",
+        "location": {
+          "field": "description"
+        },
+        "text": "Approved for safe contact with food.",
+        "reason": "The copy asserts the product is approved for food contact, but the 'foodSafe' field in UNAUTHORIZED_FIELDS has status 'Rejected', prohibiting this claim.",
+        "factKeys": [
+          "foodSafe"
+        ],
+        "suggestedFix": "Remove the statement regarding food safety approval.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v7",
+      "ruleVersion": "review-hard-v5",
+      "inputHash": "b072620ba159afd579af58d1808e4a17bd94c19c43a1f333ea4816532edcdf7d",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsr1v4c0005qq90pm7084qd"
+    }
+  },
+  "audit": {
+    "id": "cmtsr1v4c0005qq90pm7084qd",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 760,
+    "promptTokens": 1114,
+    "completionTokens": 135,
+    "totalTokens": 1249
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "7b6a6d1fc1bff4359f525f35b7ff19d1bd556ddab40d8937b5bed123dee1b232"
+}
