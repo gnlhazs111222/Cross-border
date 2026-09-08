@@ -1,5 +1,5 @@
 import { useI18n } from '../i18n/I18nContext';
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { useRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Tabs from '@radix-ui/react-tabs';
 import { ArrowRight, Check, LoaderCircle, Package, X } from 'lucide-react';
@@ -27,7 +27,11 @@ export function Notice({ children, tone = 'neutral' }: { children: ReactNode; to
 }
 export function Modal({ open, onOpenChange, title, description, children, wide = false }: { open: boolean; onOpenChange: (open: boolean) => void; title: string; description: string; children: ReactNode; wide?: boolean }) {
   const { t } = useI18n();
-  return <Dialog.Root open={open} onOpenChange={onOpenChange}><Dialog.Portal><Dialog.Overlay className="modal-overlay" /><Dialog.Content className={`modal ${wide ? 'wide' : ''}`}><div className="modal-heading"><div><Dialog.Title>{t(title)}</Dialog.Title><Dialog.Description>{t(description)}</Dialog.Description></div><Dialog.Close asChild><Button variant="ghost" aria-label={t("Close dialog")}><X size={20} /></Button></Dialog.Close></div>{children}</Dialog.Content></Dialog.Portal></Dialog.Root>;
+  const wasOpen = useRef(false);
+  const returnFocus = useRef<HTMLElement | null>(null);
+  if (open && !wasOpen.current) returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  wasOpen.current = open;
+  return <Dialog.Root open={open} onOpenChange={onOpenChange}><Dialog.Portal><Dialog.Overlay className="modal-overlay" /><Dialog.Content onCloseAutoFocus={event => { event.preventDefault(); const target = returnFocus.current; if (target?.isConnected) target.focus({ preventScroll: true }); else document.getElementById('main')?.focus({ preventScroll: true }); }} className={`modal ${wide ? 'wide' : ''}`}><div className="modal-heading"><div><Dialog.Title>{t(title)}</Dialog.Title><Dialog.Description>{t(description)}</Dialog.Description></div><Dialog.Close asChild><Button variant="ghost" aria-label={t("Close dialog")}><X size={20} /></Button></Dialog.Close></div>{children}</Dialog.Content></Dialog.Portal></Dialog.Root>;
 }
 export function PlatformTabs({ value, onChange, disabled }: { value: Platform; onChange: (p: Platform) => void; disabled?: boolean }) {
   const { t } = useI18n();

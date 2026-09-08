@@ -8,7 +8,7 @@ async function start(page: Page) {
   await page.goto('/');
   await expect(page.getByRole('button', { name: 'Reset Demo', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'Reset Demo', exact: true }).click();
-  await expect(page.locator('.state-indicator')).toHaveText('initial');
+  await expect(page.locator('.state-indicator')).toHaveText('Ready to start');
   await expect(page.locator('.product-table tbody tr')).toHaveCount(10);
   await page.getByRole('button', { name: 'Create Demo Task', exact: true }).click();
   await expect(page.getByTestId('recommendation-1')).toContainText(HERO);

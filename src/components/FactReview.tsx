@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ClipboardCheck } from 'lucide-react';
+import { CheckCircle2, ClipboardCheck } from 'lucide-react';
 import type { Fact } from '../types';
 import { useDemo } from './DemoContext';
 import { useI18n } from '../i18n/I18nContext';
@@ -9,32 +9,40 @@ import { Badge, Button, Modal, Notice } from './ui';
 export function FactReview() {
   const { t } = useI18n();
   const { state, busy, act, notify } = useDemo();
+  const [focusedKey, setFocusedKey] = useState<string | null>(null);
   const [editing, setEditing] = useState<Fact | null>(null);
   const [value, setValue] = useState('');
   const [error, setError] = useState('');
   const facts = (state.v2 ?? state.v1)?.facts ?? [];
+  const priority = (f: Fact) => f.key === focusedKey ? -1 : f.status === 'Missing' ? 0 : f.status === 'Requires Confirmation' ? 1 : 2;
+  const orderedFacts = [...facts].sort((a, b) => priority(a) - priority(b));
+  const manualWeight = facts.find(f => f.key === 'packagingWeight' && f.sourceKind === 'manual' && f.status === 'Confirmed');
+  const pricingUnlocked = !!manualWeight && state.pricing?.status === 'ready';
   const editor = editing ? mockApi.factEditor(editing) : null;
   const hadResults = Object.keys(state.listings).length > 0 || Object.keys(state.reviews).length > 0 || Object.keys(state.publications).length > 0;
   const confirm = async (f: Fact) => {
+    setFocusedKey(f.key);
     const wasBlocked = state.pricing?.status === 'blocked';
     const ok = await act(`confirm-${f.key}`, () => mockApi.confirmFact(f.key), 'Fact confirmed. Downstream eligibility has been recalculated.');
     if (ok && wasBlocked && mockApi.getState().pricing?.status === 'ready') notify('Fact confirmed. Pricing is now available.');
   };
-  return <section className="panel fact-review" aria-label={t('Fact Review')}>
+  return <section id="fact-review" className="panel fact-review" aria-label={t('Fact Review')}>
     <div className="panel-title"><ClipboardCheck size={20} /><h2>{t('Fact Review')}</h2><Badge>{t('{count} confirmed fields', { count: facts.filter(f => f.status === 'Confirmed').length })}</Badge></div>
     <p className="fact-review-intro">{t('Edit or add a value, then confirm it. Only confirmed, listing-allowed facts may enter normal copy.')}</p>
+    <div className="fact-permission-note"><span><strong>{t('Confirmed')}</strong> {t('describes the fact decision.')}</span><span><strong>{t('Allowed')}</strong> {t('means it may appear in customer copy. Confirmed costs and weights still stay internal.')}</span></div>
+    {pricingUnlocked && <div className="fact-outcome" role="status" data-testid="fact-outcome"><CheckCircle2 size={22} /><div><strong>{t('Fact confirmed — pricing is now available')}</strong><p>{t('Packaging weight: {weight}. Suggested price: USD {price}.', { weight: manualWeight!.value, price: state.pricing!.suggestedPrice!.toFixed(2) })}</p><small>{t('Source: Manual confirmation. The weight is used for pricing only, not customer copy.')}</small></div></div>}
     <div className="table-scroll"><table className="fact-table fact-review-table"><thead><tr><th>{t('Field')}</th><th>{t('Value')}</th><th>{t('Source:')}</th><th>{t('Status')}</th><th>{t('Listing Use')}</th><th>{t('Action')}</th></tr></thead><tbody>
-      {facts.map(f => {
+      {orderedFacts.map(f => {
         const editable = mockApi.editableFact(f.key);
         const canConfirm = editable && !['Missing', 'Confirmed'].includes(f.status) && f.value !== 'Missing';
-        return <tr key={f.key} data-testid={`fact-review-${f.key}`}>
-          <th scope="row">{t(f.label)}</th><td className="review-fact-value">{t(f.value)}</td>
-          <td className="review-fact-source"><Badge tone={f.sourceKind === 'manual' ? 'blue' : 'neutral'}>{t(f.sourceKind === 'manual' ? 'Manual Confirmation' : f.sourceKind === 'supplier' ? 'Supplier File' : 'Mock Evidence')}</Badge><details><summary>{t(f.source)}</summary><small>{f.anchor}</small>{f.previousValue !== undefined && <small>{t('Previous value:')} {t(f.previousValue)}</small>}{f.previousSource && <small>{t('Previous source:')} {f.previousSource}</small>}{f.confirmedAt && <small>{t('Confirmed at:')} <time dateTime={f.confirmedAt}>{f.confirmedAt}</time></small>}</details></td>
-          <td><Badge tone={f.status === 'Confirmed' ? 'green' : f.status === 'Rejected' ? 'red' : 'amber'}>{t(f.status === 'Requires Confirmation' ? 'Needs confirmation' : f.status)}</Badge></td>
-          <td><Badge tone={f.allowed && f.status === 'Confirmed' ? 'green' : 'neutral'}>{t(f.allowed && f.status === 'Confirmed' ? 'Allowed' : 'Not allowed')}</Badge></td>
-          <td><div className="fact-actions">
-            {editable && <Button variant="secondary" disabled={!!busy} onClick={() => { setEditing(f); setValue(mockApi.factEditor(f).value); setError(''); }}>{t(f.status === 'Missing' ? 'Add Value' : 'Edit')}</Button>}
-            {canConfirm && <Button disabled={!!busy} busy={busy === `confirm-${f.key}`} onClick={() => void confirm(f)}>{t('Confirm')}</Button>}
+        return <tr key={f.key} className={f.key === focusedKey ? 'focused-fact' : undefined} data-testid={`fact-review-${f.key}`}>
+          <th scope="row">{t(f.label)}</th><td data-label={t("Value")} className="review-fact-value">{t(f.value)}</td>
+          <td data-label={t("Source:")} className="review-fact-source"><Badge tone={f.sourceKind === 'manual' ? 'blue' : 'neutral'}>{t(f.sourceKind === 'manual' ? 'Manual Confirmation' : f.sourceKind === 'supplier' ? 'Supplier File' : 'Mock Evidence')}</Badge><details><summary>{t(f.source)}</summary><small>{f.anchor}</small>{f.previousValue !== undefined && <small>{t('Previous value:')} {t(f.previousValue)}</small>}{f.previousSource && <small>{t('Previous source:')} {f.previousSource}</small>}{f.confirmedAt && <small>{t('Confirmed at:')} <time dateTime={f.confirmedAt}>{f.confirmedAt}</time></small>}</details></td>
+          <td data-label={t("Status")}><Badge tone={f.status === 'Confirmed' ? 'green' : f.status === 'Rejected' ? 'red' : 'amber'}>{t(f.status === 'Requires Confirmation' ? 'Needs confirmation' : f.status)}</Badge></td>
+          <td data-label={t("Listing Use")}><Badge tone={f.allowed && f.status === 'Confirmed' ? 'green' : 'neutral'}>{t(f.allowed && f.status === 'Confirmed' ? 'Allowed' : 'Not allowed')}</Badge></td>
+          <td className="review-fact-actions"><div className="fact-actions">
+            {editable && <Button variant="secondary" disabled={!!busy} onClick={() => { setFocusedKey(f.key); setEditing(f); setValue(mockApi.factEditor(f).value); setError(''); }}>{t(f.status === 'Missing' ? 'Add Value' : 'Edit')}</Button>}
+            {canConfirm && <Button variant="secondary" disabled={!!busy} busy={busy === `confirm-${f.key}`} onClick={() => void confirm(f)}>{t('Confirm')}</Button>}
             {f.status !== 'Rejected' && f.status !== 'Missing' && <Button variant="ghost" disabled={!!busy} busy={busy === `reject-${f.key}`} onClick={() => void act(`reject-${f.key}`, () => mockApi.rejectFact(f.key), hadResults ? 'Fact rejected. Previous listings, reviews and publish results were cleared.' : 'Fact rejected. It cannot be used in normal listing copy.')}>{t('Reject')}</Button>}
           </div>{f.key === 'leakproof' && <small className="restricted-claim">{t('Unsupported performance claim; confirmation is unavailable. Demo risk injection remains separate.')}</small>}</td>
         </tr>;

@@ -1,5 +1,7 @@
 # PrismLaunch Web Demo
 
+比赛演示材料已整理：[3 分钟 / 5 分钟讲稿](docs/DEMO_SCRIPT.md)、[评委问答](docs/DEMO_QA.md)、[1920×1080 PPT 截图](artifacts/presentation/README.md)、[UX Audit](docs/DEMO_UX_AUDIT.md)。右上角“演示能力说明”集中解释哪些逻辑在本地真实执行、哪些智能和外部数据仍为 Mock。
+
 现已增加 **Fact Review / 事实人工核对**：商品详情 → 核对事实 → 补齐缺失包装重量 → 保存为待确认 → Confirm → 自动解除定价阻断。事实变更会清除双平台旧文案、审核和发布结果。内置缺重量 SKU 补 `0.42 kg` 后为 USD 19.20，导入样例缺重量 SKU 为 USD 18.90。详见 [人工事实核对说明](FACT_REVIEW.md)。
 
 跨境商品可信上新的本地演示：Materials → Launch Task → Top 3 → Evidence / FactCard V2 → Pricing → Listing → Review Block → Human Fix → Mock Publish。
