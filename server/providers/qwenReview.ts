@@ -2,7 +2,6 @@ import { createHash } from 'node:crypto';
 import { z } from 'zod';
 import type { Issue } from '../../src/types';
 import { REVIEW_PROMPT_VERSION, REVIEW_RULE_VERSION, type ReviewInput, type ReviewLocation, type ReviewMetadata, type SemanticReviewResult } from '../../shared/review';
-import { authorizedCopyFacts } from './listingValidation';
 import type { TextModelProvider } from './text';
 import { REVIEW_SYSTEM_PROMPT } from '../prompts/review-v1';
 import { AppError } from '../errors';
@@ -30,8 +29,10 @@ export function hardReviewIssues(input: ReviewInput): Issue[] {
   return issues;
 }
 export function reviewModelInput(input: ReviewInput) {
-  const allowed = authorizedCopyFacts(input.facts);
-  const publicKeys = new Set([...allowed.map(f => f.key), 'leakproof', 'color', 'capacity', 'material', 'straw', 'countryOfOrigin', 'packageIncludes', 'finish', 'lidType']);
+  // Review has its own consumer-field scope; generation's narrower whitelist must not erase valid review evidence.
+  const publicKeys = new Set(['leakproof', 'color', 'capacity', 'material', 'straw', 'countryOfOrigin', 'packageIncludes', 'finish', 'lidType',
+    'bpaFree', 'foodSafe', 'dishwasherSafe', 'coldRetention', 'heatRetention', 'dropTest']);
+  const allowed = input.facts.filter(f => publicKeys.has(f.key) && f.status === 'Confirmed' && f.allowed);
   return { platform: input.listing.platform, market: input.context.market, category: input.context.category,
     COPY: { title: input.listing.title, bullets: input.listing.bullets, description: input.listing.description, attributes: input.listing.attributes },
     ALLOWED_FACTS: allowed.map(f => ({ field: f.key, label: f.label, value: f.value, sourceKind: f.sourceKind ?? 'supplier' })),

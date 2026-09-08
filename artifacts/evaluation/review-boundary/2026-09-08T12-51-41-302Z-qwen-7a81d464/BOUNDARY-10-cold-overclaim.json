@@ -1,0 +1,63 @@
+{
+  "caseId": "BOUNDARY-10-cold-overclaim",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "risk-control",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 1122,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "Keeps water cold for 24 hours.",
+        "reason": "The description asserts a specific temperature retention performance (24 hours). This claim is not supported by any fact in ALLOWED_FACTS. Furthermore, the UNAUTHORIZED_FIELDS list explicitly marks 'coldRetention' as allowed:false, meaning this property cannot be asserted based on the provided data.",
+        "factKeys": [],
+        "suggestedFix": "Remove the specific duration claim or verify if this performance metric is authorized before including it.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v3",
+      "ruleVersion": "review-hard-v1",
+      "inputHash": "1c5b8946da7dc7e6c16aa835138f697ce5e582728a4093cbf0aafd0819070460",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtso58zk0009qqysgirdtev9"
+    }
+  },
+  "audit": {
+    "id": "cmtso58zk0009qqysgirdtev9",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 1073,
+    "promptTokens": 935,
+    "completionTokens": 162,
+    "totalTokens": 1097
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "74eb4ebba9ee83faf4ec6f2c4be3f747b2f22357aa9cb979caaefe85a99d180e"
+}

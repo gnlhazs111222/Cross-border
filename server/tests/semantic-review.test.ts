@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { QwenReviewProvider } from '../providers/qwenReview';
+import { QwenReviewProvider, reviewModelInput, reviewInputHash } from '../providers/qwenReview';
 import type { ReviewInput } from '../../shared/review';
 import { MockTextModelProvider, type TextRequest } from '../providers/text';
 import type { z } from 'zod';
@@ -21,6 +21,44 @@ class ResponseModel extends MockTextModelProvider {
   }
 }
 const options = { model: 'qwen-test', liveEnabled: true, configured: true };
+
+test('review accepts authorized consumer performance but never private keys or nonconfirmed values', () => {
+  for (const key of ['coldRetention', 'dishwasherSafe', 'foodSafe']) {
+    const i = input();
+    const f = { key, label: key, value: 'AUTHORIZED_PERFORMANCE', status: 'Confirmed' as const, allowed: true, source: 'private.pdf', anchor: '' };
+    i.facts.push(f);
+    i.facts.find(f => f.key === 'supplierCost')!.allowed = true;
+    let p = reviewModelInput(i);
+    assert.ok(p.ALLOWED_FACTS.some(a => a.field === key && a.value === f.value));
+    assert.ok(!p.UNAUTHORIZED_FIELDS.some(a => a.field === key));
+    assert.doesNotMatch(JSON.stringify(p), /supplierCost|8\.20|private.pdf/);
+    const before = reviewInputHash(i, 'test');
+    f.allowed = false;
+    p = reviewModelInput(i);
+    assert.ok(!p.ALLOWED_FACTS.some(a => a.field === key));
+    assert.ok(p.UNAUTHORIZED_FIELDS.some(a => a.field === key));
+    assert.notEqual(reviewInputHash(i, 'test'), before);
+    f.allowed = true;
+    i.facts[i.facts.length - 1].status = 'Requires Confirmation';
+    assert.doesNotMatch(JSON.stringify(reviewModelInput(i)), /AUTHORIZED_PERFORMANCE/);
+  }
+});
+
+test('review transmits consumer safety authorization states without private or unconfirmed values', () => {
+  const i = input();
+  for (const [key, status] of [['bpaFree', 'Requires Confirmation'], ['foodSafe', 'Rejected'], ['dishwasherSafe', 'Requires Confirmation']] as const) {
+    i.facts.push({ key, label: key, value: 'PRIVATE_UNCONFIRMED_VALUE', status, allowed: false, source: 'private.pdf', anchor: 'secret' });
+  }
+  const payload = reviewModelInput(i);
+  for (const key of ['bpaFree', 'foodSafe', 'dishwasherSafe']) {
+    assert.ok(payload.UNAUTHORIZED_FIELDS.some(f => f.field === key));
+    assert.ok(!payload.ALLOWED_FACTS.some(f => f.field === key));
+  }
+  assert.doesNotMatch(JSON.stringify(payload), /PRIVATE_UNCONFIRMED_VALUE|private.pdf|supplierCost|8\.20/);
+  const before = reviewInputHash(i, 'test');
+  i.facts.find(f => f.key === 'bpaFree')!.status = 'Rejected';
+  assert.notEqual(reviewInputHash(i, 'test'), before);
+});
 test('semantic review allows supported paraphrase without exposing internal or pending values', async () => {
   const model = new ResponseModel(); const result = await new QwenReviewProvider(model, options).review(input());
   assert.equal(result.status, 'passed'); assert.equal(result.metadata.aiCallId, 'call-1');

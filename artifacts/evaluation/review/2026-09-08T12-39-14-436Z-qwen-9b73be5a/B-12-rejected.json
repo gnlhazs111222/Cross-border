@@ -1,0 +1,63 @@
+{
+  "caseId": "B-12-rejected",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "unauthorized",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 841,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unauthorized fact",
+        "category": "unauthorized_fact",
+        "location": {
+          "field": "description"
+        },
+        "text": "Certified food-safe.",
+        "reason": "The description claims the product is 'Certified food-safe', but the UNAUTHORIZED_FIELDS indicates that the 'foodSafe' status is 'Rejected'. Asserting a positive safety certification when it has been explicitly rejected is an unauthorized fact.",
+        "factKeys": [],
+        "suggestedFix": "Remove the claim 'Certified food-safe.' as the food safety certification was rejected.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v3",
+      "ruleVersion": "review-hard-v1",
+      "inputHash": "e1bd0c93e7205d5d7361665c7d404b9b9102990aba8fde95fbef58da9ae530e5",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsnpc08000aqqgw4zsza0tb"
+    }
+  },
+  "audit": {
+    "id": "cmtsnpc08000aqqgw4zsza0tb",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 806,
+    "promptTokens": 923,
+    "completionTokens": 148,
+    "totalTokens": 1071
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "d0a71c9bb4f234aae6e66e465bfe2a21d7aadeffe6a881f4c8922226b0dfe306"
+}

@@ -1,0 +1,81 @@
+{
+  "caseId": "B-30-hold-color",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "contradiction",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 1251,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "title"
+        },
+        "text": "Black stainless steel bottle, 500ml.",
+        "reason": "The title describes the bottle as 'Black', but the description states it has a 'White finish'. These are contradictory color specifications.",
+        "factKeys": [
+          "color"
+        ],
+        "suggestedFix": "Ensure the title and description agree on the product's color (e.g., change 'Black' to 'White' or vice versa).",
+        "origin": "qwen"
+      },
+      {
+        "id": "B-2",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "description"
+        },
+        "text": "White finish.",
+        "reason": "The description claims a 'White finish', which contradicts the allowed fact that the color is 'Black'.",
+        "factKeys": [
+          "color"
+        ],
+        "suggestedFix": "Update the description to reflect the authorized color 'Black'.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v3",
+      "ruleVersion": "review-hard-v1",
+      "inputHash": "53ccaa9a9476e6b2fb4327f194fa978cc328e6801ecd61bf62c30f2cebadae8b",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsnppf10005qq841zpjbbcp"
+    }
+  },
+  "audit": {
+    "id": "cmtsnppf10005qq841zpjbbcp",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 1199,
+    "promptTokens": 908,
+    "completionTokens": 257,
+    "totalTokens": 1165
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "808d7bb7480e483f63aeda3285d11c7956bfde5526357cc5a3b0ca04445f6f09"
+}

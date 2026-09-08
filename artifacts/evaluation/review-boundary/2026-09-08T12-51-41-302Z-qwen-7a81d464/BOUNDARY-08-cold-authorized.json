@@ -1,0 +1,63 @@
+{
+  "caseId": "BOUNDARY-08-cold-authorized",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "authorized-performance",
+  "expected": "passed",
+  "actual": "blocked",
+  "latencyMs": 956,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "Keeps water cold for 6 hours.",
+        "reason": "The description asserts a specific temperature retention performance ('Keeps water cold for 6 hours'). The ALLOWED_FACTS do not contain any data regarding thermal retention, and the UNAUTHORIZED_FIELDS explicitly lists 'coldRetention' as allowed:false. Therefore, this claim is unsupported by authorized facts.",
+        "factKeys": [],
+        "suggestedFix": "Remove the claim about keeping water cold for 6 hours or replace it with information supported by ALLOWED_FACTS (e.g., material, capacity, color).",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v3",
+      "ruleVersion": "review-hard-v1",
+      "inputHash": "899fdfacf005d334282f44fc19e439cd70a26ede8ceefce488104d1b27fab4b3",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtso57ej0007qqysvl65rqqc"
+    }
+  },
+  "audit": {
+    "id": "cmtso57ej0007qqysvl65rqqc",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 911,
+    "promptTokens": 934,
+    "completionTokens": 177,
+    "totalTokens": 1111
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "798c252317851a0be7a72e4df8aa301c8d6dcee8e0197cf0db44eeaf2a9d95ea"
+}

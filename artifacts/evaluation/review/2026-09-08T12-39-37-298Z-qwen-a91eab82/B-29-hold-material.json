@@ -1,0 +1,66 @@
+{
+  "caseId": "B-29-hold-material",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "contradiction",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 877,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "Lightweight aluminium body.",
+        "reason": "The bullet point claims the body is made of aluminium, but the allowed facts explicitly state the material is Stainless steel. This is a direct contradiction of confirmed product specifications.",
+        "factKeys": [
+          "material"
+        ],
+        "suggestedFix": "Change 'aluminium' to 'stainless steel' or remove the material claim if not supported.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v3",
+      "ruleVersion": "review-hard-v1",
+      "inputHash": "3c2552b91d75f27d0a80ab9d1ffc5bae82dd68a3793a0c579852327d39f464fa",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsnpogi0004qq844ml2cbrk"
+    }
+  },
+  "audit": {
+    "id": "cmtsnpogi0004qq844ml2cbrk",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 834,
+    "promptTokens": 909,
+    "completionTokens": 154,
+    "totalTokens": 1063
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "b27966f2c3c359dd117d0f4b559954898a42f0965b92d1677569969988039267"
+}

@@ -1,0 +1,63 @@
+{
+  "caseId": "B-36-hold-rejected",
+  "split": "holdout",
+  "category": "Water bottles",
+  "risk": "unauthorized",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 923,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "Drop-tested to survive a two-metre fall.",
+        "reason": "The description asserts a specific performance outcome (surviving a drop test) that is not supported by ALLOWED_FACTS. Furthermore, the UNAUTHORIZED_FIELDS indicates that 'dropTest' status is 'Rejected', meaning this claim cannot be verified and should not be made.",
+        "factKeys": [],
+        "suggestedFix": "Remove the reference to drop testing or verify if this claim is authorized before publishing.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v3",
+      "ruleVersion": "review-hard-v1",
+      "inputHash": "31fe3c8c85d57e7a37b54f1dd6847023a8e6d09cd14d3187c419838c92c16269",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsnpt61000aqq84ckdeoztl"
+    }
+  },
+  "audit": {
+    "id": "cmtsnpt61000aqq84ckdeoztl",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 875,
+    "promptTokens": 928,
+    "completionTokens": 159,
+    "totalTokens": 1087
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "55c93fe9ab44b7998cfb071cccc4eccb79e1e1b0a5d6aa4593bcf6a9bd476ad0"
+}

@@ -1,0 +1,63 @@
+{
+  "caseId": "BOUNDARY-12-pending-positive",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "risk-control",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 890,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unauthorized fact",
+        "category": "unauthorized_fact",
+        "location": {
+          "field": "description"
+        },
+        "text": "This bottle is certified food-safe.",
+        "reason": "The description asserts that the product is 'certified food-safe'. However, the UNAUTHORIZED_FIELDS for 'foodSafe' indicates a status of 'Requires Confirmation' and allowed: false. Claims relying on unauthorized or unconfirmed fields are prohibited.",
+        "factKeys": [],
+        "suggestedFix": "Remove the claim regarding food safety certification as it is not an authorized fact.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v3",
+      "ruleVersion": "review-hard-v2",
+      "inputHash": "b1cba8092c19a293c0fb9a6a09b89e3e8539c3df8af34891c491cc666f6d6402",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtso97ac000bqqhkl6huus9q"
+    }
+  },
+  "audit": {
+    "id": "cmtso97ac000bqqhkl6huus9q",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 809,
+    "promptTokens": 933,
+    "completionTokens": 150,
+    "totalTokens": 1083
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "253594951ae4aa60dc6a286de68e7ed2c8cea37141f31e5f79dba9784e6a6eb4"
+}

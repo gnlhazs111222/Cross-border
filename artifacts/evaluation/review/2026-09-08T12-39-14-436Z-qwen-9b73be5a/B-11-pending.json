@@ -1,0 +1,66 @@
+{
+  "caseId": "B-11-pending",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "unauthorized",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 1001,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unauthorized fact",
+        "category": "unauthorized_fact",
+        "location": {
+          "field": "bullets",
+          "index": 0
+        },
+        "text": "BPA-free bottle.",
+        "reason": "The claim that the bottle is BPA-free relies on the 'bpaFree' field, which is listed in UNAUTHORIZED_FIELDS with status 'Requires Confirmation'. Asserting this property as a fact is not permitted when the field is unauthorized or pending confirmation.",
+        "factKeys": [
+          "bpaFree"
+        ],
+        "suggestedFix": "Remove the 'BPA-free' claim until the bpaFree field is confirmed and authorized.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v3",
+      "ruleVersion": "review-hard-v1",
+      "inputHash": "e2f35661a01d4dd1c4bf9b9cfd9ea99875910fbc3ec40609318019970cc2719b",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtsnpbc50009qqgwqw0ry7p0"
+    }
+  },
+  "audit": {
+    "id": "cmtsnpbc50009qqgwqw0ry7p0",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 941,
+    "promptTokens": 924,
+    "completionTokens": 173,
+    "totalTokens": 1097
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "7be6c0c23d0c5de3a4d4435d0a72491afd2acbd1330ac5f1534d5888d088bf47"
+}

@@ -1,0 +1,63 @@
+{
+  "caseId": "BOUNDARY-09-wash-authorized",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "authorized-performance",
+  "expected": "passed",
+  "actual": "blocked",
+  "latencyMs": 933,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unauthorized fact",
+        "category": "unauthorized_fact",
+        "location": {
+          "field": "description"
+        },
+        "text": "Suitable for dishwasher cleaning.",
+        "reason": "The claim that the product is suitable for dishwasher cleaning relies on the 'dishwasherSafe' field, which is listed in UNAUTHORIZED_FIELDS. Even though the status is 'Confirmed', the field is marked as 'allowed: false', meaning this attribute cannot be asserted in the copy.",
+        "factKeys": [],
+        "suggestedFix": "Remove the statement about dishwasher suitability or verify if this information is available in an authorized fact field.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v3",
+      "ruleVersion": "review-hard-v1",
+      "inputHash": "57b5fb264d37273cddb271f57b12a4b6b11ad53d6e95185b3725760a1eff026b",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtso584j0008qqysnqtp6h0e"
+    }
+  },
+  "audit": {
+    "id": "cmtso584j0008qqysnqtp6h0e",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 890,
+    "promptTokens": 932,
+    "completionTokens": 161,
+    "totalTokens": 1093
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "62c2db648b7c231f5216ecb7ef6ad1d1aa8f01319a95eb23b0c79811342447e5"
+}

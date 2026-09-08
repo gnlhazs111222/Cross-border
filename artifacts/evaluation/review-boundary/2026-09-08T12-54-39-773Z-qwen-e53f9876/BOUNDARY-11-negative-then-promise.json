@@ -1,0 +1,63 @@
+{
+  "caseId": "BOUNDARY-11-negative-then-promise",
+  "split": "dev",
+  "category": "Water bottles",
+  "risk": "risk-control",
+  "expected": "blocked",
+  "actual": "blocked",
+  "latencyMs": 1211,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "your documents will stay dry beside this bottle.",
+        "reason": "The copy implies a containment or protective performance outcome (that the bottle prevents moisture from reaching nearby items) which is not supported by the allowed facts. The allowed facts only confirm material, capacity, and lid type. While the text acknowledges leak resistance is unverified, it simultaneously makes an affirmative claim about keeping documents dry, which constitutes an unsupported performance promise.",
+        "factKeys": [],
+        "suggestedFix": "Remove the claim that documents will stay dry. You may retain the disclaimer that leak resistance has not been verified.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v3",
+      "ruleVersion": "review-hard-v2",
+      "inputHash": "a819c94e42f3530dfa790d1bffea919276dd876b1f9fce2ccab2540183ef7d5d",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtso96ll000aqqhkt2sxb54b"
+    }
+  },
+  "audit": {
+    "id": "cmtso96ll000aqqhkt2sxb54b",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "success": true,
+    "errorCode": null,
+    "latencyMs": 1130,
+    "promptTokens": 930,
+    "completionTokens": 180,
+    "totalTokens": 1110
+  },
+  "ruleStatus": "blocked",
+  "ruleIssues": [
+    {
+      "id": "R002",
+      "severity": "HIGH",
+      "title": "Unverified edited content",
+      "text": "Text differs from the evidence-backed draft.",
+      "reason": "This mock reviewer only approves the confirmed FactCard wording. Apply the suggested fix to restore supported copy."
+    }
+  ],
+  "inputHash": "73a78003389a970a277bdec1905c97268c18b36e5e3716e06ba21bbc009c743b"
+}
