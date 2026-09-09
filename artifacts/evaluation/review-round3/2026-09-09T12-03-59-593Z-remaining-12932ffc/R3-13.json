@@ -1,0 +1,54 @@
+{
+  "id": "R3-13",
+  "expected": "blocked",
+  "actual": "blocked",
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unauthorized fact",
+        "category": "unauthorized_fact",
+        "location": {
+          "field": "description"
+        },
+        "text": "Safe to clean in your dishwasher.",
+        "reason": "The copy asserts dishwasher safety, but the dishwasherSafe field is explicitly Rejected and not allowed.",
+        "factKeys": [
+          "dishwasherSafe"
+        ],
+        "suggestedFix": "Remove the claim about dishwasher safety as it is unauthorized.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v13",
+      "ruleVersion": "review-hard-v10",
+      "inputHash": "5fe54e9c7233ff711ad960cb73cf8e34df350b805de0b233f3a5a7560821596d",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtu1vu030009qqp0msossxry"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v13",
+    "inputHash": "5fe54e9c7233ff711ad960cb73cf8e34df350b805de0b233f3a5a7560821596d",
+    "id": "cmtu1vu030009qqp0msossxry",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 1507,
+    "success": true,
+    "errorCode": null,
+    "promptTokens": 1670,
+    "completionTokens": 127,
+    "totalTokens": 1797,
+    "createdAt": "2026-09-09T12:04:07.971Z",
+    "updatedAt": "2026-09-09T12:04:07.971Z"
+  }
+}

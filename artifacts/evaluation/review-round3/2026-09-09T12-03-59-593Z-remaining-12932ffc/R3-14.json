@@ -1,0 +1,70 @@
+{
+  "id": "R3-14",
+  "expected": "blocked",
+  "actual": "blocked",
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "title"
+        },
+        "text": "1200ml",
+        "reason": "The title claims a capacity of 1200ml, which contradicts the authorized fact of 900ml.",
+        "factKeys": [
+          "capacity"
+        ],
+        "suggestedFix": "Change 1200ml to 900ml in the title.",
+        "origin": "qwen"
+      },
+      {
+        "id": "B-2",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "description"
+        },
+        "text": "stainless steel",
+        "reason": "The description states the material is stainless steel, but the authorized fact specifies Ceramic.",
+        "factKeys": [
+          "material"
+        ],
+        "suggestedFix": "Change 'stainless steel' to 'Ceramic' in the description.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v13",
+      "ruleVersion": "review-hard-v10",
+      "inputHash": "5b43b3c502c63980309614f0166548e689408515cff5a91d6fdbdcdb5984bb7b",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtu1vuwb000aqqp01cfe0s06"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v13",
+    "inputHash": "5b43b3c502c63980309614f0166548e689408515cff5a91d6fdbdcdb5984bb7b",
+    "id": "cmtu1vuwb000aqqp01cfe0s06",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 1111,
+    "success": true,
+    "errorCode": null,
+    "promptTokens": 1657,
+    "completionTokens": 240,
+    "totalTokens": 1897,
+    "createdAt": "2026-09-09T12:04:09.132Z",
+    "updatedAt": "2026-09-09T12:04:09.132Z"
+  }
+}

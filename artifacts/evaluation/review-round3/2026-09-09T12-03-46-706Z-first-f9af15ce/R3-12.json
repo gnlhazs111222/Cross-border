@@ -1,0 +1,54 @@
+{
+  "id": "R3-12",
+  "expected": "blocked",
+  "actual": "blocked",
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unauthorized fact",
+        "category": "unauthorized_fact",
+        "location": {
+          "field": "description"
+        },
+        "text": "Made without BPA.",
+        "reason": "The description asserts the product is free of BPA, but the bpaFree field is in UNAUTHORIZED_FIELDS with status Pending and allowed false, meaning this claim cannot be made.",
+        "factKeys": [
+          "bpaFree"
+        ],
+        "suggestedFix": "Remove the statement 'Made without BPA.' as BPA-free status is not authorized.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v13",
+      "ruleVersion": "review-hard-v10",
+      "inputHash": "cc0cd4591947009ce5ab33bed972661812e34ff3efb01feb361c83bfc30b1eb8",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtu1vfbw0002qqkw8zcac1b1"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v13",
+    "inputHash": "cc0cd4591947009ce5ab33bed972661812e34ff3efb01feb361c83bfc30b1eb8",
+    "id": "cmtu1vfbw0002qqkw8zcac1b1",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 844,
+    "success": true,
+    "errorCode": null,
+    "promptTokens": 1687,
+    "completionTokens": 149,
+    "totalTokens": 1836,
+    "createdAt": "2026-09-09T12:03:48.957Z",
+    "updatedAt": "2026-09-09T12:03:48.957Z"
+  }
+}

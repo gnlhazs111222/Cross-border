@@ -1,0 +1,52 @@
+{
+  "id": "R3-11",
+  "expected": "blocked",
+  "actual": "blocked",
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "Coffee splashes leave no marks on this scarf.",
+        "reason": "The claim of stain resistance is an objective performance promise with no evidence provided in the authorized facts.",
+        "factKeys": [],
+        "suggestedFix": "Remove the unverified stain resistance claim or provide test data.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v13",
+      "ruleVersion": "review-hard-v10",
+      "inputHash": "91d743314ea2ee0fc6220a312b41a624c9324e14f66de13ac5f7b826da8d961c",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtu1vst40008qqp0n8b0onml"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v13",
+    "inputHash": "91d743314ea2ee0fc6220a312b41a624c9324e14f66de13ac5f7b826da8d961c",
+    "id": "cmtu1vst40008qqp0n8b0onml",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 971,
+    "success": true,
+    "errorCode": null,
+    "promptTokens": 1660,
+    "completionTokens": 120,
+    "totalTokens": 1780,
+    "createdAt": "2026-09-09T12:04:06.424Z",
+    "updatedAt": "2026-09-09T12:04:06.424Z"
+  }
+}

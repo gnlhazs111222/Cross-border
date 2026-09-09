@@ -1,0 +1,13 @@
+{
+  "frozenAt": "2026-09-09T12:03:42.726Z",
+  "baselineCommit": "dd27398",
+  "files": {
+    "server/providers/qwenReview.ts": "064c3969c41cc53fea82480dae25854fbf73ba8bfece0d58d8cefdf933ff9a74",
+    "server/prompts/review-v1.ts": "c85687b7c00b8e777980745c676d5fdd6f07bedf4fba28d5ca3553f3390353e2",
+    "shared/review.ts": "b151183b691bb6667276a0daf2ad6af52ae6ee68032ac5269ac231a7c2b33909",
+    "evaluation/review/round3/cases.json": "7dcfc8f119755ecdf2eca63331c18735607cd7028d2af50904590b338bf2e69b",
+    "evaluation/review/round3/manifest.json": "f8ca937b96ae501e9ace46ec0c663894f453b23a0b51e4908c2d71beb1f74884",
+    "evaluation/review/round3/run.ts": "9cdf1cf389adb3a398276109e72435f03c4335d479485bac0ff75dbf2789eebf",
+    "evaluation/review/round3/README.md": "55be62e724edcd96c0d4a226b9a806d9c5f9624beafeb786f48eeff1deb165f9"
+  }
+}

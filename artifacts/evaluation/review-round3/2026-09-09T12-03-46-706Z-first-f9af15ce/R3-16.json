@@ -1,0 +1,52 @@
+{
+  "id": "R3-16",
+  "expected": "needs_human_review",
+  "actual": "needs_human_review",
+  "outcome": {
+    "status": "needs_human_review",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "lightweight design",
+        "reason": "No weight or comparison basis is supplied to support the lightweight claim.",
+        "factKeys": [],
+        "suggestedFix": "Provide verified weight or remove the adjective.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v13",
+      "ruleVersion": "review-hard-v10",
+      "inputHash": "d351fb93bed28f061d48332a9bcebf3cdf2d61d3982ff562bdf405a3fe9f4390",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtu1vfyx0003qqkwo2iuxa14"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v13",
+    "inputHash": "d351fb93bed28f061d48332a9bcebf3cdf2d61d3982ff562bdf405a3fe9f4390",
+    "id": "cmtu1vfyx0003qqkwo2iuxa14",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 728,
+    "success": true,
+    "errorCode": null,
+    "promptTokens": 1649,
+    "completionTokens": 106,
+    "totalTokens": 1755,
+    "createdAt": "2026-09-09T12:03:49.786Z",
+    "updatedAt": "2026-09-09T12:03:49.786Z"
+  }
+}
