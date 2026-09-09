@@ -4,12 +4,14 @@ import { resolve } from 'node:path';
 
 publicTest('real login UI, HttpOnly session, wrong password and logout', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Sign in to your workspace' })).toBeVisible();
-  await page.getByLabel('Password', { exact: true }).fill('incorrect');
-  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
-  await expect(page.getByRole('alert')).toContainText('Email or password is incorrect.');
-  await page.getByLabel('Password', { exact: true }).fill('Demo123456');
-  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  const login = page.frameLocator('.login-experience-frame');
+  await expect(page.locator('.login-experience-frame')).toBeVisible();
+  await login.locator('#start').click();
+  await login.locator('#password').fill('incorrect');
+  await login.locator('#loginForm .submit').click();
+  await expect(login.locator('#toast')).toContainText('登录失败：Email or password is incorrect.');
+  await login.locator('#password').fill('Demo123456');
+  await login.locator('#loginForm .submit').click();
   await expect(page.locator('.product-table tbody tr')).toHaveCount(10);
   await expect(page.locator('.account-menu')).toContainText('PrismLaunch Demo');
   const session = (await page.context().cookies()).find(c => c.name === 'prismlaunch_session');
@@ -17,7 +19,7 @@ publicTest('real login UI, HttpOnly session, wrong password and logout', async (
   expect(await page.evaluate(() => document.cookie)).not.toContain('prismlaunch_session');
   expect(await page.evaluate(() => JSON.stringify(localStorage))).not.toContain(session!.value);
   await page.getByRole('button', { name: 'Logout', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Sign in to your workspace' })).toBeVisible();
+  await expect(page.locator('.login-experience-frame')).toBeVisible();
   expect((await page.context().request.get('/api/auth/me')).status()).toBe(401);
   expect(await page.evaluate(() => localStorage.getItem('prismlaunch.demo.v1'))).toBeNull();
 });
