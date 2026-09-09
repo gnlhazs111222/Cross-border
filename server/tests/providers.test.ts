@@ -5,8 +5,34 @@ import { readConfig } from '../config';
 import { BailianTextModelProvider, MockTextModelProvider } from '../providers/text';
 import { domainProviders, QwenEvidenceProvider } from '../providers/domain';
 import { demoTask, products } from '../../src/data/mockData';
+import { AppError } from '../errors';
+import { QwenReviewProvider } from '../providers/qwenReview';
 
 const config = { ...readConfig({ NODE_ENV: 'test' }), NODE_ENV: 'development' as const, AI_LIVE_ENABLED: true, BAILIAN_API_KEY: 'unit-test-key', BAILIAN_BASE_URL: 'https://provider.test/v1' };
+test('structured validation preserves safe failure paths without leaking model values or custom messages', async () => {
+  const rows: { errorCode?: string; success: boolean }[] = [];
+  const provider = new BailianTextModelProvider(config, async row => { rows.push(row); return { id: 'schema-call' }; }, async () => new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify({ issues: [{ reason: 'PRIVATE_VALUE', suggestedFix: null }] }) } }] }), { headers: { 'content-type': 'application/json' } }));
+  const schema = z.object({ issues: z.array(z.object({ reason: z.literal('safe', { errorMap: () => ({ message: 'PRIVATE_MESSAGE' }) }), suggestedFix: z.string() })) });
+  await assert.rejects(provider.generateStructured({ prompt: 'PRIVATE_PROMPT', purpose: 'listing_review', schema, example: { issues: [] } }), error => {
+    assert.ok(error instanceof AppError);
+    assert.equal(error.code, 'invalid_ai_schema');
+    assert.equal(error.aiCallId, 'schema-call');
+    assert.deepEqual(error.validationIssues, [{ path: 'issues.0.reason', code: 'invalid_literal' }, { path: 'issues.0.suggestedFix', code: 'invalid_type' }]);
+    assert.doesNotMatch(JSON.stringify(error), /PRIVATE_/);
+    return true;
+  });
+  assert.equal(rows.length, 1); assert.equal(rows[0].success, false); assert.equal(rows[0].errorCode, 'invalid_ai_schema');
+});
+test('review failure retains schema diagnostics and never converts a malformed issue to approval', async () => {
+  const provider = new BailianTextModelProvider(config, async () => ({ id: 'bad-review' }), async () => new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ status: 'blocked', issues: [{ category: 'spec_conflict', location: { field: 'title' }, text: '750ml', reason: 'Capacity mismatch.', factKeys: ['capacity'] }] }) } }] }), { headers: { 'content-type': 'application/json' } }));
+  const result = await new QwenReviewProvider(provider, { model: config.BAILIAN_TEXT_MODEL, configured: true, liveEnabled: true }).review({ listing: { platform: 'shopify', title: '750ml', bullets: [], description: '', attributes: {} }, facts: [], context: { market: 'United States', category: 'Home & Kitchen', taskRevision: 1 }, listingRevision: 1, factsRevision: 1 });
+  assert.equal(result.status, 'failed');
+  assert.deepEqual(result.issues, []);
+  assert.equal(result.metadata.aiCallId, 'bad-review');
+  assert.equal(result.metadata.errorCode, 'invalid_ai_schema');
+  assert.deepEqual(result.metadata.validationIssues, [{ path: 'issues.0.suggestedFix', code: 'invalid_type' }]);
+});
+
 test('MockTextModelProvider and active domain providers are deterministic and local', async () => {
   const mock = new MockTextModelProvider();
   assert.equal((await mock.generateText()).provider, 'mock');

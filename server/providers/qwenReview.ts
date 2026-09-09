@@ -89,9 +89,10 @@ export class QwenReviewProvider {
       });
       return { status: output.status, issues, metadata };
     } catch (error) {
-      const safe = /^(live_ai_disabled|bailian_not_configured|bailian_timeout|bailian_auth_failed|bailian_http_\w+|bailian_connection_error|invalid_ai_response|invalid_ai_json|ai_output_limit|live_ai_budget_exhausted|insecure_tls_configuration|review_input_limit|invalid_review_reference|invalid_review_location|invalid_review_quote|invalid_review_output)$/;
+      const safe = /^(live_ai_disabled|bailian_not_configured|bailian_timeout|bailian_auth_failed|bailian_http_\w+|bailian_connection_error|invalid_ai_response|invalid_ai_json|invalid_ai_schema|ai_output_limit|live_ai_budget_exhausted|insecure_tls_configuration|review_input_limit|invalid_review_reference|invalid_review_location|invalid_review_quote|invalid_review_output)$/;
       metadata.errorCode = error instanceof AppError && safe.test(error.code) ? error.code : 'invalid_review_output';
       metadata.aiCallId ??= error instanceof AppError ? error.aiCallId : undefined;
+      if (error instanceof AppError && error.validationIssues) metadata.validationIssues = error.validationIssues;
       metadata.modelCalled = !!metadata.aiCallId;
       if (metadata.aiCallId && this.options.rejectedAudit) await this.options.rejectedAudit(metadata.aiCallId, metadata.errorCode).catch(() => undefined);
       return { status: 'failed', issues: [], metadata };

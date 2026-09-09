@@ -31,6 +31,7 @@ export function SemanticReviewDetails({ review, approvalExpired = false }: { rev
       <dt>{t('Prompt version')}</dt><dd>{metadata.promptVersion}</dd>
       <dt>{t('Rule version')}</dt><dd>{metadata.ruleVersion}</dd>
       <dt>{t('Listing / facts / task revisions')}</dt><dd>{metadata.listingRevision} / {metadata.factsRevision} / {metadata.taskRevision}</dd>
+      {metadata.validationIssues?.length ? <><dt>{t('Output validation')}</dt><dd>{metadata.validationIssues.map((issue, index) => <div key={index}><code>{issue.path}: {issue.code}</code></div>)}</dd></> : null}
       {metadata.aiCallId && <><dt>{t('Call ID')}</dt><dd>{metadata.aiCallId}</dd></>}
     </dl></details>}
   </div>;

@@ -52,8 +52,18 @@ export class BailianTextModelProvider implements TextModelProvider {
       if (!content) throw new AppError('invalid_ai_response', 'The provider returned no text.', 502);
       let data: T | undefined;
       if (structured) {
-        try { data = structured.schema.parse(JSON.parse(content)); }
+        let parsed: unknown;
+        try { parsed = JSON.parse(content); }
         catch { throw new AppError('invalid_ai_json', 'The provider returned invalid structured output.', 502); }
+        const checked = structured.schema.safeParse(parsed);
+        if (!checked.success) {
+          const failure = new AppError(request.purpose === 'listing_review' ? 'invalid_ai_schema' : 'invalid_ai_json', 'The provider output failed field validation.', 502);
+          // Keep constraint codes and known structural paths, never model values, messages or arbitrary keys.
+          const safeKeys = new Set(['status', 'issues', 'category', 'location', 'field', 'index', 'key', 'occurrence', 'text', 'reason', 'factKeys', 'suggestedFix']);
+          failure.validationIssues = checked.error.issues.slice(0, 8).map(issue => ({ code: issue.code, path: issue.path.slice(0, 8).map(part => typeof part === 'number' ? part : safeKeys.has(part) ? part : '[field]').join('.') || '$' }));
+          throw failure;
+        }
+        data = checked.data;
       }
       const latencyMs = Date.now() - started;
       const audit = await this.audit({ promptVersion: request.promptVersion, inputHash: request.inputHash, provider: 'bailian', model, purpose: request.purpose, latencyMs, success: true, promptTokens: usage?.prompt_tokens, completionTokens: usage?.completion_tokens, totalTokens: usage?.total_tokens });
@@ -63,6 +73,7 @@ export class BailianTextModelProvider implements TextModelProvider {
       const audit = await this.audit({ promptVersion: request.promptVersion, inputHash: request.inputHash, provider: 'bailian', model, purpose: request.purpose, latencyMs: Date.now() - started, success: false, errorCode: code, promptTokens: usage?.prompt_tokens, completionTokens: usage?.completion_tokens, totalTokens: usage?.total_tokens });
       // Do not return upstream bodies, headers, full request prompts or SDK stack traces.
       const failure = new AppError(code, 'Bailian request failed. Check server configuration and the sanitized call log.', 502);
+      if (error instanceof AppError) failure.validationIssues = error.validationIssues;
       if (audit && typeof audit === 'object' && 'id' in audit) failure.aiCallId = String(audit.id);
       throw failure;
     }

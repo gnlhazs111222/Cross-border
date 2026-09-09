@@ -1,4 +1,9 @@
 {
+  "AI features follow server configuration. Platform publishing is simulated.": "智能功能按服务端配置运行，平台发布仍为模拟。",
+  "Server AI configuration": "服务端智能配置",
+  "Saving requires a new review against confirmed facts. Review mode is shown on Review & Publish.": "保存后须依据已确认事实重新审核，具体审核模式请查看“审核与发布”页面。",
+  "Review configuration must be confirmed before interpreting results. Publishing is simulated.": "请先确认审核配置，再查看审核结果。发布为模拟操作。",
+  "Output validation": "输出字段校验",
   "Interface language": "界面语言",
   "Materials": "商品资料",
   "Launch Tasks": "上新任务",
