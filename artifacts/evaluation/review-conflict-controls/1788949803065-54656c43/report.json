@@ -1,0 +1,270 @@
+{
+  "inputHash": "8250d0358c3e8da3f64f88fc2920aafaf6db9fabe4ec6b36579f75e162efaac4",
+  "provenance": "AI-authored development controls, not independent human evaluation",
+  "rows": [
+    {
+      "id": "correct-title-wrong-attribute",
+      "repetition": 1,
+      "expected": "blocked",
+      "matched": false,
+      "outcome": {
+        "status": "failed",
+        "issues": [],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v10",
+          "ruleVersion": "review-hard-v8",
+          "inputHash": "29f90ebe9fc0fab3434d8885294c9b455c6f1882cb4f7e6cf5a1492a25dbcf2f",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttyivn10000qqtculuu8sxn",
+          "errorCode": "invalid_review_reason"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v10",
+        "inputHash": "29f90ebe9fc0fab3434d8885294c9b455c6f1882cb4f7e6cf5a1492a25dbcf2f",
+        "id": "cmttyivn10000qqtculuu8sxn",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 1641,
+        "success": false,
+        "errorCode": "invalid_review_reason",
+        "promptTokens": 1351,
+        "completionTokens": 332,
+        "totalTokens": 1683,
+        "createdAt": "2026-09-09T10:30:04.718Z",
+        "updatedAt": "2026-09-09T10:30:04.759Z"
+      }
+    },
+    {
+      "id": "wrong-title-correct-attribute",
+      "repetition": 1,
+      "expected": "blocked",
+      "matched": true,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "spec conflict",
+            "category": "spec_conflict",
+            "location": {
+              "field": "title"
+            },
+            "text": "leather",
+            "reason": "The title claims the material is leather, but the authorized fact specifies Canvas.",
+            "factKeys": [
+              "material"
+            ],
+            "suggestedFix": "Change 'leather' to 'Canvas' in the title.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v10",
+          "ruleVersion": "review-hard-v8",
+          "inputHash": "1412806d5dec9ee1815c654eeb27eb4f7059fcf3b3e5ebac56a4926e7083fb08",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttyiw7u0001qqtcstybjst7"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v10",
+        "inputHash": "1412806d5dec9ee1815c654eeb27eb4f7059fcf3b3e5ebac56a4926e7083fb08",
+        "id": "cmttyiw7u0001qqtcstybjst7",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 674,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1349,
+        "completionTokens": 119,
+        "totalTokens": 1468,
+        "createdAt": "2026-09-09T10:30:05.466Z",
+        "updatedAt": "2026-09-09T10:30:05.466Z"
+      }
+    },
+    {
+      "id": "both-correct",
+      "repetition": 1,
+      "expected": "passed",
+      "matched": true,
+      "outcome": {
+        "status": "passed",
+        "issues": [],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v10",
+          "ruleVersion": "review-hard-v8",
+          "inputHash": "09411c3402bfd53d0fa8962bf928136ee877748ed4ff314d23d0c8c762770732",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttyiwjl0002qqtcud63uojd"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v10",
+        "inputHash": "09411c3402bfd53d0fa8962bf928136ee877748ed4ff314d23d0c8c762770732",
+        "id": "cmttyiwjl0002qqtcud63uojd",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 384,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1349,
+        "completionTokens": 8,
+        "totalTokens": 1357,
+        "createdAt": "2026-09-09T10:30:05.889Z",
+        "updatedAt": "2026-09-09T10:30:05.889Z"
+      }
+    },
+    {
+      "id": "correct-title-wrong-attribute",
+      "repetition": 2,
+      "expected": "blocked",
+      "matched": false,
+      "outcome": {
+        "status": "failed",
+        "issues": [],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v10",
+          "ruleVersion": "review-hard-v8",
+          "inputHash": "29f90ebe9fc0fab3434d8885294c9b455c6f1882cb4f7e6cf5a1492a25dbcf2f",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttyixqs0003qqtcgu6jv04n",
+          "errorCode": "invalid_review_reason"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v10",
+        "inputHash": "29f90ebe9fc0fab3434d8885294c9b455c6f1882cb4f7e6cf5a1492a25dbcf2f",
+        "id": "cmttyixqs0003qqtcgu6jv04n",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 1505,
+        "success": false,
+        "errorCode": "invalid_review_reason",
+        "promptTokens": 1351,
+        "completionTokens": 332,
+        "totalTokens": 1683,
+        "createdAt": "2026-09-09T10:30:07.444Z",
+        "updatedAt": "2026-09-09T10:30:07.482Z"
+      }
+    },
+    {
+      "id": "wrong-title-correct-attribute",
+      "repetition": 2,
+      "expected": "blocked",
+      "matched": true,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "spec conflict",
+            "category": "spec_conflict",
+            "location": {
+              "field": "title"
+            },
+            "text": "leather",
+            "reason": "The title claims the material is leather, but the authorized fact specifies Canvas.",
+            "factKeys": [
+              "material"
+            ],
+            "suggestedFix": "Change 'leather' to 'Canvas' in the title.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v10",
+          "ruleVersion": "review-hard-v8",
+          "inputHash": "1412806d5dec9ee1815c654eeb27eb4f7059fcf3b3e5ebac56a4926e7083fb08",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttyiybe0004qqtco98s49xh"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v10",
+        "inputHash": "1412806d5dec9ee1815c654eeb27eb4f7059fcf3b3e5ebac56a4926e7083fb08",
+        "id": "cmttyiybe0004qqtco98s49xh",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 669,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1349,
+        "completionTokens": 119,
+        "totalTokens": 1468,
+        "createdAt": "2026-09-09T10:30:08.187Z",
+        "updatedAt": "2026-09-09T10:30:08.187Z"
+      }
+    },
+    {
+      "id": "both-correct",
+      "repetition": 2,
+      "expected": "passed",
+      "matched": true,
+      "outcome": {
+        "status": "passed",
+        "issues": [],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v10",
+          "ruleVersion": "review-hard-v8",
+          "inputHash": "09411c3402bfd53d0fa8962bf928136ee877748ed4ff314d23d0c8c762770732",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttyiyk50005qqtcsm7b8112"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v10",
+        "inputHash": "09411c3402bfd53d0fa8962bf928136ee877748ed4ff314d23d0c8c762770732",
+        "id": "cmttyiyk50005qqtcsm7b8112",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 262,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1349,
+        "completionTokens": 8,
+        "totalTokens": 1357,
+        "createdAt": "2026-09-09T10:30:08.501Z",
+        "updatedAt": "2026-09-09T10:30:08.501Z"
+      }
+    }
+  ]
+}

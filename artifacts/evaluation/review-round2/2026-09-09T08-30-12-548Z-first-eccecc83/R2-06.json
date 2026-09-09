@@ -1,0 +1,54 @@
+{
+  "id": "R2-06",
+  "expected": "blocked",
+  "actual": "blocked",
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "description"
+        },
+        "text": "820ml",
+        "reason": "The description claims a capacity of 820ml, which contradicts the authorized fact in ALLOWED_FACTS stating the capacity is 620ml.",
+        "factKeys": [
+          "capacity"
+        ],
+        "suggestedFix": "Replace '820ml' with '620ml' to match the authorized capacity.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v6",
+      "inputHash": "2b78974fd3c5c821a2013c7a19e83d746da7b6a37bd3d9c844500989926d7eec",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmttu8r3i0001qqpw7j76am3l"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v8",
+    "inputHash": "2b78974fd3c5c821a2013c7a19e83d746da7b6a37bd3d9c844500989926d7eec",
+    "id": "cmttu8r3i0001qqpw7j76am3l",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 773,
+    "success": true,
+    "errorCode": null,
+    "promptTokens": 1288,
+    "completionTokens": 146,
+    "totalTokens": 1434,
+    "createdAt": "2026-09-09T08:30:13.806Z",
+    "updatedAt": "2026-09-09T08:30:13.806Z"
+  }
+}

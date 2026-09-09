@@ -1,0 +1,52 @@
+{
+  "id": "R2-11",
+  "expected": "blocked",
+  "actual": "blocked",
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "everything inside stays dry through a downpour",
+        "reason": "The copy claims the bag keeps contents dry in a downpour, but no evidence of water resistance or containment is provided.",
+        "factKeys": [],
+        "suggestedFix": "Remove the claim that contents stay dry or provide verified water resistance test results.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v12",
+      "ruleVersion": "review-hard-v8",
+      "inputHash": "055b4aa1545a9a1c9414bf6d1b258b1b96dab213dcc50458288549b0e4973497",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmttylq8t0008qqrw5pru0mzf"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v12",
+    "inputHash": "055b4aa1545a9a1c9414bf6d1b258b1b96dab213dcc50458288549b0e4973497",
+    "id": "cmttylq8t0008qqrw5pru0mzf",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 741,
+    "success": true,
+    "errorCode": null,
+    "promptTokens": 1537,
+    "completionTokens": 127,
+    "totalTokens": 1664,
+    "createdAt": "2026-09-09T10:32:17.693Z",
+    "updatedAt": "2026-09-09T10:32:17.693Z"
+  }
+}

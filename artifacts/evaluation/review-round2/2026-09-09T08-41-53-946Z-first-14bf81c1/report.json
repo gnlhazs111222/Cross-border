@@ -1,0 +1,236 @@
+{
+  "runId": "2026-09-09T08-41-53-946Z-first-14bf81c1",
+  "datasetHash": "c4d7501eca381d6f0ff8a5abb175d8d877aeead1ce84fca9c215cb213bd59a95",
+  "datasetVersion": "round2-v1",
+  "runner": "E:\\hks\\Create_new_products\\evaluation\\review\\round2\\run.ts",
+  "model": "qwen3.6-flash",
+  "promptVersion": "review-qwen-v9",
+  "ruleVersion": "review-hard-v7",
+  "provenance": "AI-assisted development evaluation; not human blind testing",
+  "batch": "first",
+  "requestedIds": [
+    "R2-01",
+    "R2-06",
+    "R2-12",
+    "R2-14"
+  ],
+  "completedCount": 4,
+  "metrics": {
+    "total": 4,
+    "confusion": {
+      "tp": 2,
+      "tn": 1,
+      "fp": 0,
+      "fn": 0
+    },
+    "failed": 0,
+    "abstained": 1,
+    "ambiguousExpected": 1,
+    "ambiguousPassed": 0,
+    "binaryCoverage": 1,
+    "exactStatusAccuracy": 1,
+    "precision": 1,
+    "recall": 1,
+    "falsePositiveRate": 0,
+    "falseNegativeRate": 0
+  },
+  "rows": [
+    {
+      "id": "R2-01",
+      "expected": "passed",
+      "actual": "passed",
+      "outcome": {
+        "status": "passed",
+        "issues": [],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v9",
+          "ruleVersion": "review-hard-v7",
+          "inputHash": "b188c11e13f9a498b62550bb0ae3a412b563912b2fc8e83882d159450c787234",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttunrop0000qqegazgsmxql"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v9",
+        "inputHash": "b188c11e13f9a498b62550bb0ae3a412b563912b2fc8e83882d159450c787234",
+        "id": "cmttunrop0000qqegazgsmxql",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 456,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1404,
+        "completionTokens": 17,
+        "totalTokens": 1421,
+        "createdAt": "2026-09-09T08:41:54.409Z",
+        "updatedAt": "2026-09-09T08:41:54.409Z"
+      }
+    },
+    {
+      "id": "R2-06",
+      "expected": "blocked",
+      "actual": "blocked",
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "spec conflict",
+            "category": "spec_conflict",
+            "location": {
+              "field": "description"
+            },
+            "text": "820ml",
+            "reason": "The description claims a capacity of 820ml, which contradicts the authorized fact stating the capacity is 620ml.",
+            "factKeys": [
+              "capacity"
+            ],
+            "suggestedFix": "Replace '820ml' with '620ml' to match the authorized capacity.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v9",
+          "ruleVersion": "review-hard-v7",
+          "inputHash": "42ac373680e6ec200c85bc27bb619cadb4541c18c0002020876cc8ea9783c3cb",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttunsau0001qqegdbed8fr8"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v9",
+        "inputHash": "42ac373680e6ec200c85bc27bb619cadb4541c18c0002020876cc8ea9783c3cb",
+        "id": "cmttunsau0001qqegdbed8fr8",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 739,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1383,
+        "completionTokens": 141,
+        "totalTokens": 1524,
+        "createdAt": "2026-09-09T08:41:55.206Z",
+        "updatedAt": "2026-09-09T08:41:55.206Z"
+      }
+    },
+    {
+      "id": "R2-12",
+      "expected": "blocked",
+      "actual": "blocked",
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "unauthorized fact",
+            "category": "unauthorized_fact",
+            "location": {
+              "field": "description"
+            },
+            "text": "Put it on the top rack of your dishwasher for cleaning.",
+            "reason": "The description asserts dishwasher safety, which is an unauthorized fact (dishwasherSafe) with status 'Requires Confirmation' and allowed: false.",
+            "factKeys": [
+              "dishwasherSafe"
+            ],
+            "suggestedFix": "Remove the instruction regarding dishwasher cleaning as dishwasher safety is not confirmed.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v9",
+          "ruleVersion": "review-hard-v7",
+          "inputHash": "0ba16e5ba4f546b8c4d64a187e596e161db35249f0890708203a88a3cc8d15f4",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttunsya0002qqeg3qc109jc"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v9",
+        "inputHash": "0ba16e5ba4f546b8c4d64a187e596e161db35249f0890708203a88a3cc8d15f4",
+        "id": "cmttunsya0002qqeg3qc109jc",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 815,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1400,
+        "completionTokens": 142,
+        "totalTokens": 1542,
+        "createdAt": "2026-09-09T08:41:56.051Z",
+        "updatedAt": "2026-09-09T08:41:56.051Z"
+      }
+    },
+    {
+      "id": "R2-14",
+      "expected": "needs_human_review",
+      "actual": "needs_human_review",
+      "outcome": {
+        "status": "needs_human_review",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "unsupported claim",
+            "category": "unsupported_claim",
+            "location": {
+              "field": "description"
+            },
+            "text": "sturdy",
+            "reason": "The adjective 'sturdy' implies strength or durability, but no evidence regarding structural integrity or load capacity is supplied in the authorized facts.",
+            "factKeys": [],
+            "suggestedFix": "Remove the subjective claim 'sturdy' or provide verified data on material strength.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v9",
+          "ruleVersion": "review-hard-v7",
+          "inputHash": "95b1e1808a3ce7f61102534ddf00fbb2ae7b3608efff4a7b73474cb2669c258b",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttuntjr0003qqegbd9gx9zj"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v9",
+        "inputHash": "95b1e1808a3ce7f61102534ddf00fbb2ae7b3608efff4a7b73474cb2669c258b",
+        "id": "cmttuntjr0003qqegbd9gx9zj",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 733,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1334,
+        "completionTokens": 127,
+        "totalTokens": 1461,
+        "createdAt": "2026-09-09T08:41:56.824Z",
+        "updatedAt": "2026-09-09T08:41:56.824Z"
+      }
+    }
+  ]
+}

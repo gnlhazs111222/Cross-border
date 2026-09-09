@@ -1,0 +1,54 @@
+{
+  "id": "R2-13",
+  "expected": "blocked",
+  "actual": "blocked",
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unauthorized fact",
+        "category": "unauthorized_fact",
+        "location": {
+          "field": "description"
+        },
+        "text": "Approved for direct contact with food and beverages.",
+        "reason": "The description asserts food safety approval, but the foodSafe field is explicitly Rejected and not authorized.",
+        "factKeys": [
+          "foodSafe"
+        ],
+        "suggestedFix": "Remove the claim regarding food contact approval as it is unauthorized.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v13",
+      "ruleVersion": "review-hard-v9",
+      "inputHash": "f9847b8c5ca9a999bf1abb49c844c1371b2da8025610af5a5a0d9d0ba1132f87",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmttzw5yr0009qqsgonccy7k6"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v13",
+    "inputHash": "f9847b8c5ca9a999bf1abb49c844c1371b2da8025610af5a5a0d9d0ba1132f87",
+    "id": "cmttzw5yr0009qqsgonccy7k6",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 761,
+    "success": true,
+    "errorCode": null,
+    "promptTokens": 1692,
+    "completionTokens": 130,
+    "totalTokens": 1822,
+    "createdAt": "2026-09-09T11:08:24.243Z",
+    "updatedAt": "2026-09-09T11:08:24.243Z"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "id": "R2-10",
+  "expected": "blocked",
+  "actual": "blocked",
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "without eye fatigue",
+        "reason": "The claim that the lamp prevents eye fatigue is a health/performance benefit with no supporting evidence in ALLOWED_FACTS.",
+        "factKeys": [],
+        "suggestedFix": "Remove the claim about preventing eye fatigue.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v6",
+      "inputHash": "966c29c91e1ef4a52a2dec07483c2b4dbb497c0d02b7b5b2f3e42c7cefdbafba",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtttd93q0007qqbss56xuhka"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v8",
+    "inputHash": "966c29c91e1ef4a52a2dec07483c2b4dbb497c0d02b7b5b2f3e42c7cefdbafba",
+    "id": "cmtttd93q0007qqbss56xuhka",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 744,
+    "success": true,
+    "errorCode": null,
+    "promptTokens": 1259,
+    "completionTokens": 115,
+    "totalTokens": 1374,
+    "createdAt": "2026-09-09T08:05:44.150Z",
+    "updatedAt": "2026-09-09T08:05:44.150Z"
+  }
+}

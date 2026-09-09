@@ -1,0 +1,52 @@
+{
+  "id": "R2-14",
+  "expected": "needs_human_review",
+  "actual": "needs_human_review",
+  "outcome": {
+    "status": "needs_human_review",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "sturdy",
+        "reason": "No strength or durability evidence is supplied to support the claim that the bag is sturdy.",
+        "factKeys": [],
+        "suggestedFix": "Provide verified strength data or remove the adjective 'sturdy'.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v12",
+      "ruleVersion": "review-hard-v8",
+      "inputHash": "22024dab54d4941c66fd50798f0976234e03046196dbc5924f889da447a38f8f",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmttyll7z0003qq5oirqiniqw"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v12",
+    "inputHash": "22024dab54d4941c66fd50798f0976234e03046196dbc5924f889da447a38f8f",
+    "id": "cmttyll7z0003qq5oirqiniqw",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 768,
+    "success": true,
+    "errorCode": null,
+    "promptTokens": 1520,
+    "completionTokens": 114,
+    "totalTokens": 1634,
+    "createdAt": "2026-09-09T10:32:11.183Z",
+    "updatedAt": "2026-09-09T10:32:11.183Z"
+  }
+}

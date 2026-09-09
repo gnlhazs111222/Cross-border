@@ -6,5 +6,5 @@ export type ReviewLocation = { field: 'title' | 'bullets' | 'description' | 'att
 export type ReviewMetadata = { mode: 'rules_qwen'; model: string; promptVersion: string; ruleVersion: string; inputHash: string; listingRevision: number; factsRevision: number; taskRevision: number; aiCallId?: string; errorCode?: string; validationIssues?: { path: string; code: string }[]; modelCalled: boolean };
 export type ReviewInput = { listing: Pick<Listing, 'title' | 'bullets' | 'description' | 'attributes' | 'platform'>; facts: Fact[]; context: { market: string; category: string; taskRevision: number }; listingRevision: number; factsRevision: number };
 export type SemanticReviewResult = { status: Exclude<ReviewStatus, 'running'>; issues: Issue[]; metadata: ReviewMetadata };
-export const REVIEW_PROMPT_VERSION = 'review-qwen-v8';
-export const REVIEW_RULE_VERSION = 'review-hard-v6';
+export const REVIEW_PROMPT_VERSION = 'review-qwen-v13';
+export const REVIEW_RULE_VERSION = 'review-hard-v9';

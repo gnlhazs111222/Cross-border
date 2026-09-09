@@ -1,0 +1,117 @@
+{
+  "hash": "ede18223450363e93c89c1a2cb63d1dbb332c854ef79339f77fe92912ac1659b",
+  "modelInput": {
+    "platform": "amazon",
+    "market": "United States",
+    "category": "Bags",
+    "ALLOWED_FACTS": [
+      {
+        "field": "material",
+        "label": "material",
+        "value": "Canvas",
+        "sourceKind": "manual"
+      },
+      {
+        "field": "color",
+        "label": "color",
+        "value": "Beige",
+        "sourceKind": "manual"
+      }
+    ],
+    "COPY": {
+      "title": "Beige canvas bag",
+      "bullets": [],
+      "description": "A beige bag for everyday use.",
+      "attributes": {
+        "Material": "Leather",
+        "Color": "Beige"
+      }
+    },
+    "COPY_FIELDS": [
+      {
+        "location": {
+          "field": "title"
+        },
+        "text": "Beige canvas bag"
+      },
+      {
+        "location": {
+          "field": "description"
+        },
+        "text": "A beige bag for everyday use."
+      },
+      {
+        "location": {
+          "field": "attributes",
+          "key": "Material"
+        },
+        "text": "Leather"
+      },
+      {
+        "location": {
+          "field": "attributes",
+          "key": "Color"
+        },
+        "text": "Beige"
+      }
+    ],
+    "UNAUTHORIZED_FIELDS": []
+  },
+  "result": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "attributes",
+          "key": "Material"
+        },
+        "text": "Leather",
+        "reason": "The attribute claims the material is Leather, which contradicts the authorized Canvas material.",
+        "factKeys": [
+          "material"
+        ],
+        "suggestedFix": "Change Material to Canvas.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v12",
+      "ruleVersion": "review-hard-v8",
+      "inputHash": "ede18223450363e93c89c1a2cb63d1dbb332c854ef79339f77fe92912ac1659b",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmttykodg0000qqb0wdeado91"
+    }
+  },
+  "captures": [
+    {
+      "parsed": {
+        "status": "blocked",
+        "issues": [
+          {
+            "category": "spec_conflict",
+            "location": {
+              "field": "attributes",
+              "key": "Material"
+            },
+            "text": "Leather",
+            "reason": "The attribute claims the material is Leather, which contradicts the authorized Canvas material.",
+            "factKeys": [
+              "material"
+            ],
+            "suggestedFix": "Change Material to Canvas."
+          }
+        ]
+      },
+      "errors": []
+    }
+  ]
+}

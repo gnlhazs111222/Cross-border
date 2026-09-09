@@ -1,0 +1,54 @@
+{
+  "id": "R2-12",
+  "expected": "blocked",
+  "actual": "blocked",
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unauthorized fact",
+        "category": "unauthorized_fact",
+        "location": {
+          "field": "description"
+        },
+        "text": "Put it on the top rack of your dishwasher for cleaning.",
+        "reason": "The description asserts dishwasher safety, but the field 'dishwasherSafe' is in UNAUTHORIZED_FIELDS with status 'Requires Confirmation' and allowed:false. This is an unauthorized claim.",
+        "factKeys": [
+          "dishwasherSafe"
+        ],
+        "suggestedFix": "Remove the instruction regarding dishwasher cleaning as dishwasher safety is not confirmed.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v6",
+      "inputHash": "81c31ce1e83bad68f7aa34281ad2a976e189ffd26132d1cabfc30cf17216ec49",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtttcq7n0002qq18h8goripc"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v8",
+    "inputHash": "81c31ce1e83bad68f7aa34281ad2a976e189ffd26132d1cabfc30cf17216ec49",
+    "id": "cmtttcq7n0002qq18h8goripc",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 860,
+    "success": true,
+    "errorCode": null,
+    "promptTokens": 1305,
+    "completionTokens": 150,
+    "totalTokens": 1455,
+    "createdAt": "2026-09-09T08:05:19.667Z",
+    "updatedAt": "2026-09-09T08:05:19.667Z"
+  }
+}

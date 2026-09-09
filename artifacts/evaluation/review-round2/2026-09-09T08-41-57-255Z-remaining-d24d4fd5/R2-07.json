@@ -1,0 +1,55 @@
+{
+  "id": "R2-07",
+  "expected": "blocked",
+  "actual": "blocked",
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "attributes",
+          "key": "Material"
+        },
+        "text": "Leather",
+        "reason": "The attribute claims the material is Leather, which contradicts the authorized fact that the material is Canvas.",
+        "factKeys": [
+          "material"
+        ],
+        "suggestedFix": "Replace 'Leather' with 'Canvas'.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v9",
+      "ruleVersion": "review-hard-v7",
+      "inputHash": "0c6f124568ec7785b5171bd0e1cbfcb10ef982005c7a1acbd238bb436d1b7f57",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmttunvme0004qqhc1w7ewmi1"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v9",
+    "inputHash": "0c6f124568ec7785b5171bd0e1cbfcb10ef982005c7a1acbd238bb436d1b7f57",
+    "id": "cmttunvme0004qqhc1w7ewmi1",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 716,
+    "success": true,
+    "errorCode": null,
+    "promptTokens": 1367,
+    "completionTokens": 129,
+    "totalTokens": 1496,
+    "createdAt": "2026-09-09T08:41:59.511Z",
+    "updatedAt": "2026-09-09T08:41:59.511Z"
+  }
+}

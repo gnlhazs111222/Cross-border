@@ -1,0 +1,54 @@
+{
+  "id": "R2-09",
+  "expected": "blocked",
+  "actual": "blocked",
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "even if the bottle tips over, every page stays dry",
+        "reason": "The description claims leak resistance (keeping pages dry when tipped) but only provides a screw-top lid as evidence. A screw-top lid alone does not establish leak resistance.",
+        "factKeys": [
+          "lidType"
+        ],
+        "suggestedFix": "Remove the claim that pages stay dry when tipped, or provide evidence of leak resistance.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v9",
+      "ruleVersion": "review-hard-v7",
+      "inputHash": "7133627e5a223dcbdbcb44fce961505977b06ec5041614faf9f4d866653c3157",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmttunwzn0006qqhct9rq2w3a"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v9",
+    "inputHash": "7133627e5a223dcbdbcb44fce961505977b06ec5041614faf9f4d866653c3157",
+    "id": "cmttunwzn0006qqhct9rq2w3a",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 899,
+    "success": true,
+    "errorCode": null,
+    "promptTokens": 1398,
+    "completionTokens": 150,
+    "totalTokens": 1548,
+    "createdAt": "2026-09-09T08:42:01.284Z",
+    "updatedAt": "2026-09-09T08:42:01.284Z"
+  }
+}

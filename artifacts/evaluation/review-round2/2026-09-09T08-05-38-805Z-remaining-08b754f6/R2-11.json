@@ -1,0 +1,52 @@
+{
+  "id": "R2-11",
+  "expected": "blocked",
+  "actual": "blocked",
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "everything inside stays dry through a downpour",
+        "reason": "The copy claims the bag keeps contents dry during a downpour, but no evidence of water resistance or containment is provided in ALLOWED_FACTS. The preceding disclaimer does not negate this positive performance guarantee.",
+        "factKeys": [],
+        "suggestedFix": "Remove the claim that everything stays dry through a downpour.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v6",
+      "inputHash": "e7b3fb017e6f5e9bfc00a9418ef7952bdbc015074ebf0bddfd40df252e844524",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtttd9u80008qqbs95bkcr66"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v8",
+    "inputHash": "e7b3fb017e6f5e9bfc00a9418ef7952bdbc015074ebf0bddfd40df252e844524",
+    "id": "cmtttd9u80008qqbs95bkcr66",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 908,
+    "success": true,
+    "errorCode": null,
+    "promptTokens": 1256,
+    "completionTokens": 140,
+    "totalTokens": 1396,
+    "createdAt": "2026-09-09T08:05:45.104Z",
+    "updatedAt": "2026-09-09T08:05:45.104Z"
+  }
+}

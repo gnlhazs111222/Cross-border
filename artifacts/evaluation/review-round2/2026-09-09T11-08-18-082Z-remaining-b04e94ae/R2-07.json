@@ -1,0 +1,55 @@
+{
+  "id": "R2-07",
+  "expected": "blocked",
+  "actual": "blocked",
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "attributes",
+          "key": "Material"
+        },
+        "text": "Leather",
+        "reason": "The attribute value Leather contradicts the authorized Canvas material.",
+        "factKeys": [
+          "material"
+        ],
+        "suggestedFix": "Change Material to Canvas.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v13",
+      "ruleVersion": "review-hard-v9",
+      "inputHash": "1e99555bdc9ff39e871e23b39d578725d439666493c00e2ff1bf2ea245299094",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmttzw2v20004qqsggsgktbfk"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v13",
+    "inputHash": "1e99555bdc9ff39e871e23b39d578725d439666493c00e2ff1bf2ea245299094",
+    "id": "cmttzw2v20004qqsggsgktbfk",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 588,
+    "success": true,
+    "errorCode": null,
+    "promptTokens": 1668,
+    "completionTokens": 97,
+    "totalTokens": 1765,
+    "createdAt": "2026-09-09T11:08:20.222Z",
+    "updatedAt": "2026-09-09T11:08:20.222Z"
+  }
+}

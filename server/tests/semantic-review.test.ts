@@ -4,6 +4,7 @@ import { QwenReviewProvider, reviewModelInput, reviewInputHash } from '../provid
 import type { ReviewInput } from '../../shared/review';
 import { MockTextModelProvider, type TextRequest } from '../providers/text';
 import type { z } from 'zod';
+import { readFileSync } from 'node:fs';
 
 const input = (): ReviewInput => ({ listing: { platform: 'amazon', title: 'Black bottle', bullets: ['Holds 500ml.'], description: 'Stainless steel body.', attributes: { Color: 'Black' } },
   facts: [
@@ -21,6 +22,88 @@ class ResponseModel extends MockTextModelProvider {
   }
 }
 const options = { model: 'qwen-test', liveEnabled: true, configured: true };
+
+test('captured containment explanation must cite the lid fact it explicitly discusses', async () => {
+  const cases = JSON.parse(readFileSync('evaluation/review/round2/cases.json', 'utf8'));
+  const report = JSON.parse(readFileSync('artifacts/evaluation/review-round2/2026-09-09T10-32-11-607Z-remaining-a78d4217/report.json', 'utf8'));
+  const i = cases.cases.find((c: { id: string }) => c.id === 'R2-09').input;
+  const outcome = report.rows.find((r: { id: string }) => r.id === 'R2-09').outcome;
+  const model = new ResponseModel();
+  const issues = outcome.issues.map(({ id, severity, title, origin, ...issue }: Record<string, unknown>) => issue);
+  model.output = { status: 'blocked', issues };
+  const missing = await new QwenReviewProvider(model, options).review(i);
+  assert.equal(missing.status, 'failed'); assert.equal(missing.metadata.errorCode, 'invalid_review_reference');
+  assert.deepEqual(missing.issues, []);
+  issues[0].factKeys = ['lidType'];
+  const cited = await new QwenReviewProvider(model, options).review(i);
+  assert.equal(cited.status, 'blocked'); assert.deepEqual(cited.issues[0].factKeys, ['lidType']);
+  assert.equal(cited.issues[0].category, 'unsupported_claim');
+});
+
+test('reference completeness requires only unambiguous supplied multiword values, not arbitrary facts', async () => {
+  const i = input(); i.listing.description = 'Keeps belongings dry.';
+  const model = new ResponseModel();
+  const issue = { category: 'unsupported_claim', location: { field: 'description' }, text: i.listing.description, reason: 'Stainless-steel alone cannot establish containment.', factKeys: [] as string[], suggestedFix: 'Remove the containment promise.' };
+  model.output = { status: 'blocked', issues: [issue] };
+  assert.equal((await new QwenReviewProvider(model, options).review(i)).status, 'failed');
+  issue.factKeys = ['material'];
+  assert.equal((await new QwenReviewProvider(model, options).review(i)).status, 'blocked');
+  issue.factKeys = []; issue.reason = 'No containment evidence is supplied.';
+  assert.equal((await new QwenReviewProvider(model, options).review(i)).status, 'blocked');
+  // Unknown or private values must not be inferred into consumer-facing references.
+  i.facts.find(f => f.key === 'material')!.allowed = false;
+  issue.reason = 'Stainless-steel alone cannot establish containment.';
+  assert.equal((await new QwenReviewProvider(model, options).review(i)).status, 'blocked');
+  i.facts.find(f => f.key === 'material')!.allowed = true;
+  i.facts.push({ ...i.facts.find(f => f.key === 'material')!, key: 'finish' });
+  assert.equal((await new QwenReviewProvider(model, options).review(i)).status, 'blocked');
+});
+
+test('blank suggestions and revision-marker reasoning cannot become final findings', async () => {
+  const model = new ResponseModel();
+  const issue = { category: 'spec_conflict', location: { field: 'bullets', index: 0 }, text: '500ml', reason: 'The capacity differs from the fact.', factKeys: ['capacity'], suggestedFix: 'Use the authorized capacity.' };
+  for (const patch of [{ suggestedFix: ' \n\t ' }, { reason: 'Wait, the values agree.' }, { reason: 'Wait: the attribute is correct.' }]) {
+    model.output = { status: 'blocked', issues: [{ ...issue, ...patch }] };
+    const result = await new QwenReviewProvider(model, options).review(input());
+    assert.equal(result.status, 'failed', JSON.stringify(patch));
+    assert.deepEqual(result.issues, []);
+  }
+});
+
+test('captured empty-fix response fails as a whole; only the complete true conflict is valid', async () => {
+  const captured = JSON.parse(readFileSync('artifacts/b-review/empty-fix-diagnostic/diagnostic-1788949692387.json', 'utf8'));
+  const i = input(); i.listing.title = 'Black stainless steel bottle, 750ml';
+  i.listing.attributes.Capacity = '500ml / 16.9 fl oz';
+  const model = new ResponseModel(); model.output = captured.captures[0].parsed;
+  const failed = await new QwenReviewProvider(model, options).review(i);
+  assert.equal(failed.status, 'failed'); assert.deepEqual(failed.issues, []);
+  model.output = { status: 'blocked', issues: [captured.captures[0].parsed.issues[0]] };
+  const valid = await new QwenReviewProvider(model, options).review(i);
+  assert.equal(valid.status, 'blocked'); assert.equal(valid.issues.length, 1);
+  assert.equal(valid.issues[0].location?.field, 'title');
+});
+
+test('rejects the captured self-correcting false title accusation instead of presenting it or silently approving', async () => {
+  const cases = JSON.parse(readFileSync('evaluation/review/round2/cases.json', 'utf8'));
+  const report = JSON.parse(readFileSync('artifacts/evaluation/review-round2/2026-09-09T08-30-23-715Z-remaining-1cad93f7/report.json', 'utf8'));
+  const model = new ResponseModel();
+  const captured = report.rows.find((r: { id: string }) => r.id === 'R2-07').outcome;
+  model.output = { status: captured.status, issues: captured.issues.map(({ id, severity, title, origin, ...issue }: Record<string, unknown>) => issue) };
+  const result = await new QwenReviewProvider(model, options).review(cases.cases.find((c: { id: string }) => c.id === 'R2-07').input);
+  assert.equal(result.status, 'failed');
+  assert.equal(result.metadata.errorCode, 'invalid_review_reason');
+  assert.deepEqual(result.issues, []);
+});
+
+test('rejects exact fact agreement alleged as a conflict but retains actual differing values', async () => {
+  const i = input(); i.listing.attributes.Material = 'stainless steel';
+  const model = new ResponseModel();
+  const issue = { category: 'spec_conflict', location: { field: 'attributes', key: 'Material' }, text: 'stainless steel', reason: 'The material contradicts the fact.', factKeys: ['material'], suggestedFix: 'Use the authorized material.' };
+  model.output = { status: 'blocked', issues: [issue] };
+  assert.equal((await new QwenReviewProvider(model, options).review(i)).status, 'failed');
+  i.listing.attributes.Material = 'Glass'; issue.text = 'Glass';
+  assert.equal((await new QwenReviewProvider(model, options).review(i)).status, 'blocked');
+});
 
 test('review normalizes only irrelevant null location fields, retaining mandatory location checks', async () => {
   const i = input(); i.listing.title = '750ml bottle'; i.listing.bullets = ['750ml capacity']; i.listing.attributes.Capacity = '750ml';

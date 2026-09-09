@@ -1,0 +1,52 @@
+{
+  "id": "R2-14",
+  "expected": "needs_human_review",
+  "actual": "needs_human_review",
+  "outcome": {
+    "status": "needs_human_review",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "unsupported claim",
+        "category": "unsupported_claim",
+        "location": {
+          "field": "description"
+        },
+        "text": "sturdy",
+        "reason": "The adjective 'sturdy' implies strength or durability, but no evidence regarding material thickness, construction quality, or load capacity is provided in the allowed facts.",
+        "factKeys": [],
+        "suggestedFix": "Remove the subjective adjective 'sturdy' or provide verified data on durability.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v6",
+      "inputHash": "85a0373de72fb4c9256d3d302feb7a15f41c0c2e351c49dae78b3da3462c8538",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmtttcqtf0003qq18eqbx4fnz"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v8",
+    "inputHash": "85a0373de72fb4c9256d3d302feb7a15f41c0c2e351c49dae78b3da3462c8538",
+    "id": "cmtttcqtf0003qq18eqbx4fnz",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 743,
+    "success": true,
+    "errorCode": null,
+    "promptTokens": 1239,
+    "completionTokens": 130,
+    "totalTokens": 1369,
+    "createdAt": "2026-09-09T08:05:20.452Z",
+    "updatedAt": "2026-09-09T08:05:20.452Z"
+  }
+}

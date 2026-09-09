@@ -1,0 +1,551 @@
+{
+  "runId": "2026-09-09T11-08-18-082Z-remaining-b04e94ae",
+  "datasetHash": "c4d7501eca381d6f0ff8a5abb175d8d877aeead1ce84fca9c215cb213bd59a95",
+  "datasetVersion": "round2-v1",
+  "runner": "E:\\hks\\Create_new_products\\evaluation\\review\\round2\\run.ts",
+  "model": "qwen3.6-flash",
+  "promptVersion": "review-qwen-v13",
+  "ruleVersion": "review-hard-v9",
+  "provenance": "AI-assisted development evaluation; not human blind testing",
+  "batch": "remaining",
+  "requestedIds": [
+    "R2-02",
+    "R2-03",
+    "R2-04",
+    "R2-05",
+    "R2-07",
+    "R2-08",
+    "R2-09",
+    "R2-10",
+    "R2-11",
+    "R2-13",
+    "R2-15"
+  ],
+  "completedCount": 11,
+  "metrics": {
+    "total": 11,
+    "confusion": {
+      "tp": 7,
+      "tn": 4,
+      "fp": 0,
+      "fn": 0
+    },
+    "failed": 0,
+    "abstained": 0,
+    "ambiguousExpected": 0,
+    "ambiguousPassed": 0,
+    "binaryCoverage": 1,
+    "exactStatusAccuracy": 1,
+    "precision": 1,
+    "recall": 1,
+    "falsePositiveRate": 0,
+    "falseNegativeRate": 0
+  },
+  "rows": [
+    {
+      "id": "R2-02",
+      "expected": "passed",
+      "actual": "passed",
+      "outcome": {
+        "status": "passed",
+        "issues": [],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v13",
+          "ruleVersion": "review-hard-v9",
+          "inputHash": "f25387957a34f7c71761c7601a497491f7a84759fb0518e43d937645e6e3b61a",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttzw1l60000qqsgvv5a3ktj"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v13",
+        "inputHash": "f25387957a34f7c71761c7601a497491f7a84759fb0518e43d937645e6e3b61a",
+        "id": "cmttzw1l60000qqsgvv5a3ktj",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 471,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1686,
+        "completionTokens": 17,
+        "totalTokens": 1703,
+        "createdAt": "2026-09-09T11:08:18.570Z",
+        "updatedAt": "2026-09-09T11:08:18.570Z"
+      }
+    },
+    {
+      "id": "R2-03",
+      "expected": "passed",
+      "actual": "passed",
+      "outcome": {
+        "status": "passed",
+        "issues": [],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v13",
+          "ruleVersion": "review-hard-v9",
+          "inputHash": "a9cdd82951f294753b95e2dd392756a12efcc58f92f7af97a2c2ecd4f5497b76",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttzw1vc0001qqsg97mst5tm"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v13",
+        "inputHash": "a9cdd82951f294753b95e2dd392756a12efcc58f92f7af97a2c2ecd4f5497b76",
+        "id": "cmttzw1vc0001qqsg97mst5tm",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 324,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1679,
+        "completionTokens": 17,
+        "totalTokens": 1696,
+        "createdAt": "2026-09-09T11:08:18.936Z",
+        "updatedAt": "2026-09-09T11:08:18.936Z"
+      }
+    },
+    {
+      "id": "R2-04",
+      "expected": "passed",
+      "actual": "passed",
+      "outcome": {
+        "status": "passed",
+        "issues": [],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v13",
+          "ruleVersion": "review-hard-v9",
+          "inputHash": "bb6d224135869767b258be358ba3c396c1dab36230194601b91749a2b6250430",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttzw25o0002qqsglukse6es"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v13",
+        "inputHash": "bb6d224135869767b258be358ba3c396c1dab36230194601b91749a2b6250430",
+        "id": "cmttzw25o0002qqsglukse6es",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 286,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1665,
+        "completionTokens": 17,
+        "totalTokens": 1682,
+        "createdAt": "2026-09-09T11:08:19.308Z",
+        "updatedAt": "2026-09-09T11:08:19.308Z"
+      }
+    },
+    {
+      "id": "R2-05",
+      "expected": "passed",
+      "actual": "passed",
+      "outcome": {
+        "status": "passed",
+        "issues": [],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v13",
+          "ruleVersion": "review-hard-v9",
+          "inputHash": "801a844f95c9b07ab7a3d4153e03b02219e3b32651ab91ad9d3249dcf3529891",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttzw2dp0003qqsg5rtgyw8p"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v13",
+        "inputHash": "801a844f95c9b07ab7a3d4153e03b02219e3b32651ab91ad9d3249dcf3529891",
+        "id": "cmttzw2dp0003qqsg5rtgyw8p",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 252,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1638,
+        "completionTokens": 8,
+        "totalTokens": 1646,
+        "createdAt": "2026-09-09T11:08:19.597Z",
+        "updatedAt": "2026-09-09T11:08:19.597Z"
+      }
+    },
+    {
+      "id": "R2-07",
+      "expected": "blocked",
+      "actual": "blocked",
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "spec conflict",
+            "category": "spec_conflict",
+            "location": {
+              "field": "attributes",
+              "key": "Material"
+            },
+            "text": "Leather",
+            "reason": "The attribute value Leather contradicts the authorized Canvas material.",
+            "factKeys": [
+              "material"
+            ],
+            "suggestedFix": "Change Material to Canvas.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v13",
+          "ruleVersion": "review-hard-v9",
+          "inputHash": "1e99555bdc9ff39e871e23b39d578725d439666493c00e2ff1bf2ea245299094",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttzw2v20004qqsggsgktbfk"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v13",
+        "inputHash": "1e99555bdc9ff39e871e23b39d578725d439666493c00e2ff1bf2ea245299094",
+        "id": "cmttzw2v20004qqsggsgktbfk",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 588,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1668,
+        "completionTokens": 97,
+        "totalTokens": 1765,
+        "createdAt": "2026-09-09T11:08:20.222Z",
+        "updatedAt": "2026-09-09T11:08:20.222Z"
+      }
+    },
+    {
+      "id": "R2-08",
+      "expected": "blocked",
+      "actual": "blocked",
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "spec conflict",
+            "category": "spec_conflict",
+            "location": {
+              "field": "description"
+            },
+            "text": "18W",
+            "reason": "The description claims a power of 18W, which contradicts the authorized fact of 9W.",
+            "factKeys": [
+              "power"
+            ],
+            "suggestedFix": "Change '18W' to '9W' in the description.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v13",
+          "ruleVersion": "review-hard-v9",
+          "inputHash": "d8274644425a05001852e521be295f3642d28962f0e9e046f4d7f50c5192f540",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttzw3fr0005qqsgkj754g1i"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v13",
+        "inputHash": "d8274644425a05001852e521be295f3642d28962f0e9e046f4d7f50c5192f540",
+        "id": "cmttzw3fr0005qqsgkj754g1i",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 700,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1657,
+        "completionTokens": 129,
+        "totalTokens": 1786,
+        "createdAt": "2026-09-09T11:08:20.968Z",
+        "updatedAt": "2026-09-09T11:08:20.968Z"
+      }
+    },
+    {
+      "id": "R2-09",
+      "expected": "blocked",
+      "actual": "blocked",
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "unsupported claim",
+            "category": "unsupported_claim",
+            "location": {
+              "field": "description"
+            },
+            "text": "even if the bottle tips over, every page stays dry",
+            "reason": "The copy promises leak resistance (keeping pages dry) but only provides an authorized screw-top lid type, which does not prove containment reliability.",
+            "factKeys": [
+              "lidType"
+            ],
+            "suggestedFix": "Remove the claim about keeping pages dry or provide evidence of leak-proof performance.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v13",
+          "ruleVersion": "review-hard-v9",
+          "inputHash": "28bb7b25b4220ebe070807ce8d47249211465228166578b827c05959d52a7417",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttzw4510006qqsg7zbmo2b2"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v13",
+        "inputHash": "28bb7b25b4220ebe070807ce8d47249211465228166578b827c05959d52a7417",
+        "id": "cmttzw4510006qqsg7zbmo2b2",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 865,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1699,
+        "completionTokens": 142,
+        "totalTokens": 1841,
+        "createdAt": "2026-09-09T11:08:21.877Z",
+        "updatedAt": "2026-09-09T11:08:21.877Z"
+      }
+    },
+    {
+      "id": "R2-10",
+      "expected": "blocked",
+      "actual": "blocked",
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "unsupported claim",
+            "category": "unsupported_claim",
+            "location": {
+              "field": "description"
+            },
+            "text": "without eye fatigue",
+            "reason": "No evidence is supplied to support the claim that the lamp prevents eye fatigue.",
+            "factKeys": [],
+            "suggestedFix": "Remove the health benefit claim or provide supporting evidence.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v13",
+          "ruleVersion": "review-hard-v9",
+          "inputHash": "365696017dbb20d053ac81bf9f106b9b23eb9e7a85f2e34022ecaeee3e0a8c24",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttzw4o90007qqsgeggsmva9"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v13",
+        "inputHash": "365696017dbb20d053ac81bf9f106b9b23eb9e7a85f2e34022ecaeee3e0a8c24",
+        "id": "cmttzw4o90007qqsgeggsmva9",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 643,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1655,
+        "completionTokens": 108,
+        "totalTokens": 1763,
+        "createdAt": "2026-09-09T11:08:22.569Z",
+        "updatedAt": "2026-09-09T11:08:22.569Z"
+      }
+    },
+    {
+      "id": "R2-11",
+      "expected": "blocked",
+      "actual": "blocked",
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "unsupported claim",
+            "category": "unsupported_claim",
+            "location": {
+              "field": "description"
+            },
+            "text": "everything inside stays dry through a downpour",
+            "reason": "The copy claims the bag keeps contents dry during a downpour, but no water resistance or containment evidence is provided. The disclaimer about untested rain protection does not negate this positive performance guarantee.",
+            "factKeys": [],
+            "suggestedFix": "Remove the claim that contents stay dry or provide verified water resistance test results.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v13",
+          "ruleVersion": "review-hard-v9",
+          "inputHash": "5be05db157cc083ce60a2693ee7609651b1b96e9ecad85e8dd5d4d4eaceb980d",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttzw5ca0008qqsgx6iwyfcx"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v13",
+        "inputHash": "5be05db157cc083ce60a2693ee7609651b1b96e9ecad85e8dd5d4d4eaceb980d",
+        "id": "cmttzw5ca0008qqsgx6iwyfcx",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 820,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1652,
+        "completionTokens": 141,
+        "totalTokens": 1793,
+        "createdAt": "2026-09-09T11:08:23.435Z",
+        "updatedAt": "2026-09-09T11:08:23.435Z"
+      }
+    },
+    {
+      "id": "R2-13",
+      "expected": "blocked",
+      "actual": "blocked",
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "unauthorized fact",
+            "category": "unauthorized_fact",
+            "location": {
+              "field": "description"
+            },
+            "text": "Approved for direct contact with food and beverages.",
+            "reason": "The description asserts food safety approval, but the foodSafe field is explicitly Rejected and not authorized.",
+            "factKeys": [
+              "foodSafe"
+            ],
+            "suggestedFix": "Remove the claim regarding food contact approval as it is unauthorized.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v13",
+          "ruleVersion": "review-hard-v9",
+          "inputHash": "f9847b8c5ca9a999bf1abb49c844c1371b2da8025610af5a5a0d9d0ba1132f87",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttzw5yr0009qqsgonccy7k6"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v13",
+        "inputHash": "f9847b8c5ca9a999bf1abb49c844c1371b2da8025610af5a5a0d9d0ba1132f87",
+        "id": "cmttzw5yr0009qqsgonccy7k6",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 761,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1692,
+        "completionTokens": 130,
+        "totalTokens": 1822,
+        "createdAt": "2026-09-09T11:08:24.243Z",
+        "updatedAt": "2026-09-09T11:08:24.243Z"
+      }
+    },
+    {
+      "id": "R2-15",
+      "expected": "blocked",
+      "actual": "blocked",
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-LOCAL-1",
+            "severity": "HIGH",
+            "category": "internal_disclosure",
+            "title": "Internal commercial information",
+            "text": "[Internal information withheld]",
+            "location": {
+              "field": "description"
+            },
+            "reason": "Remove internal commercial or credential information before public copy is reviewed.",
+            "factKeys": [],
+            "suggestedFix": "Remove the internal information and run review again.",
+            "origin": "rules"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v13",
+          "ruleVersion": "review-hard-v9",
+          "inputHash": "95367229e0246459356c34cfdb929c30bb5de0852a0261b23f998c662ac986d5",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": false
+        }
+      },
+      "audit": null
+    }
+  ]
+}

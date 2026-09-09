@@ -1,0 +1,36 @@
+{
+  "id": "R2-15",
+  "expected": "blocked",
+  "actual": "blocked",
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-LOCAL-1",
+        "severity": "HIGH",
+        "category": "internal_disclosure",
+        "title": "Internal commercial information",
+        "text": "[Internal information withheld]",
+        "location": {
+          "field": "description"
+        },
+        "reason": "Remove internal commercial or credential information before public copy is reviewed.",
+        "factKeys": [],
+        "suggestedFix": "Remove the internal information and run review again.",
+        "origin": "rules"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v9",
+      "ruleVersion": "review-hard-v7",
+      "inputHash": "07114ae182acbc0a28858181a1ed51c93214d2200b41c44f93b48f26492490e3",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": false
+    }
+  },
+  "audit": null
+}

@@ -1,0 +1,55 @@
+{
+  "id": "wrong-title-correct-attribute",
+  "repetition": 1,
+  "expected": "blocked",
+  "matched": true,
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "title"
+        },
+        "text": "leather bag",
+        "reason": "The title claims the material is leather, but the authorized fact specifies Canvas.",
+        "factKeys": [
+          "material"
+        ],
+        "suggestedFix": "Replace 'leather' with 'Canvas' in the title.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v9",
+      "ruleVersion": "review-hard-v7",
+      "inputHash": "504981ca486f319118806cc90e32a19a5195a231aa5b7b102f8b3be72d53b023",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmttunbhv0001qqv4mv3jsm6r"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v9",
+    "inputHash": "504981ca486f319118806cc90e32a19a5195a231aa5b7b102f8b3be72d53b023",
+    "id": "cmttunbhv0001qqv4mv3jsm6r",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 695,
+    "success": true,
+    "errorCode": null,
+    "promptTokens": 1365,
+    "completionTokens": 126,
+    "totalTokens": 1491,
+    "createdAt": "2026-09-09T08:41:33.427Z",
+    "updatedAt": "2026-09-09T08:41:33.427Z"
+  }
+}

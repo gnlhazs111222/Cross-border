@@ -1,0 +1,54 @@
+{
+  "id": "R2-08",
+  "expected": "blocked",
+  "actual": "blocked",
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "description"
+        },
+        "text": "18W",
+        "reason": "The description claims a power of 18W, which contradicts the authorized fact of 9W.",
+        "factKeys": [
+          "power"
+        ],
+        "suggestedFix": "Change '18W' to '9W' in the description.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v13",
+      "ruleVersion": "review-hard-v9",
+      "inputHash": "d8274644425a05001852e521be295f3642d28962f0e9e046f4d7f50c5192f540",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmttzw3fr0005qqsgkj754g1i"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v13",
+    "inputHash": "d8274644425a05001852e521be295f3642d28962f0e9e046f4d7f50c5192f540",
+    "id": "cmttzw3fr0005qqsgkj754g1i",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 700,
+    "success": true,
+    "errorCode": null,
+    "promptTokens": 1657,
+    "completionTokens": 129,
+    "totalTokens": 1786,
+    "createdAt": "2026-09-09T11:08:20.968Z",
+    "updatedAt": "2026-09-09T11:08:20.968Z"
+  }
+}

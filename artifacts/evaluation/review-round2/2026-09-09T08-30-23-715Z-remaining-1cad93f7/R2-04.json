@@ -1,0 +1,37 @@
+{
+  "id": "R2-04",
+  "expected": "passed",
+  "actual": "passed",
+  "outcome": {
+    "status": "passed",
+    "issues": [],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v6",
+      "inputHash": "65d380b565c6e14e7d9b9ce6f5ebfea523e0694a686bc936d123c6aabb00b35f",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmttu8znq0002qqaoy48feu6u"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v8",
+    "inputHash": "65d380b565c6e14e7d9b9ce6f5ebfea523e0694a686bc936d123c6aabb00b35f",
+    "id": "cmttu8znq0002qqaoy48feu6u",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 290,
+    "success": true,
+    "errorCode": null,
+    "promptTokens": 1269,
+    "completionTokens": 17,
+    "totalTokens": 1286,
+    "createdAt": "2026-09-09T08:30:24.903Z",
+    "updatedAt": "2026-09-09T08:30:24.903Z"
+  }
+}

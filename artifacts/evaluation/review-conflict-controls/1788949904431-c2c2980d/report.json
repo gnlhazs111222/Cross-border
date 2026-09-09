@@ -1,0 +1,304 @@
+{
+  "inputHash": "8250d0358c3e8da3f64f88fc2920aafaf6db9fabe4ec6b36579f75e162efaac4",
+  "provenance": "AI-authored development controls, not independent human evaluation",
+  "rows": [
+    {
+      "id": "correct-title-wrong-attribute",
+      "repetition": 1,
+      "expected": "blocked",
+      "matched": true,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "spec conflict",
+            "category": "spec_conflict",
+            "location": {
+              "field": "attributes",
+              "key": "Material"
+            },
+            "text": "Leather",
+            "reason": "The attribute claims the material is Leather, which contradicts the authorized Canvas material.",
+            "factKeys": [
+              "material"
+            ],
+            "suggestedFix": "Change Material to Canvas.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v12",
+          "ruleVersion": "review-hard-v8",
+          "inputHash": "ede18223450363e93c89c1a2cb63d1dbb332c854ef79339f77fe92912ac1659b",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttyl1bl0000qqtoomehf4gu"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v12",
+        "inputHash": "ede18223450363e93c89c1a2cb63d1dbb332c854ef79339f77fe92912ac1659b",
+        "id": "cmttyl1bl0000qqtoomehf4gu",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 952,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1553,
+        "completionTokens": 102,
+        "totalTokens": 1655,
+        "createdAt": "2026-09-09T10:31:45.394Z",
+        "updatedAt": "2026-09-09T10:31:45.394Z"
+      }
+    },
+    {
+      "id": "wrong-title-correct-attribute",
+      "repetition": 1,
+      "expected": "blocked",
+      "matched": true,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "spec conflict",
+            "category": "spec_conflict",
+            "location": {
+              "field": "title"
+            },
+            "text": "leather",
+            "reason": "The title claims the bag is made of leather, which contradicts the authorized material Canvas.",
+            "factKeys": [
+              "material"
+            ],
+            "suggestedFix": "Change 'leather' to 'Canvas' in the title.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v12",
+          "ruleVersion": "review-hard-v8",
+          "inputHash": "81beb1664597fb93dab4bd4854f0c180041b3f1c8df7c3079f6fc6ebe35aab96",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttyl21c0001qqto437k08bc"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v12",
+        "inputHash": "81beb1664597fb93dab4bd4854f0c180041b3f1c8df7c3079f6fc6ebe35aab96",
+        "id": "cmttyl21c0001qqto437k08bc",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 878,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1551,
+        "completionTokens": 122,
+        "totalTokens": 1673,
+        "createdAt": "2026-09-09T10:31:46.320Z",
+        "updatedAt": "2026-09-09T10:31:46.320Z"
+      }
+    },
+    {
+      "id": "both-correct",
+      "repetition": 1,
+      "expected": "passed",
+      "matched": true,
+      "outcome": {
+        "status": "passed",
+        "issues": [],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v12",
+          "ruleVersion": "review-hard-v8",
+          "inputHash": "9901972012cf2494c4e1ad22b9ac6993874c656c2b98292f1eab95d89ebbdef4",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttyl2b90002qqtol3hjpzqh"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v12",
+        "inputHash": "9901972012cf2494c4e1ad22b9ac6993874c656c2b98292f1eab95d89ebbdef4",
+        "id": "cmttyl2b90002qqtol3hjpzqh",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 314,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1551,
+        "completionTokens": 8,
+        "totalTokens": 1559,
+        "createdAt": "2026-09-09T10:31:46.678Z",
+        "updatedAt": "2026-09-09T10:31:46.678Z"
+      }
+    },
+    {
+      "id": "correct-title-wrong-attribute",
+      "repetition": 2,
+      "expected": "blocked",
+      "matched": true,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "spec conflict",
+            "category": "spec_conflict",
+            "location": {
+              "field": "attributes",
+              "key": "Material"
+            },
+            "text": "Leather",
+            "reason": "The attribute claims the material is Leather, which contradicts the authorized Canvas material.",
+            "factKeys": [
+              "material"
+            ],
+            "suggestedFix": "Change Material to Canvas.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v12",
+          "ruleVersion": "review-hard-v8",
+          "inputHash": "ede18223450363e93c89c1a2cb63d1dbb332c854ef79339f77fe92912ac1659b",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttyl2yf0003qqtoiopivsae"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v12",
+        "inputHash": "ede18223450363e93c89c1a2cb63d1dbb332c854ef79339f77fe92912ac1659b",
+        "id": "cmttyl2yf0003qqtoiopivsae",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 782,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1553,
+        "completionTokens": 120,
+        "totalTokens": 1673,
+        "createdAt": "2026-09-09T10:31:47.511Z",
+        "updatedAt": "2026-09-09T10:31:47.511Z"
+      }
+    },
+    {
+      "id": "wrong-title-correct-attribute",
+      "repetition": 2,
+      "expected": "blocked",
+      "matched": true,
+      "outcome": {
+        "status": "blocked",
+        "issues": [
+          {
+            "id": "B-1",
+            "severity": "HIGH",
+            "title": "spec conflict",
+            "category": "spec_conflict",
+            "location": {
+              "field": "title"
+            },
+            "text": "leather",
+            "reason": "The title claims the bag is made of leather, which contradicts the authorized material fact of Canvas.",
+            "factKeys": [
+              "material"
+            ],
+            "suggestedFix": "Change 'leather' to 'Canvas' in the title.",
+            "origin": "qwen"
+          }
+        ],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v12",
+          "ruleVersion": "review-hard-v8",
+          "inputHash": "81beb1664597fb93dab4bd4854f0c180041b3f1c8df7c3079f6fc6ebe35aab96",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttyl3pj0004qqtoga0r2la7"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v12",
+        "inputHash": "81beb1664597fb93dab4bd4854f0c180041b3f1c8df7c3079f6fc6ebe35aab96",
+        "id": "cmttyl3pj0004qqtoga0r2la7",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 922,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1551,
+        "completionTokens": 124,
+        "totalTokens": 1675,
+        "createdAt": "2026-09-09T10:31:48.488Z",
+        "updatedAt": "2026-09-09T10:31:48.488Z"
+      }
+    },
+    {
+      "id": "both-correct",
+      "repetition": 2,
+      "expected": "passed",
+      "matched": true,
+      "outcome": {
+        "status": "passed",
+        "issues": [],
+        "metadata": {
+          "mode": "rules_qwen",
+          "model": "qwen3.6-flash",
+          "promptVersion": "review-qwen-v12",
+          "ruleVersion": "review-hard-v8",
+          "inputHash": "9901972012cf2494c4e1ad22b9ac6993874c656c2b98292f1eab95d89ebbdef4",
+          "listingRevision": 1,
+          "factsRevision": 1,
+          "taskRevision": 1,
+          "modelCalled": true,
+          "aiCallId": "cmttyl3z40005qqto3dwh61bz"
+        }
+      },
+      "audit": {
+        "promptVersion": "review-qwen-v12",
+        "inputHash": "9901972012cf2494c4e1ad22b9ac6993874c656c2b98292f1eab95d89ebbdef4",
+        "id": "cmttyl3z40005qqto3dwh61bz",
+        "provider": "bailian",
+        "model": "qwen3.6-flash",
+        "purpose": "listing_review",
+        "latencyMs": 299,
+        "success": true,
+        "errorCode": null,
+        "promptTokens": 1551,
+        "completionTokens": 8,
+        "totalTokens": 1559,
+        "createdAt": "2026-09-09T10:31:48.832Z",
+        "updatedAt": "2026-09-09T10:31:48.832Z"
+      }
+    }
+  ]
+}

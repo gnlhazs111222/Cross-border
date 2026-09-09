@@ -1,0 +1,71 @@
+{
+  "id": "R2-07",
+  "expected": "blocked",
+  "actual": "blocked",
+  "outcome": {
+    "status": "blocked",
+    "issues": [
+      {
+        "id": "B-1",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "title"
+        },
+        "text": "canvas bag",
+        "reason": "The title identifies the material as canvas, which contradicts the authorized fact that the material is Canvas. While the word matches, the context implies a specific type or finish not authorized, or more critically, it conflicts with the attribute below. However, looking at ALLOWED_FACTS, value is 'Canvas'. The title says 'canvas'. This is a match. Wait, let's look at the attribute.",
+        "factKeys": [
+          "material"
+        ],
+        "suggestedFix": "Ensure the title accurately reflects the authorized material 'Canvas' without implying unauthorized variations.",
+        "origin": "qwen"
+      },
+      {
+        "id": "B-2",
+        "severity": "HIGH",
+        "title": "spec conflict",
+        "category": "spec_conflict",
+        "location": {
+          "field": "attributes",
+          "key": "Material"
+        },
+        "text": "Leather",
+        "reason": "The attribute states the material is Leather, which directly contradicts the authorized fact that the material is Canvas.",
+        "factKeys": [
+          "material"
+        ],
+        "suggestedFix": "Replace 'Leather' with 'Canvas' to match the authorized material.",
+        "origin": "qwen"
+      }
+    ],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v8",
+      "ruleVersion": "review-hard-v6",
+      "inputHash": "5289ff47b7cb4b0405340326522107e4b7d67c0cdf204ab74b7c6d724a83bf6e",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmttu913a0004qqao1t4ts765"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v8",
+    "inputHash": "5289ff47b7cb4b0405340326522107e4b7d67c0cdf204ab74b7c6d724a83bf6e",
+    "id": "cmttu913a0004qqao1t4ts765",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 1478,
+    "success": true,
+    "errorCode": null,
+    "promptTokens": 1272,
+    "completionTokens": 309,
+    "totalTokens": 1581,
+    "createdAt": "2026-09-09T08:30:26.759Z",
+    "updatedAt": "2026-09-09T08:30:26.759Z"
+  }
+}

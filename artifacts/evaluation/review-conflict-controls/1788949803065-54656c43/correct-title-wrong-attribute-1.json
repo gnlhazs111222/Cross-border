@@ -1,0 +1,39 @@
+{
+  "id": "correct-title-wrong-attribute",
+  "repetition": 1,
+  "expected": "blocked",
+  "matched": false,
+  "outcome": {
+    "status": "failed",
+    "issues": [],
+    "metadata": {
+      "mode": "rules_qwen",
+      "model": "qwen3.6-flash",
+      "promptVersion": "review-qwen-v10",
+      "ruleVersion": "review-hard-v8",
+      "inputHash": "29f90ebe9fc0fab3434d8885294c9b455c6f1882cb4f7e6cf5a1492a25dbcf2f",
+      "listingRevision": 1,
+      "factsRevision": 1,
+      "taskRevision": 1,
+      "modelCalled": true,
+      "aiCallId": "cmttyivn10000qqtculuu8sxn",
+      "errorCode": "invalid_review_reason"
+    }
+  },
+  "audit": {
+    "promptVersion": "review-qwen-v10",
+    "inputHash": "29f90ebe9fc0fab3434d8885294c9b455c6f1882cb4f7e6cf5a1492a25dbcf2f",
+    "id": "cmttyivn10000qqtculuu8sxn",
+    "provider": "bailian",
+    "model": "qwen3.6-flash",
+    "purpose": "listing_review",
+    "latencyMs": 1641,
+    "success": false,
+    "errorCode": "invalid_review_reason",
+    "promptTokens": 1351,
+    "completionTokens": 332,
+    "totalTokens": 1683,
+    "createdAt": "2026-09-09T10:30:04.718Z",
+    "updatedAt": "2026-09-09T10:30:04.759Z"
+  }
+}
