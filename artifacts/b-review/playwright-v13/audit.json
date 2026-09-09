@@ -1,0 +1,365 @@
+{
+  "reviews": [
+    {
+      "status": "failed",
+      "metadata": {
+        "mode": "rules_qwen",
+        "model": "qwen3.6-flash",
+        "promptVersion": "review-qwen-v13",
+        "ruleVersion": "review-hard-v9",
+        "inputHash": "50e898f02d6c5083fd761d0ccf128be4f064bec9f81ac14f460acd858ea4c55f",
+        "listingRevision": 17,
+        "factsRevision": 2,
+        "taskRevision": 1,
+        "modelCalled": true,
+        "aiCallId": "cmtu18f190004qq3ow3yqfv9l",
+        "errorCode": "invalid_review_location"
+      },
+      "issues": [],
+      "listingDraft": {
+        "revision": 17,
+        "data": {
+          "platform": "shopify",
+          "revision": 17,
+          "factRevision": 2,
+          "riskDemoInjected": false,
+          "title": "Black stainless steel bottle, 500ml",
+          "bullets": [
+            "Capacity: 500ml."
+          ],
+          "description": "Black stainless steel bottle with a screw-top lid. Carry it beside your notebook; even if the bottle tips over, every page stays dry.",
+          "attributes": {
+            "Color": "Black",
+            "Capacity": "500ml / 16.9 fl oz",
+            "Material": "Stainless Steel",
+            "Straw": "No straw",
+            "Country of origin": "China",
+            "Finish": "Matte black",
+            "Lid type": "Screw-top lid"
+          },
+          "sources": [
+            {
+              "label": "Color",
+              "sourceKind": "mock",
+              "valueType": "string",
+              "recordId": "cmtssdv29000oqqy0d6s7zn5t",
+              "key": "color",
+              "value": "Black",
+              "source": "Supplier Spreadsheet",
+              "anchor": "Products · column D",
+              "status": "Confirmed",
+              "allowed": true,
+              "revision": 1,
+              "updatedAt": "2026-09-08T14:50:26.817Z"
+            },
+            {
+              "label": "Capacity",
+              "sourceKind": "mock",
+              "valueType": "number",
+              "recordId": "cmtssdv29000pqqy0vroax8kt",
+              "key": "capacity",
+              "value": "500ml / 16.9 fl oz",
+              "source": "Specification PDF",
+              "anchor": "Page 1 · specifications",
+              "status": "Confirmed",
+              "allowed": true,
+              "revision": 1,
+              "updatedAt": "2026-09-08T14:50:26.817Z"
+            },
+            {
+              "label": "Material",
+              "sourceKind": "mock",
+              "valueType": "string",
+              "recordId": "cmtssdv29000qqqy00gqw2med",
+              "key": "material",
+              "value": "Stainless Steel",
+              "source": "Specification PDF",
+              "anchor": "Page 1 · body material",
+              "status": "Confirmed",
+              "allowed": true,
+              "revision": 1,
+              "updatedAt": "2026-09-08T14:50:26.817Z"
+            },
+            {
+              "label": "Straw",
+              "sourceKind": "mock",
+              "valueType": "boolean",
+              "recordId": "cmtssdv29000rqqy06clchnty",
+              "key": "straw",
+              "value": "No straw",
+              "source": "Supplier Spreadsheet",
+              "anchor": "Products · column F",
+              "status": "Confirmed",
+              "allowed": true,
+              "revision": 1,
+              "updatedAt": "2026-09-08T14:50:26.817Z"
+            },
+            {
+              "label": "Country of origin",
+              "sourceKind": "mock",
+              "valueType": "string",
+              "recordId": "cmtssdv29000sqqy06km2w51j",
+              "key": "countryOfOrigin",
+              "value": "China",
+              "source": "Supplier Spreadsheet",
+              "anchor": "Products · column G",
+              "status": "Confirmed",
+              "allowed": true,
+              "revision": 1,
+              "updatedAt": "2026-09-08T14:50:26.817Z"
+            },
+            {
+              "label": "Package includes",
+              "sourceKind": "mock",
+              "valueType": "string",
+              "recordId": "cmtssdv29000zqqy068sp1syw",
+              "key": "packageIncludes",
+              "value": "Bottle, Lid, Instruction card",
+              "source": "Packaging Image",
+              "anchor": "Image 2 · contents",
+              "status": "Confirmed",
+              "allowed": true,
+              "revision": 1,
+              "updatedAt": "2026-09-08T14:50:26.817Z"
+            },
+            {
+              "label": "Finish",
+              "sourceKind": "mock",
+              "valueType": "string",
+              "recordId": "cmtssdv290010qqy0j178gjul",
+              "key": "finish",
+              "value": "Matte black",
+              "source": "Product Image",
+              "anchor": "Image 1 · exterior",
+              "status": "Confirmed",
+              "allowed": true,
+              "revision": 1,
+              "updatedAt": "2026-09-08T14:50:26.817Z"
+            },
+            {
+              "label": "Lid type",
+              "sourceKind": "mock",
+              "valueType": "string",
+              "recordId": "cmtssdv290011qqy0ar360p42",
+              "key": "lidType",
+              "value": "Screw-top lid",
+              "source": "Specification PDF",
+              "anchor": "Page 1 · closure",
+              "status": "Confirmed",
+              "allowed": true,
+              "revision": 1,
+              "updatedAt": "2026-09-08T14:50:26.817Z"
+            }
+          ],
+          "generationMode": "template_fallback",
+          "generation": {
+            "provider": "template",
+            "model": "qwen3.6-flash",
+            "promptVersion": "listing-qwen-v1",
+            "inputHash": "0a4eb8d7bc2c46a0f67f65267a66a56c3773f61dcc1e99fa485b581e653d6f64",
+            "fallbackReason": "unsupported_specification",
+            "aiCallId": "cmtssdwva0013qqy09djjay5b",
+            "cacheHit": false
+          }
+        }
+      }
+    },
+    {
+      "status": "passed",
+      "metadata": {
+        "mode": "rules_qwen",
+        "model": "qwen3.6-flash",
+        "promptVersion": "review-qwen-v13",
+        "ruleVersion": "review-hard-v9",
+        "inputHash": "183d99efffd969ce4d467ab234ffde1e9336a500870adaa892baf2f4ee89a582",
+        "listingRevision": 18,
+        "factsRevision": 2,
+        "taskRevision": 1,
+        "modelCalled": true,
+        "aiCallId": "cmtu1ar6v0009qq3op42slfa0"
+      },
+      "issues": [],
+      "listingDraft": {
+        "revision": 18,
+        "data": {
+          "platform": "shopify",
+          "revision": 18,
+          "factRevision": 2,
+          "riskDemoInjected": false,
+          "title": "Black stainless steel bottle, 500ml",
+          "bullets": [
+            "Capacity: 500ml."
+          ],
+          "description": "Black stainless steel bottle with a screw-top lid.",
+          "attributes": {
+            "Color": "Black",
+            "Capacity": "500ml / 16.9 fl oz",
+            "Material": "Stainless Steel",
+            "Straw": "No straw",
+            "Country of origin": "China",
+            "Finish": "Matte black",
+            "Lid type": "Screw-top lid"
+          },
+          "sources": [
+            {
+              "label": "Color",
+              "sourceKind": "mock",
+              "valueType": "string",
+              "recordId": "cmtssdv29000oqqy0d6s7zn5t",
+              "key": "color",
+              "value": "Black",
+              "source": "Supplier Spreadsheet",
+              "anchor": "Products · column D",
+              "status": "Confirmed",
+              "allowed": true,
+              "revision": 1,
+              "updatedAt": "2026-09-08T14:50:26.817Z"
+            },
+            {
+              "label": "Capacity",
+              "sourceKind": "mock",
+              "valueType": "number",
+              "recordId": "cmtssdv29000pqqy0vroax8kt",
+              "key": "capacity",
+              "value": "500ml / 16.9 fl oz",
+              "source": "Specification PDF",
+              "anchor": "Page 1 · specifications",
+              "status": "Confirmed",
+              "allowed": true,
+              "revision": 1,
+              "updatedAt": "2026-09-08T14:50:26.817Z"
+            },
+            {
+              "label": "Material",
+              "sourceKind": "mock",
+              "valueType": "string",
+              "recordId": "cmtssdv29000qqqy00gqw2med",
+              "key": "material",
+              "value": "Stainless Steel",
+              "source": "Specification PDF",
+              "anchor": "Page 1 · body material",
+              "status": "Confirmed",
+              "allowed": true,
+              "revision": 1,
+              "updatedAt": "2026-09-08T14:50:26.817Z"
+            },
+            {
+              "label": "Straw",
+              "sourceKind": "mock",
+              "valueType": "boolean",
+              "recordId": "cmtssdv29000rqqy06clchnty",
+              "key": "straw",
+              "value": "No straw",
+              "source": "Supplier Spreadsheet",
+              "anchor": "Products · column F",
+              "status": "Confirmed",
+              "allowed": true,
+              "revision": 1,
+              "updatedAt": "2026-09-08T14:50:26.817Z"
+            },
+            {
+              "label": "Country of origin",
+              "sourceKind": "mock",
+              "valueType": "string",
+              "recordId": "cmtssdv29000sqqy06km2w51j",
+              "key": "countryOfOrigin",
+              "value": "China",
+              "source": "Supplier Spreadsheet",
+              "anchor": "Products · column G",
+              "status": "Confirmed",
+              "allowed": true,
+              "revision": 1,
+              "updatedAt": "2026-09-08T14:50:26.817Z"
+            },
+            {
+              "label": "Package includes",
+              "sourceKind": "mock",
+              "valueType": "string",
+              "recordId": "cmtssdv29000zqqy068sp1syw",
+              "key": "packageIncludes",
+              "value": "Bottle, Lid, Instruction card",
+              "source": "Packaging Image",
+              "anchor": "Image 2 · contents",
+              "status": "Confirmed",
+              "allowed": true,
+              "revision": 1,
+              "updatedAt": "2026-09-08T14:50:26.817Z"
+            },
+            {
+              "label": "Finish",
+              "sourceKind": "mock",
+              "valueType": "string",
+              "recordId": "cmtssdv290010qqy0j178gjul",
+              "key": "finish",
+              "value": "Matte black",
+              "source": "Product Image",
+              "anchor": "Image 1 · exterior",
+              "status": "Confirmed",
+              "allowed": true,
+              "revision": 1,
+              "updatedAt": "2026-09-08T14:50:26.817Z"
+            },
+            {
+              "label": "Lid type",
+              "sourceKind": "mock",
+              "valueType": "string",
+              "recordId": "cmtssdv290011qqy0ar360p42",
+              "key": "lidType",
+              "value": "Screw-top lid",
+              "source": "Specification PDF",
+              "anchor": "Page 1 · closure",
+              "status": "Confirmed",
+              "allowed": true,
+              "revision": 1,
+              "updatedAt": "2026-09-08T14:50:26.817Z"
+            }
+          ],
+          "generationMode": "template_fallback",
+          "generation": {
+            "provider": "template",
+            "model": "qwen3.6-flash",
+            "promptVersion": "listing-qwen-v1",
+            "inputHash": "0a4eb8d7bc2c46a0f67f65267a66a56c3773f61dcc1e99fa485b581e653d6f64",
+            "fallbackReason": "unsupported_specification",
+            "aiCallId": "cmtssdwva0013qqy09djjay5b",
+            "cacheHit": false
+          }
+        }
+      }
+    }
+  ],
+  "calls": [
+    {
+      "promptVersion": "review-qwen-v13",
+      "inputHash": "50e898f02d6c5083fd761d0ccf128be4f064bec9f81ac14f460acd858ea4c55f",
+      "id": "cmtu18f190004qq3ow3yqfv9l",
+      "provider": "bailian",
+      "model": "qwen3.6-flash",
+      "purpose": "listing_review",
+      "latencyMs": 1059,
+      "success": false,
+      "errorCode": "invalid_review_location",
+      "promptTokens": 2041,
+      "completionTokens": 162,
+      "totalTokens": 2203,
+      "createdAt": "2026-09-09T11:45:55.485Z",
+      "updatedAt": "2026-09-09T11:45:55.527Z"
+    },
+    {
+      "promptVersion": "review-qwen-v13",
+      "inputHash": "183d99efffd969ce4d467ab234ffde1e9336a500870adaa892baf2f4ee89a582",
+      "id": "cmtu1ar6v0009qq3op42slfa0",
+      "provider": "bailian",
+      "model": "qwen3.6-flash",
+      "purpose": "listing_review",
+      "latencyMs": 406,
+      "success": true,
+      "errorCode": null,
+      "promptTokens": 2005,
+      "completionTokens": 15,
+      "totalTokens": 2020,
+      "createdAt": "2026-09-09T11:47:44.552Z",
+      "updatedAt": "2026-09-09T11:47:44.552Z"
+    }
+  ]
+}

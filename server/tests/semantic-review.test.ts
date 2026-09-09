@@ -23,6 +23,37 @@ class ResponseModel extends MockTextModelProvider {
 }
 const options = { model: 'qwen-test', liveEnabled: true, configured: true };
 
+test('captured description index zero preserves its actual issue and references', async () => {
+  const capture = JSON.parse(readFileSync('artifacts/b-review/location-diagnostic/diagnostic-1788954665509.json', 'utf8'));
+  const i = input(); i.listing = { ...capture.modelInput.COPY, platform: 'shopify' };
+  i.facts.push({ key: 'lidType', label: 'Lid type', value: 'Screw-top lid', status: 'Confirmed', allowed: true, source: 'supplier', anchor: '' });
+  const model = new ResponseModel(); model.output = capture.captures[0].parsed;
+  const result = await new QwenReviewProvider(model, options).review(i);
+  assert.equal(result.status, 'blocked'); assert.equal(result.issues.length, 1);
+  assert.deepEqual(result.issues[0].location, { field: 'description' });
+  assert.deepEqual(result.issues[0].factKeys, ['lidType', 'leakproof']);
+  assert.equal(result.issues[0].text, capture.captures[0].parsed.issues[0].text);
+});
+
+test('singleton copy fields tolerate only a redundant zero index and still validate the quote', async () => {
+  const model = new ResponseModel();
+  const i = input();
+  i.listing.description = 'The bottle tips over, but every page stays dry.';
+  const issue = { category: 'unsupported_claim', location: { field: 'description', index: 0 } as Record<string, unknown>, text: 'every page stays dry', reason: 'No containment evidence supports this promise.', factKeys: [], suggestedFix: 'Remove the dry-page promise.' };
+  model.output = { status: 'blocked', issues: [issue] };
+  const result = await new QwenReviewProvider(model, options).review(i);
+  assert.equal(result.status, 'blocked'); assert.deepEqual(result.issues[0].location, { field: 'description' });
+  i.listing.title = issue.text;
+  issue.location = { field: 'title', index: 0 };
+  assert.equal((await new QwenReviewProvider(model, options).review(i)).status, 'blocked');
+  for (const location of [{ field: 'description', index: 1 }, { field: 'description', index: -1 }, { field: 'description', index: '0' }, { field: 'attributes', key: 'Color', index: 0 }]) {
+    issue.location = location;
+    assert.equal((await new QwenReviewProvider(model, options).review(i)).status, 'failed');
+  }
+  issue.location = { field: 'description', index: 0 }; issue.text = 'nonexistent phrase';
+  assert.equal((await new QwenReviewProvider(model, options).review(i)).status, 'failed');
+});
+
 test('captured containment explanation must cite the lid fact it explicitly discusses', async () => {
   const cases = JSON.parse(readFileSync('evaluation/review/round2/cases.json', 'utf8'));
   const report = JSON.parse(readFileSync('artifacts/evaluation/review-round2/2026-09-09T10-32-11-607Z-remaining-a78d4217/report.json', 'utf8'));

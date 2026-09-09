@@ -1,0 +1,120 @@
+{
+  "reviews": [
+    {
+      "status": "blocked",
+      "metadata": {
+        "mode": "rules_qwen",
+        "model": "qwen3.6-flash",
+        "promptVersion": "review-qwen-v13",
+        "ruleVersion": "review-hard-v10",
+        "inputHash": "13f1adaea2485ac99eec934d29e3ee8511b5961295931ceb0a4a2462a6f9c081",
+        "listingRevision": 19,
+        "factsRevision": 2,
+        "taskRevision": 1,
+        "modelCalled": true,
+        "aiCallId": "cmtu1ik280004qqewsg9xee8e"
+      },
+      "issues": [
+        {
+          "id": "B-1",
+          "severity": "HIGH",
+          "title": "unsupported claim",
+          "category": "unsupported_claim",
+          "location": {
+            "field": "description"
+          },
+          "text": "even if the bottle tips over, every page stays dry",
+          "reason": "The copy promises leak resistance (dry pages) but only provides an authorized screw-top lid type, which does not prove containment performance. The leakproof field is unauthorized.",
+          "factKeys": [
+            "lidType",
+            "leakproof"
+          ],
+          "suggestedFix": "Remove the claim about keeping pages dry or provide verified leak-proof testing evidence.",
+          "origin": "qwen"
+        }
+      ]
+    },
+    {
+      "status": "passed",
+      "metadata": {
+        "mode": "rules_qwen",
+        "model": "qwen3.6-flash",
+        "promptVersion": "review-qwen-v13",
+        "ruleVersion": "review-hard-v10",
+        "inputHash": "775311e646dd67edb52424523964c8bf4a696cee971061ccde1fafc235556059",
+        "listingRevision": 20,
+        "factsRevision": 2,
+        "taskRevision": 1,
+        "modelCalled": true,
+        "aiCallId": "cmtu1jnvv0009qqewwsqsvf4h"
+      },
+      "issues": []
+    }
+  ],
+  "calls": [
+    {
+      "promptVersion": "review-qwen-v13",
+      "inputHash": "50e898f02d6c5083fd761d0ccf128be4f064bec9f81ac14f460acd858ea4c55f",
+      "id": "cmtu1f27p0000qqpg98izts1c",
+      "provider": "bailian",
+      "model": "qwen3.6-flash",
+      "purpose": "listing_review",
+      "latencyMs": 1073,
+      "success": true,
+      "errorCode": null,
+      "promptTokens": 2041,
+      "completionTokens": 162,
+      "totalTokens": 2203,
+      "createdAt": "2026-09-09T11:51:05.462Z",
+      "updatedAt": "2026-09-09T11:51:05.462Z"
+    },
+    {
+      "promptVersion": "review-qwen-v13",
+      "inputHash": "c8c7aca4a77519a52de09b6b06da3b177fa94c8f15996116d19735b37d8ef0af",
+      "id": "cmtu1h55t0000qquwi2dw3hj6",
+      "provider": "bailian",
+      "model": "qwen3.6-flash",
+      "purpose": "listing_review",
+      "latencyMs": 1413,
+      "success": true,
+      "errorCode": null,
+      "promptTokens": 2041,
+      "completionTokens": 162,
+      "totalTokens": 2203,
+      "createdAt": "2026-09-09T11:52:42.594Z",
+      "updatedAt": "2026-09-09T11:52:42.594Z"
+    },
+    {
+      "promptVersion": "review-qwen-v13",
+      "inputHash": "13f1adaea2485ac99eec934d29e3ee8511b5961295931ceb0a4a2462a6f9c081",
+      "id": "cmtu1ik280004qqewsg9xee8e",
+      "provider": "bailian",
+      "model": "qwen3.6-flash",
+      "purpose": "listing_review",
+      "latencyMs": 1238,
+      "success": true,
+      "errorCode": null,
+      "promptTokens": 2041,
+      "completionTokens": 162,
+      "totalTokens": 2203,
+      "createdAt": "2026-09-09T11:53:48.560Z",
+      "updatedAt": "2026-09-09T11:53:48.560Z"
+    },
+    {
+      "promptVersion": "review-qwen-v13",
+      "inputHash": "775311e646dd67edb52424523964c8bf4a696cee971061ccde1fafc235556059",
+      "id": "cmtu1jnvv0009qqewwsqsvf4h",
+      "provider": "bailian",
+      "model": "qwen3.6-flash",
+      "purpose": "listing_review",
+      "latencyMs": 357,
+      "success": true,
+      "errorCode": null,
+      "promptTokens": 2005,
+      "completionTokens": 15,
+      "totalTokens": 2020,
+      "createdAt": "2026-09-09T11:54:40.171Z",
+      "updatedAt": "2026-09-09T11:54:40.171Z"
+    }
+  ]
+}

@@ -12,6 +12,9 @@ const locationSchema = z.preprocess(value => {
   const location = { ...value } as Record<string, unknown>;
   // Models may serialize unused optional members as null. Never erase required members or unknown keys.
   if (location.field !== 'bullets' && location.index === null) delete location.index;
+  // Title and description each contain one string. Some outputs serialize that
+  // singleton as index 0; other indices and attribute indices remain invalid.
+  if ((location.field === 'title' || location.field === 'description') && location.index === 0) delete location.index;
   if (location.field !== 'attributes' && location.key === null) delete location.key;
   if (location.occurrence === null) delete location.occurrence;
   return location;

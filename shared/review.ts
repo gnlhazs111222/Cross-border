@@ -7,4 +7,4 @@ export type ReviewMetadata = { mode: 'rules_qwen'; model: string; promptVersion:
 export type ReviewInput = { listing: Pick<Listing, 'title' | 'bullets' | 'description' | 'attributes' | 'platform'>; facts: Fact[]; context: { market: string; category: string; taskRevision: number }; listingRevision: number; factsRevision: number };
 export type SemanticReviewResult = { status: Exclude<ReviewStatus, 'running'>; issues: Issue[]; metadata: ReviewMetadata };
 export const REVIEW_PROMPT_VERSION = 'review-qwen-v13';
-export const REVIEW_RULE_VERSION = 'review-hard-v9';
+export const REVIEW_RULE_VERSION = 'review-hard-v10';
