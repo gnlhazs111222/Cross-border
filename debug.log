@@ -1,0 +1,6 @@
+[0910/085437.806:ERROR:net\base\network_change_notifier_win.cc:224] WSALookupServiceBegin failed with: 10108
+[0910/085438.967:ERROR:gpu\command_buffer\service\gl_utils.cc:427] [.WebGL-0x7bc0040f400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+[0910/085440.787:ERROR:gpu\command_buffer\service\gl_utils.cc:427] [.WebGL-0x7bc0040f400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+[0910/085441.774:ERROR:gpu\command_buffer\service\gl_utils.cc:427] [.WebGL-0x7bc0040f400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+[0910/085442.796:ERROR:gpu\command_buffer\service\gl_utils.cc:427] [.WebGL-0x7bc0040f400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)
+[0910/085710.484:ERROR:net\base\network_change_notifier_win.cc:224] WSALookupServiceBegin failed with: 10108

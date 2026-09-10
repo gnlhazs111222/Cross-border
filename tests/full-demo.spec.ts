@@ -3,10 +3,15 @@ import { test } from './fixtures';
 import { resolve } from 'node:path';
 
 publicTest('real login UI, HttpOnly session, wrong password and logout', async ({ page }) => {
+  // Exercise real authentication without the unrelated continuous WebGL render loop.
+  await page.route('**/login-3d/scene.js', route => route.fulfill({ contentType: 'application/javascript', body: '' }));
   await page.goto('/');
   const login = page.frameLocator('.login-experience-frame');
   await expect(page.locator('.login-experience-frame')).toBeVisible();
   await login.locator('#start').click();
+  await expect(login.locator('.demo-note')).toContainText('demo@prismlaunch.local');
+  await expect(login.locator('.demo-note')).toContainText('Demo123456');
+  await login.locator('#email').fill('demo@prismlaunch.local');
   await login.locator('#password').fill('incorrect');
   await login.locator('#loginForm .submit').click();
   await expect(login.locator('#toast')).toContainText('登录失败：Email or password is incorrect.');
