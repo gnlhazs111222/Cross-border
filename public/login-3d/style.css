@@ -10,7 +10,7 @@
 .eyebrow{display:flex;align-items:center;gap:10px;margin:0 0 26px;font-size:15px;font-weight:500;letter-spacing:.09em;color:#325b42}.eyebrow span{width:22px;height:2px;background:#3d7451}
 .copy h1{font-size:clamp(44px,4.25vw,66px);font-weight:500;letter-spacing:-.045em;line-height:1.3;margin:0 0 25px;color:#173c28}.intro{font-size:17px;line-height:1.95;color:#2f553d;margin:0;max-width:510px;text-wrap:pretty}
 .capabilities{display:flex;flex-wrap:wrap;gap:0;list-style:none;padding:0;margin:25px 0 32px;color:#31553d;font-size:15px}.capabilities li+li{border-left:1px solid #2b604140;margin-left:18px;padding-left:18px}
-.actions{display:flex;align-items:center;gap:25px;flex-wrap:wrap}.start{border:1px solid #194b31;border-radius:8px;padding:17px 24px;background:#205239;color:#f4faee;display:flex;gap:40px;align-items:center;font-size:17px;box-shadow:0 8px 25px #1c493322}.start:hover{background:#173f2a;box-shadow:0 12px 30px #1c493338}.start span{font-size:22px}
+.actions{display:flex;align-items:center;gap:25px;flex-wrap:wrap}.start{border:1px solid #194b31;border-radius:8px;padding:17px 24px;background:#205239;color:#f4faee;display:flex;gap:40px;align-items:center;font-size:24px;box-shadow:0 8px 25px #1c493322}.start:hover{background:#173f2a;box-shadow:0 12px 30px #1c493338}.start span{font-size:22px}
 .secondary{border:0;padding:12px 0;background:transparent;color:#23472f;display:flex;align-items:center;gap:12px;font-size:16px}.secondary:hover{text-decoration:underline;text-underline-offset:6px}
 .trust-note{display:flex;align-items:center;gap:10px;margin-top:27px;color:#31513b;font-size:14px}.trust-note p{margin:0;line-height:1.8}.trust-mark{display:grid;place-items:center;width:20px;height:20px;border:1px solid #37604560;border-radius:50%;font-size:14px;flex-shrink:0}
 .stage{position:absolute;inset:0;z-index:0;width:100%;height:100%;touch-action:pan-y}#scene{width:100%;height:100%;display:block}.loading{position:absolute;left:74%;top:47%;transform:translate(-50%,-50%);text-align:center;font-size:15px;color:#204d33;white-space:nowrap}.loading>span{display:inline-block;width:30px;height:30px;border:2px solid #38694744;border-top-color:#285239;border-radius:50%;animation:load 1s linear infinite}
@@ -29,7 +29,7 @@ body{background:linear-gradient(110deg,#b6cbaa 0%,#a5c095 48%,#71936b 100%)}
 .hero{height:auto;min-height:0;flex:1;width:100%;overflow:hidden}
 .copy{left:27%;top:49%;width:619.2px;text-align:center;transform:translate(-50%,-50%) scale(var(--content-scale,1));transform-origin:center}
 .eyebrow{justify-content:center;margin-bottom:24px;font-size:15px}
-.copy h1{font-size:58px;line-height:1.3;margin-bottom:24px}
+.copy h1{font-size:76px;line-height:1.25;margin-bottom:40px}
 .intro{max-width:570px;margin:0 auto;font-size:17px;line-height:1.95}
 .capabilities{justify-content:center;margin:25px 0 31px;font-size:15px}
 .actions{justify-content:center;gap:28px}
