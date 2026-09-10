@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#82ae8b">
+<meta name="description" content="棱镜上新，以可追溯的商品事实为基础，连接资料整理、智能选品、内容生成与审核发布。">
+<title>棱镜上新｜跨境商品上线工作台</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<svg class="svg-defs" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><symbol id="brand-symbol" viewBox="0 0 44 36"><path d="M22 9C17-1 7 2 7 11c-9 4-5 17 4 17h12l7-15c5-11-9-16-13-7m5 5 7 17h4c10 0 13-12 5-16-1-9-11-10-15-3" fill="none" stroke="currentColor" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"/></symbol></defs></svg>
+<div class="app-shell" id="appShell">
+<main class="hero" id="home">
+<div class="brand-signature" id="siteBrand" aria-label="棱镜上新"><svg viewBox="0 0 44 36" aria-hidden="true"><use href="#brand-symbol"/></svg><span>棱镜上新</span></div>
+<section class="copy" aria-labelledby="heroTitle">
+<p class="eyebrow"><span aria-hidden="true"></span>跨境商品上线工作台</p>
+<h1 id="heroTitle">让好商品，<br>稳妥走向全球。</h1>
+<p class="intro">以可追溯的商品事实为基础，将零散的国内资料，<br class="desktop-break">整理成可审核、可发布的海外商品内容。</p>
+<ul class="capabilities" aria-label="核心能力"><li>资料归集</li><li>事实核验</li><li>平台适配</li></ul>
+<div class="actions"><button class="start" id="start">登录工作台<span aria-hidden="true">↗</span></button><button class="secondary" data-info="workflow">了解上新流程<span aria-hidden="true">→</span></button></div>
+<div class="trust-note"><span class="trust-mark" aria-hidden="true">✓</span><p>事实有来源，生成有边界，发布有审核。</p></div>
+</section>
+<section class="stage" id="stage" aria-label="水下立体商品展示：左瓶后倾、右瓶前倾，靠近右瓶自动开盖">
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="loading" id="loading"><span></span><p>正在准备立体商品场景</p></div>
+<div class="fallback" id="fallback" hidden><h2>立体场景暂不可用</h2><p>请使用支持三维图形的浏览器，并开启硬件加速。登录表单仍可正常使用。</p></div>
+<button class="lid-access" id="lidAccess" aria-pressed="false">打开或关闭右瓶盖</button>
+</section>
+</main>
+</div>
+<dialog id="loginDialog" class="dialog login-dialog" aria-labelledby="loginTitle">
+<button class="close" data-close="loginDialog" aria-label="关闭登录窗口">×</button>
+<div class="dialog-brand"><svg viewBox="0 0 44 36" aria-hidden="true"><use href="#brand-symbol"/></svg><span>棱镜上新</span></div>
+<p class="overline">跨境商品上线工作台</p><h2 id="loginTitle">欢迎回来</h2><p class="dialog-intro">从商品资料出发，开启有据可循的上新协作。</p>
+<form id="loginForm">
+<label for="email">工作邮箱</label><input type="email" id="email" autocomplete="email" placeholder="请输入工作邮箱" required>
+<label for="password">登录密码</label><div class="password-field"><input type="password" id="password" autocomplete="current-password" placeholder="请输入至少六位密码" minlength="6" required><button type="button" id="showPassword" aria-label="显示密码" aria-pressed="false">显示</button></div>
+<button type="submit" class="submit"><span>登录工作台</span><span aria-hidden="true">↗</span></button>
+<p class="demo-note">当前为前端演示，尚未连接账号服务。<br>请勿输入真实密码。</p>
+</form>
+</dialog>
+<dialog id="infoDialog" class="dialog info-dialog" aria-labelledby="infoTitle"><button class="close" data-close="infoDialog" aria-label="关闭内容窗口">×</button><p class="overline">棱镜上新 · 产品能力</p><h2 id="infoTitle"></h2><p class="info-body" id="infoBody"></p><button class="submit" id="infoStart">登录工作台<span aria-hidden="true">↗</span></button></dialog>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="vendor/three.min.js"></script>
+<script src="water.js"></script>
+<script src="scene.js"></script>
+<script src="ui.js"></script>
+</body>
+</html>
