@@ -53,7 +53,7 @@ export function effectiveProduct(p: Product, facts: Fact[]): Product {
     missing: [...new Set(missing)], status: missing.length ? 'missing_data' : 'search_ready',
   };
 }
-export function pricingFromFacts(p: Product, facts: Fact[], revision = 0): Pricing {
+export function pricingFromFacts(p: Product, facts: Fact[], revision = 0, targetProfit = 5): Pricing {
   const confirmed = (key: string) => facts.find(f => f.key === key && f.status === 'Confirmed');
   const missing = [
     ...(!confirmed('packagingWeight') ? ['Packaging Weight'] : []),
@@ -61,9 +61,9 @@ export function pricingFromFacts(p: Product, facts: Fact[], revision = 0): Prici
     ...(!confirmed('supplierCost') ? ['Supplier cost'] : []),
   ];
   const cost = confirmed('supplierCost') ? factNumber(confirmed('supplierCost')!.value) : p.supplierCost;
-  const floor = Math.ceil((cost + 3.1 + 0.7 + 2.2 + 5 - 1e-9) * 100) / 100;
+  const floor = Math.ceil((cost + 3.1 + 0.7 + 2.2 + targetProfit - 1e-9) * 100) / 100;
   return { version: `v${1 + revision}`, status: missing.length ? 'blocked' : 'ready', supplierCost: cost,
-    shipping: 3.1, duty: 0.7, platformCost: 2.2, targetProfit: 5,
+    shipping: 3.1, duty: 0.7, platformCost: 2.2, targetProfit,
     suggestedPrice: missing.length ? null : p.sku === HERO_SKU ? Math.max(19.99, floor) : floor, missing };
 }
 

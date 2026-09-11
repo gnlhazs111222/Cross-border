@@ -2,12 +2,12 @@ import type { Fact, FactCard, Issue, Listing, Platform, Pricing, Product, Recomm
 import { HERO_SKU } from '../src/data/mockData';
 
 export function rankProducts(products: Product[], task: Task): Recommendation[] {
-  return products.filter(p => p.status === 'search_ready' && p.duplicateStatus === 'unique' && p.category === task.category).map(p => {
+  return products.filter(p => ['search_ready', 'missing_data'].includes(p.status) && p.duplicateStatus === 'unique' && p.category === task.category && p.visual === 'bottle' && !!p.color && !!p.material && p.capacity > 0).map(p => {
     const reasons: string[] = []; const deductions: string[] = []; let score = 94;
     if (p.color === 'Black') reasons.push('Black matches requested color'); else { score -= 23; deductions.push('Color does not match requested black'); }
     if (p.capacity === 500) reasons.push('500ml / 16.9 fl oz closely matches target capacity'); else { score -= 16; deductions.push(p.capacity === 750 ? 'Capacity too large: 750ml / 25.4 fl oz' : 'Capacity does not match the 500ml target'); }
     if (!p.straw) reasons.push('No straw'); else { score -= 12; deductions.push('Includes straw: does not meet the no-straw preference'); }
-    reasons.push('Packaging information is complete'); return { sku: p.sku, score, reasons, deductions };
+    reasons.push('Core product facts are available for selection'); return { sku: p.sku, score, reasons, deductions };
   }).sort((a, b) => b.score - a.score || Number(b.sku === HERO_SKU) - Number(a.sku === HERO_SKU)).slice(0, 3);
 }
 export function enrichProductEvidence(p: Product, v1: FactCard, task: Task): FactCard {

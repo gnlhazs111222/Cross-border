@@ -39,7 +39,7 @@ export async function factSnapshotTx(db: DB, userId: string, taskId: string, pro
   if (!base) throw new AppError('facts_not_found', 'Select the product to create its facts.', 404);
   const card = (row: typeof base): FactCard => ({ recordId: row.id, revision: row.revision, productRevision: row.productRevision, version: row.version as 1 | 2, sku: product.sku, ...(row.version === 2 ? { taskId: task.code } : {}), facts: row.facts.map(readFact) });
   const v1 = card(base); const v2 = enhanced ? card(enhanced) : null; const facts = (v2 ?? v1).facts;
-  const p = toProduct(product); const view = effectiveProduct(p, facts); const pricing = pricingFromFacts(p, facts, facts.filter(f => PRICING_FACTS.includes(f.key)).reduce((sum, f) => sum + Math.max(0, (f.revision ?? 1) - 1), 0));
+  const p = toProduct(product); const view = effectiveProduct(p, facts); const pricing = pricingFromFacts(p, facts, facts.filter(f => PRICING_FACTS.includes(f.key)).reduce((sum, f) => sum + Math.max(0, (f.revision ?? 1) - 1), 0), task.minimumProfit);
   const blockedFacts = REQUIRED_COPY_FACTS.filter(key => !facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed));
   const listingFactsRevision = facts.filter(f => COPY_FACTS.includes(f.key)).reduce((sum, f) => sum + (f.revision ?? 1), 0);
   return { productId: product.id, taskId: task.id, product: view, v1, v2, facts, factsRevision: Math.max(base.revision, enhanced?.revision ?? 0), listingFactsRevision, downstreamInvalidated: invalidated, pricing,

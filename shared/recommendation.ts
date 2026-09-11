@@ -1,4 +1,3 @@
-import { baseFactCard, pricingFromFacts } from './facts';
 import type { Fact, Product, Recommendation, Task } from '../src/types';
 import { demoTask } from '../src/data/mockData';
 import { rankProducts } from './domain';
@@ -10,16 +9,16 @@ export type RecommendationSnapshot = {
   eligibleCount: number; excluded: { sku: string; reason: string }[]; recommendations: Recommendation[];
   generation?: RecommendationGeneration; generatedAt?: string;
 };
+export const RECOMMENDATION_FACT_KEYS = new Set(['color', 'capacity', 'material', 'straw', 'countryOfOrigin', 'finish', 'lidType', 'packageIncludes']);
+const REQUIRED_SELECTION_FACT_LABELS = new Set(['Color', 'Capacity', 'Material', 'Straw']);
 export function eligibilityReason(p: Product, task: Task): string | null {
   if (p.duplicateStatus === 'duplicate') return 'Duplicate';
   if (p.duplicateStatus === 'possible_duplicate') return 'Possible Duplicate';
   if (p.category !== task.category) return 'Category mismatch';
   if (p.visual !== 'bottle') return 'Unsupported product type';
-  if (p.status !== 'search_ready' || p.missing.length || !p.packagingWeight || !p.packagingDimensions || !p.color || !p.material || p.capacity <= 0 || !Number.isFinite(p.supplierCost)) return 'Missing critical facts';
-  const price = pricingFromFacts(p, baseFactCard(p).facts);
-  if (price.status !== 'ready') return 'Missing critical facts';
-  const profit = price.suggestedPrice! - price.supplierCost - price.shipping - price.duty - price.platformCost;
-  if (profit + 1e-8 < task.minProfit) return 'Below demo profit requirement';
+  // Candidate selection depends on product identity and searchable attributes.
+  // Pricing-only inputs are deliberately checked after an operator selects a SKU.
+  if (!['search_ready', 'missing_data'].includes(p.status) || p.missing.some(label => REQUIRED_SELECTION_FACT_LABELS.has(label)) || !p.color || !p.material || p.capacity <= 0) return 'Missing candidate facts';
   return null;
 }
 export function hardFilter(products: Product[], task: Task) {
@@ -51,7 +50,7 @@ export function ruleRank(products: Product[], task: Task, context?: Recommendati
     else if (large || small) { const distance = max === min ? 0 : (large ? max - p.capacity : p.capacity - min) / (max - min); score -= Math.round(distance * 24); reasons.push(`${p.capacity}ml capacity considered for the ${large ? 'large' : 'small'} capacity preference`); }
     if (material) { if (p.material.toLowerCase() === material) reasons.push(`${p.material} matches the material preference`); else { score -= 24; deductions.push(`Material: ${p.material}; requested ${material}`); } }
     if (/accessor|contents|配件|内含/.test(text) && context?.facts[p.sku]?.some(f => f.key === 'packageIncludes' && f.status === 'Confirmed' && f.allowed)) { score += 4; reasons.push('Package contents are confirmed'); }
-    reasons.push('Packaging information is complete');
+    reasons.push('Core product facts are available for selection');
     return { sku: p.sku, productId: p.recordId ?? p.sku, score: Math.max(0, Math.min(100, score)), reasons: reasons.slice(0, 5), deductions: deductions.slice(0, 5) };
   }).sort((a, b) => b.score - a.score || a.sku.localeCompare(b.sku)).slice(0, 3);
 }

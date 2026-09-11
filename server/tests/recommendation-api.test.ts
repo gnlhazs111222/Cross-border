@@ -33,7 +33,7 @@ async function setup() { await call('/api/demo/reset', {}); return call('/api/ta
 
 test('editable task persists revisions and GET recommendation never invokes Qwen', async () => {
   const task = await setup(); const before = calls;
-  const first = await call(`/api/tasks/${task.recordId}/recommendations`); assert.equal(first.status, 'not_run'); assert.equal(first.eligibleCount, 4); assert.equal(first.excluded.length, 6);
+    const first = await call(`/api/tasks/${task.recordId}/recommendations`); assert.equal(first.status, 'not_run'); assert.equal(first.eligibleCount, 6); assert.equal(first.excluded.length, 4);
   await call(`/api/tasks/${task.recordId}/recommendations`); assert.equal(calls, before);
   const changed = await call(`/api/tasks/${task.recordId}`, { ...fields(['Black 500ml with a straw']), platform: 'Shopify US', expectedRevision: task.revision }, 'PATCH');
   assert.equal(changed.revision, 2); assert.equal(changed.platform, 'Shopify US');
@@ -58,17 +58,17 @@ test('task changes stale recommendation, clear selection and invalidate downstre
   assert.equal((await db.listingDraft.findUniqueOrThrow({ where: { id: listing.listings.shopify.recordId } })).status, 'stale');
   const before = calls; const ranked = await call(`/api/tasks/${task.recordId}/recommendations`, { expectedTaskRevision: 2 }); assert.equal(calls, before+1); assert.equal(ranked.recommendations[0].sku, 'LM-KT-BTL-002-BLK-500');
 });
-test('manual facts stale prior ranking, repaired missing weight becomes eligible and can be selected', async () => {
+test('missing pricing facts do not block selection and can be repaired afterward', async () => {
   const task = await setup(); await call(`/api/tasks/${task.recordId}/recommendations`, { expectedTaskRevision: 1, mode: 'rule' });
   const sku = 'LM-KT-BTL-005-BLK-500';
-  assert.equal((await app.inject({ method: 'POST', url: `/api/tasks/${task.recordId}/selection`, headers: { cookie }, payload: { productId: sku, purpose: 'selected' } })).statusCode, 400);
-  await call(`/api/tasks/${task.recordId}/selection`, { productId: sku, purpose: 'fact_review' });
-  let snap = await call(`/api/tasks/${task.recordId}/products/${sku}/fact-cards/v1`, {}); const weight = snap.facts.find((f: { key: string }) => f.key === 'packagingWeight');
-  snap = await call(`/api/facts/${weight.recordId}`, { expectedRevision: snap.factsRevision, value: '0.42' }, 'PATCH');
-  assert.equal((await call(`/api/tasks/${task.recordId}/recommendations`)).status, 'stale');
-  await call(`/api/facts/${weight.recordId}/confirm`, { expectedRevision: snap.factsRevision });
-  const ranked = await call(`/api/tasks/${task.recordId}/recommendations`, { expectedTaskRevision: 1, mode: 'rule' }); assert.equal(ranked.eligibleCount, 5);
   await call(`/api/tasks/${task.recordId}/selection`, { productId: sku, purpose: 'selected' });
+  let snap = await call(`/api/tasks/${task.recordId}/products/${sku}/fact-cards/v1`, {}); const weight = snap.facts.find((f: { key: string }) => f.key === 'packagingWeight');
+  assert.equal(snap.pricingReadiness.ready, false);
+  snap = await call(`/api/facts/${weight.recordId}`, { expectedRevision: snap.factsRevision, value: '0.42' }, 'PATCH');
+  assert.equal((await call(`/api/tasks/${task.recordId}/recommendations`)).status, 'ready');
+  snap = await call(`/api/facts/${weight.recordId}/confirm`, { expectedRevision: snap.factsRevision });
+  assert.equal(snap.pricingReadiness.ready, true);
+  const ranked = await call(`/api/tasks/${task.recordId}/recommendations`, { expectedTaskRevision: 1, mode: 'rule' }); assert.equal(ranked.eligibleCount, 6);
 });
 test('catalog replacement removes old task ranking; cross-user requests and client trust flags are denied', async () => {
   const task = await setup(); const other = await app.inject({ method: 'POST', url: '/api/auth/register', payload: { email: 'other-rec@local.test', password: 'Demo123456', displayName: 'Other' } }); const otherCookie = String(other.headers['set-cookie']).split(';')[0];

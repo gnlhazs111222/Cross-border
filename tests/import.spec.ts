@@ -53,8 +53,7 @@ for (const extension of ['xlsx', 'csv']) {
     await expect(page.getByTestId('recommendation-1')).toContainText(HERO);
     await expect(page.getByTestId('recommendation-1').locator('.match-score')).toHaveText('94/100');
     await expect(page.locator('.recommendation-grid')).not.toContainText('Duplicate Hero Row');
-    await expect(page.locator('.recommendation-grid')).not.toContainText(MISSING);
-    await expect(page.locator('.shortlist-heading')).toContainText('6 eligible candidates evaluated · 1 products excluded');
+    await expect(page.locator('.shortlist-heading')).toContainText('7 eligible candidates evaluated · 0 products excluded');
     await page.getByTestId('recommendation-1').getByRole('button', { name: 'Select SKU' }).click();
     await expect(page.getByRole('heading', { name: 'FactCard V1', exact: true })).toBeVisible();
     const v1 = (await snapshot(page)).v1;

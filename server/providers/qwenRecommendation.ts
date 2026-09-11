@@ -1,21 +1,20 @@
 import { createHash } from 'node:crypto';
 import type { Fact, Product, Recommendation, Task } from '../../src/types';
 import { baseFactCard } from '../../shared/facts';
-import { hardFilter, type RecommendationContext } from '../../shared/recommendation';
+import { hardFilter, RECOMMENDATION_FACT_KEYS, type RecommendationContext } from '../../shared/recommendation';
 import type { ServerConfig } from '../config';
 import { MockRecommendationProvider, type RecommendationProvider } from './domain';
 import type { TextModelProvider, TextResult } from './text';
 import { AppError } from '../errors';
 import { RECOMMENDATION_PROMPT_VERSION, recommendationSystemPrompt } from '../prompts/recommendation-v1';
 import { recommendationOutputSchema, validateCandidateAuthorization, type RankedOutput } from './recommendationValidation';
-const publicKeys = new Set(['color', 'capacity', 'material', 'straw', 'countryOfOrigin', 'finish', 'lidType', 'packageIncludes']);
 export function normalizedRecommendationInput(products: Product[], task: Task, context?: RecommendationContext) {
-  return { task: { platform: task.platform, market: task.market, category: task.category, requirements: task.requirements.map(r => r.trim().replace(/\s+/g, ' ')), minimumProfit: task.minProfit },
+  return { task: { platform: task.platform, market: task.market, category: task.category, requirements: task.requirements.map(r => r.trim().replace(/\s+/g, ' ')) },
     taskRevision: context?.taskRevision ?? task.revision ?? 1, catalogRevision: context?.catalogRevision ?? 1, candidateVersion: context?.candidateVersion ?? 'fixture',
     candidates: products.map(p => ({ productId: p.recordId ?? p.sku, sku: p.sku, productName: p.name, category: p.category,
       attributes: { color: p.color, capacityMl: p.capacity, capacityLocalized: p.localizedCapacity, material: p.material, hasStraw: p.straw },
-      completeness: 'Required facts and packaging are complete; demo profit requirement passed',
-      confirmedFacts: (context?.facts[p.sku] ?? baseFactCard(p).facts).filter(f => f.status === 'Confirmed' && f.allowed && publicKeys.has(f.key)).map((f: Fact) => ({ field: f.key, value: f.value })).sort((a, b) => a.field.localeCompare(b.field)),
+      completeness: 'Core product facts are available for selection; pricing readiness is evaluated only after selection',
+      confirmedFacts: (context?.facts[p.sku] ?? baseFactCard(p).facts).filter(f => f.status === 'Confirmed' && f.allowed && RECOMMENDATION_FACT_KEYS.has(f.key)).map((f: Fact) => ({ field: f.key, value: f.value })).sort((a, b) => a.field.localeCompare(b.field)),
     })).sort((a, b) => a.sku.localeCompare(b.sku)) };
 }
 export function recommendationHash(products: Product[], task: Task, context: RecommendationContext | undefined, model: string, promptVersion = RECOMMENDATION_PROMPT_VERSION) {

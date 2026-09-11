@@ -1,5 +1,5 @@
 {
-  "date": "2026-09-08T09:17:39.736Z",
+  "date": "2026-09-11T06:53:34.516Z",
   "provider": "rule",
   "model": null,
   "promptVersion": null,
@@ -7,7 +7,7 @@
   "metrics": {
     "top1Accuracy": 0.8181818181818182,
     "hitAt3": 1,
-    "ndcgAt3": 0.9490725437345393,
+    "ndcgAt3": 0.9378918923620244,
     "labelledCaseCount": 11,
     "invalidCandidateRate": 0,
     "unsupportedReasonRate": 0,
@@ -39,31 +39,26 @@
       },
       "expected": {
         "preferredTop1": [
-          "LM-KT-BTL-001-BLK-500"
+          "LM-KT-BTL-001-BLK-500",
+          "LM-KT-BTL-005-BLK-500"
         ],
         "acceptableTop3": [
           "LM-KT-BTL-001-BLK-500",
+          "LM-KT-BTL-005-BLK-500",
           "LM-KT-BTL-002-BLK-500",
           "LM-KT-BTL-003-BLK-750"
         ],
         "relevance": {
           "LM-KT-BTL-001-BLK-500": 3,
+          "LM-KT-BTL-005-BLK-500": 3,
           "LM-KT-BTL-002-BLK-500": 2,
           "LM-KT-BTL-003-BLK-750": 1,
           "LM-KT-BTL-004-WHT-500": 0
         }
       },
-      "notes": "Exact black 500ml no-straw match wins. Duplicate and incomplete rows are not relevant candidates.",
-      "eligibleCount": 4,
+      "notes": "Both black 500ml no-straw products are equally relevant to selection. Missing pricing weight does not reduce selection relevance.",
+      "eligibleCount": 6,
       "excluded": [
-        {
-          "sku": "LM-KT-BTL-005-BLK-500",
-          "reason": "Missing critical facts"
-        },
-        {
-          "sku": "LM-KT-BTL-006-GRN-500",
-          "reason": "Missing critical facts"
-        },
         {
           "sku": "LM-KT-BTL-007-BLK-500",
           "reason": "Duplicate"
@@ -89,7 +84,18 @@
             "Black matches requested color",
             "500ml / 16.9 fl oz closely matches target capacity",
             "No straw",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
+          ],
+          "deductions": []
+        },
+        {
+          "sku": "LM-KT-BTL-005-BLK-500",
+          "score": 94,
+          "reasons": [
+            "Black matches requested color",
+            "500ml / 16.9 fl oz closely matches target capacity",
+            "No straw",
+            "Core product facts are available for selection"
           ],
           "deductions": []
         },
@@ -99,22 +105,10 @@
           "reasons": [
             "Black matches requested color",
             "500ml / 16.9 fl oz closely matches target capacity",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": [
             "Includes straw: does not meet the no-straw preference"
-          ]
-        },
-        {
-          "sku": "LM-KT-BTL-003-BLK-750",
-          "score": 78,
-          "reasons": [
-            "Black matches requested color",
-            "No straw",
-            "Packaging information is complete"
-          ],
-          "deductions": [
-            "Capacity too large: 750ml / 25.4 fl oz"
           ]
         }
       ],
@@ -125,7 +119,7 @@
         "invalidCandidates": 0,
         "returnedCandidates": 3,
         "unsupportedReasons": 0,
-        "checkedReasons": 10,
+        "checkedReasons": 11,
         "emptyCaseCorrect": null
       },
       "latencyMs": 2,
@@ -161,16 +155,8 @@
         }
       },
       "notes": "The straw preference intentionally reverses the classic winner.",
-      "eligibleCount": 4,
+      "eligibleCount": 6,
       "excluded": [
-        {
-          "sku": "LM-KT-BTL-005-BLK-500",
-          "reason": "Missing critical facts"
-        },
-        {
-          "sku": "LM-KT-BTL-006-GRN-500",
-          "reason": "Missing critical facts"
-        },
         {
           "sku": "LM-KT-BTL-007-BLK-500",
           "reason": "Duplicate"
@@ -197,7 +183,7 @@
             "Black matches the color preference",
             "Includes straw as requested",
             "500ml capacity matches the target",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": []
         },
@@ -208,37 +194,37 @@
           "reasons": [
             "Black matches the color preference",
             "500ml capacity matches the target",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": [
             "No straw; a straw was requested"
           ]
         },
         {
-          "sku": "LM-KT-BTL-003-BLK-750",
-          "productId": "eval-LM-KT-BTL-003-BLK-750",
-          "score": 58,
+          "sku": "LM-KT-BTL-005-BLK-500",
+          "productId": "eval-LM-KT-BTL-005-BLK-500",
+          "score": 70,
           "reasons": [
             "Black matches the color preference",
-            "Packaging information is complete"
+            "500ml capacity matches the target",
+            "Core product facts are available for selection"
           ],
           "deductions": [
-            "No straw; a straw was requested",
-            "Capacity: 750ml; requested about 500ml"
+            "No straw; a straw was requested"
           ]
         }
       ],
       "metrics": {
         "top1Accuracy": 1,
         "hitAt3": 1,
-        "ndcgAt3": 1,
+        "ndcgAt3": 0.938506417451168,
         "invalidCandidates": 0,
         "returnedCandidates": 3,
         "unsupportedReasons": 0,
-        "checkedReasons": 9,
+        "checkedReasons": 10,
         "emptyCaseCorrect": null
       },
-      "latencyMs": 1,
+      "latencyMs": 13,
       "mode": "rule"
     },
     {
@@ -286,7 +272,7 @@
             "Black matches the color preference",
             "No straw as requested",
             "1000ml capacity considered for the large capacity preference",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": []
         },
@@ -298,7 +284,7 @@
             "Black matches the color preference",
             "No straw as requested",
             "750ml capacity considered for the large capacity preference",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": []
         },
@@ -310,7 +296,7 @@
             "Black matches the color preference",
             "No straw as requested",
             "500ml capacity considered for the large capacity preference",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": []
         }
@@ -369,7 +355,7 @@
             "Black matches the color preference",
             "No straw as requested",
             "350ml capacity matches the target",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": []
         },
@@ -380,7 +366,7 @@
           "reasons": [
             "Black matches the color preference",
             "No straw as requested",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": [
             "Capacity: 250ml; requested about 350ml"
@@ -393,7 +379,7 @@
           "reasons": [
             "Black matches the color preference",
             "No straw as requested",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": [
             "Capacity: 500ml; requested about 350ml"
@@ -455,7 +441,7 @@
             "Ivory matches the color preference",
             "No straw as requested",
             "500ml capacity matches the target",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": []
         },
@@ -467,7 +453,7 @@
             "White matches the color preference",
             "No straw as requested",
             "500ml capacity matches the target",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": []
         },
@@ -478,7 +464,7 @@
           "reasons": [
             "No straw as requested",
             "500ml capacity matches the target",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": [
             "Color: Black; requested white"
@@ -495,7 +481,7 @@
         "checkedReasons": 11,
         "emptyCaseCorrect": null
       },
-      "latencyMs": 10,
+      "latencyMs": 0,
       "mode": "rule"
     },
     {
@@ -526,14 +512,9 @@
           "PACK-UNKNOWN": 1
         }
       },
-      "notes": "Known package contents are a soft preference; missing shipping weight is a hard exclusion.",
-      "eligibleCount": 3,
-      "excluded": [
-        {
-          "sku": "LM-KT-BTL-005-BLK-500",
-          "reason": "Missing critical facts"
-        }
-      ],
+      "notes": "Known package contents are a soft preference. Missing shipping weight does not affect selection and is checked only during later pricing.",
+      "eligibleCount": 4,
+      "excluded": [],
       "actual": [
         {
           "sku": "PACK-CONFIRMED",
@@ -541,7 +522,7 @@
           "score": 98,
           "reasons": [
             "Package contents are confirmed",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": []
         },
@@ -550,16 +531,16 @@
           "productId": "eval-LM-KT-BTL-001-BLK-500",
           "score": 94,
           "reasons": [
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": []
         },
         {
-          "sku": "PACK-UNKNOWN",
-          "productId": "eval-PACK-UNKNOWN",
+          "sku": "LM-KT-BTL-005-BLK-500",
+          "productId": "eval-LM-KT-BTL-005-BLK-500",
           "score": 94,
           "reasons": [
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": []
         }
@@ -567,14 +548,14 @@
       "metrics": {
         "top1Accuracy": 1,
         "hitAt3": 1,
-        "ndcgAt3": 1,
+        "ndcgAt3": 0.938506417451168,
         "invalidCandidates": 0,
         "returnedCandidates": 3,
         "unsupportedReasons": 0,
         "checkedReasons": 4,
         "emptyCaseCorrect": null
       },
-      "latencyMs": 0,
+      "latencyMs": 1,
       "mode": "rule"
     },
     {
@@ -623,7 +604,7 @@
             "No straw as requested",
             "500ml capacity matches the target",
             "Glass matches the material preference",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": []
         },
@@ -635,7 +616,7 @@
             "Black matches the color preference",
             "No straw as requested",
             "500ml capacity matches the target",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": [
             "Material: Stainless Steel; requested glass"
@@ -649,7 +630,7 @@
             "Black matches the color preference",
             "No straw as requested",
             "500ml capacity matches the target",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": [
             "Material: Plastic; requested glass"
@@ -698,13 +679,8 @@
         }
       },
       "notes": "A larger black straw bottle is preferred over no straw; light color is a second tradeoff.",
-      "eligibleCount": 3,
-      "excluded": [
-        {
-          "sku": "LM-KT-BTL-005-BLK-500",
-          "reason": "Missing critical facts"
-        }
-      ],
+      "eligibleCount": 4,
+      "excluded": [],
       "actual": [
         {
           "sku": "STRAW-750",
@@ -713,7 +689,7 @@
           "reasons": [
             "Black matches the color preference",
             "Includes straw as requested",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": [
             "Capacity: 750ml; requested about 500ml"
@@ -726,7 +702,7 @@
           "reasons": [
             "Includes straw as requested",
             "500ml capacity matches the target",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": [
             "Color: Ivory; requested black"
@@ -739,7 +715,7 @@
           "reasons": [
             "Black matches the color preference",
             "500ml capacity matches the target",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": [
             "No straw; a straw was requested"
@@ -756,7 +732,7 @@
         "checkedReasons": 9,
         "emptyCaseCorrect": null
       },
-      "latencyMs": 1,
+      "latencyMs": 0,
       "mode": "rule"
     },
     {
@@ -799,7 +775,7 @@
             "Black matches the color preference",
             "350ml capacity matches the target",
             "Glass matches the material preference",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": []
         },
@@ -810,7 +786,7 @@
           "reasons": [
             "350ml capacity matches the target",
             "Glass matches the material preference",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": [
             "Color: Ivory; requested black"
@@ -822,7 +798,7 @@
           "score": 60,
           "reasons": [
             "Black matches the color preference",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": [
             "Capacity: 500ml; requested about 350ml",
@@ -883,7 +859,7 @@
             "Black matches the color preference",
             "No straw as requested",
             "500ml capacity matches the target",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": []
         },
@@ -895,7 +871,7 @@
             "Black matches the color preference",
             "No straw as requested",
             "500ml capacity matches the target",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": []
         },
@@ -907,7 +883,7 @@
             "Black matches the color preference",
             "No straw as requested",
             "500ml capacity matches the target",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": []
         }
@@ -948,7 +924,7 @@
       "excluded": [
         {
           "sku": "LM-KT-BTL-005-BLK-500",
-          "reason": "Missing critical facts"
+          "reason": "Possible Duplicate"
         },
         {
           "sku": "LM-KT-BTL-007-BLK-500",
@@ -978,7 +954,7 @@
       "mode": "rule"
     },
     {
-      "caseId": "demo-profit-threshold",
+      "caseId": "price-target-independent",
       "task": {
         "id": "PL-DEMO-001",
         "platform": "Amazon US",
@@ -996,38 +972,26 @@
       },
       "expected": {
         "preferredTop1": [
-          "LM-KT-BTL-001-BLK-500"
+          "LM-KT-BTL-001-BLK-500",
+          "LM-KT-BTL-005-BLK-500"
         ],
         "acceptableTop3": [
-          "LM-KT-BTL-001-BLK-500"
+          "LM-KT-BTL-001-BLK-500",
+          "LM-KT-BTL-005-BLK-500",
+          "LM-KT-BTL-002-BLK-500",
+          "LM-KT-BTL-003-BLK-750"
         ],
         "relevance": {
-          "LM-KT-BTL-001-BLK-500": 3
+          "LM-KT-BTL-001-BLK-500": 3,
+          "LM-KT-BTL-005-BLK-500": 3,
+          "LM-KT-BTL-002-BLK-500": 2,
+          "LM-KT-BTL-003-BLK-750": 1,
+          "LM-KT-BTL-004-WHT-500": 0
         }
       },
-      "notes": "Only the demo hero has 5.79 simulated profit; other complete examples have 5.00. No model cost calculation.",
-      "eligibleCount": 1,
+      "notes": "The higher price target must not change eligibility or ranking; it is applied only when pricing the selected SKU.",
+      "eligibleCount": 6,
       "excluded": [
-        {
-          "sku": "LM-KT-BTL-002-BLK-500",
-          "reason": "Below demo profit requirement"
-        },
-        {
-          "sku": "LM-KT-BTL-003-BLK-750",
-          "reason": "Below demo profit requirement"
-        },
-        {
-          "sku": "LM-KT-BTL-004-WHT-500",
-          "reason": "Below demo profit requirement"
-        },
-        {
-          "sku": "LM-KT-BTL-005-BLK-500",
-          "reason": "Missing critical facts"
-        },
-        {
-          "sku": "LM-KT-BTL-006-GRN-500",
-          "reason": "Missing critical facts"
-        },
         {
           "sku": "LM-KT-BTL-007-BLK-500",
           "reason": "Duplicate"
@@ -1053,9 +1017,32 @@
             "Black matches requested color",
             "500ml / 16.9 fl oz closely matches target capacity",
             "No straw",
-            "Packaging information is complete"
+            "Core product facts are available for selection"
           ],
           "deductions": []
+        },
+        {
+          "sku": "LM-KT-BTL-005-BLK-500",
+          "score": 94,
+          "reasons": [
+            "Black matches requested color",
+            "500ml / 16.9 fl oz closely matches target capacity",
+            "No straw",
+            "Core product facts are available for selection"
+          ],
+          "deductions": []
+        },
+        {
+          "sku": "LM-KT-BTL-002-BLK-500",
+          "score": 82,
+          "reasons": [
+            "Black matches requested color",
+            "500ml / 16.9 fl oz closely matches target capacity",
+            "Core product facts are available for selection"
+          ],
+          "deductions": [
+            "Includes straw: does not meet the no-straw preference"
+          ]
         }
       ],
       "metrics": {
@@ -1063,9 +1050,9 @@
         "hitAt3": 1,
         "ndcgAt3": 1,
         "invalidCandidates": 0,
-        "returnedCandidates": 1,
+        "returnedCandidates": 3,
         "unsupportedReasons": 0,
-        "checkedReasons": 4,
+        "checkedReasons": 11,
         "emptyCaseCorrect": null
       },
       "latencyMs": 0,

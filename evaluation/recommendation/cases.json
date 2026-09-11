@@ -223,21 +223,24 @@
     ],
     "expected": {
       "preferredTop1": [
-        "LM-KT-BTL-001-BLK-500"
+        "LM-KT-BTL-001-BLK-500",
+        "LM-KT-BTL-005-BLK-500"
       ],
       "acceptableTop3": [
         "LM-KT-BTL-001-BLK-500",
+        "LM-KT-BTL-005-BLK-500",
         "LM-KT-BTL-002-BLK-500",
         "LM-KT-BTL-003-BLK-750"
       ],
       "relevance": {
         "LM-KT-BTL-001-BLK-500": 3,
+        "LM-KT-BTL-005-BLK-500": 3,
         "LM-KT-BTL-002-BLK-500": 2,
         "LM-KT-BTL-003-BLK-750": 1,
         "LM-KT-BTL-004-WHT-500": 0
       }
     },
-    "notes": "Exact black 500ml no-straw match wins. Duplicate and incomplete rows are not relevant candidates."
+    "notes": "Both black 500ml no-straw products are equally relevant to selection. Missing pricing weight does not reduce selection relevance."
   },
   {
     "id": "explicit-straw",
@@ -939,7 +942,7 @@
         "PACK-UNKNOWN": 1
       }
     },
-    "notes": "Known package contents are a soft preference; missing shipping weight is a hard exclusion."
+    "notes": "Known package contents are a soft preference. Missing shipping weight does not affect selection and is checked only during later pricing."
   },
   {
     "id": "glass-material",
@@ -1401,7 +1404,7 @@
         "straw": false,
         "countryOfOrigin": "China",
         "status": "missing_data",
-        "duplicateStatus": "unique",
+        "duplicateStatus": "possible_duplicate",
         "packagingDimensions": "8 × 8 × 25 cm",
         "supplierCost": 8.2,
         "declaredValue": 8.2,
@@ -1480,7 +1483,7 @@
     "notes": "All candidates are hard excluded. No model call and no invented Top3."
   },
   {
-    "id": "demo-profit-threshold",
+    "id": "price-target-independent",
     "task": {
       "id": "PL-DEMO-001",
       "platform": "Amazon US",
@@ -1703,15 +1706,23 @@
     ],
     "expected": {
       "preferredTop1": [
-        "LM-KT-BTL-001-BLK-500"
+        "LM-KT-BTL-001-BLK-500",
+        "LM-KT-BTL-005-BLK-500"
       ],
       "acceptableTop3": [
-        "LM-KT-BTL-001-BLK-500"
+        "LM-KT-BTL-001-BLK-500",
+        "LM-KT-BTL-005-BLK-500",
+        "LM-KT-BTL-002-BLK-500",
+        "LM-KT-BTL-003-BLK-750"
       ],
       "relevance": {
-        "LM-KT-BTL-001-BLK-500": 3
+        "LM-KT-BTL-001-BLK-500": 3,
+        "LM-KT-BTL-005-BLK-500": 3,
+        "LM-KT-BTL-002-BLK-500": 2,
+        "LM-KT-BTL-003-BLK-750": 1,
+        "LM-KT-BTL-004-WHT-500": 0
       }
     },
-    "notes": "Only the demo hero has 5.79 simulated profit; other complete examples have 5.00. No model cost calculation."
+    "notes": "The higher price target must not change eligibility or ranking; it is applied only when pricing the selected SKU."
   }
 ]

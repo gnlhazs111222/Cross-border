@@ -140,8 +140,7 @@ function selected(): Product {
   return product;
 }
 function eligible(p: Product) {
-  if (serverOwner) return !eligibilityReason(p, current.task ?? demoTask);
-  return p.status === 'search_ready' && p.duplicateStatus === 'unique' && p.category === demoTask.category;
+  return !eligibilityReason(p, current.task ?? demoTask);
 }
 function cardV1(p: Product): FactCard {
   if (serverOwner) return clone(serverSnapshots[p.sku]?.v1 ?? serverPreviews[p.sku].v1);
@@ -158,7 +157,7 @@ function productView(p: Product): Product {
   return Object.keys(editsFor(p.sku)).length ? effectiveProduct(p, [...cardV1(p).facts, ...Object.values(editsFor(p.sku)).filter(f => !cardV1(p).facts.some(b => b.key === f.key))]) : clone(p);
 }
 function pricingFor(p: Product): Pricing {
-  return serverOwner ? clone(serverSnapshots[p.sku]?.pricing ?? serverPreviews[p.sku].pricing) : pricingFromFacts(p, cardV1(p).facts, factRevision(p.sku, PRICING_FACTS));
+  return serverOwner ? clone(serverSnapshots[p.sku]?.pricing ?? serverPreviews[p.sku].pricing) : pricingFromFacts(p, cardV1(p).facts, factRevision(p.sku, PRICING_FACTS), current.task?.minProfit ?? demoTask.minProfit);
 }
 function synchronizeFacts() {
   if (serverOwner) return;
@@ -298,10 +297,12 @@ export const mockApi = {
     return current.task ? rankProducts(current.catalog.map(productView), current.task) : [];
   },
   exclusionReason(p: Product) {
-    if (p.duplicateStatus === 'duplicate') return 'Exact duplicate · excluded from recommendations';
-    if (p.duplicateStatus === 'possible_duplicate') return 'Possible duplicate · human verification required';
-    if (p.status === 'missing_data') return `Missing ${p.missing.join(', ')} · excluded from recommendations`;
-    if (p.category !== demoTask.category) return 'Category mismatch · outside Home & Kitchen';
+    const reason = eligibilityReason(productView(p), current.task ?? demoTask);
+    if (reason === 'Duplicate') return 'Exact duplicate · excluded from recommendations';
+    if (reason === 'Possible Duplicate') return 'Possible duplicate · human verification required';
+    if (reason === 'Category mismatch') return 'Category mismatch · outside the task category';
+    if (reason) return `${reason} · excluded from recommendations`;
+    if (p.status === 'missing_data') return 'Pricing inputs are incomplete, but this product is still eligible for selection';
     return 'Eligible for the candidate pool';
   },
   isEligible: (p: Product) => eligible(productView(p)),
