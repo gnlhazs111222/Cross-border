@@ -16,7 +16,7 @@ export const productInput = z.object({
   status: z.enum(['search_ready', 'missing_data']), duplicateStatus: z.literal('unique'),
   missing: z.array(z.string().max(220)).max(14), visual: z.enum(['bottle', 'bag', 'lamp']),
 }).strict();
-const issue = z.object({ code: z.enum(['required', 'number', 'boolean', 'formula', 'extra', 'long', 'duplicate', 'missing']), field: z.string().max(220) });
+const issue = z.object({ code: z.enum(['required', 'number', 'boolean', 'formula', 'extra', 'long', 'duplicate', 'missing', 'category']), field: z.string().max(220) });
 export const importSchema = z.object({
   mode: z.enum(['replace', 'append', 'merge']), expectedRevision: z.number().int().positive(), products: z.array(productInput).min(1).max(500),
   sourceFile: z.object({ fileName: text, mimeType: text, contentBase64: z.string().min(1).max(8_000_000) }).strict().optional(),

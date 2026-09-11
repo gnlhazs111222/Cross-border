@@ -17,7 +17,7 @@ function ImportResults({ report }: { report: ImportReport }) {
       extra: 'Unexpected extra values: {field}', long: 'Value exceeds 220 characters: {field}',
       duplicate: 'Duplicate SKU skipped; the first accepted product is retained.',
       missing: 'Missing {field}; pricing is blocked.',
-    };
+      category: 'Category {field} disagrees with the product name; fix the category so the row can be accepted.',    };
     return t(messages[issue.code], { field: t(issue.field) });
   };
   return <div className="import-results">

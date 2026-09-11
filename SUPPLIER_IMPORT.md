@@ -98,3 +98,35 @@ npm run test:e2e
 - `tests/import.spec.ts`：真实文件上传后的完整链路、追加去重、坏文件、数据连续性、中文手机界面、旧状态迁移。
 
 SheetJS 使用官方固定发行包 0.20.3，安装依据：[Frameworks and Bundlers](https://docs.sheetjs.com/docs/getting-started/installation/frameworks/)。解析器打包为本地按需加载的资源，页面运行时不会从 SheetJS CDN 拉取脚本，也不会向它发送文件。
+
+## 供应商表格的列
+
+导入只认这套列名（大小写敏感，顺序任意）。必需列缺任何一列，整份文件都会被拒绝，并在提示里列出缺哪几列；其余列可以自由增减。
+
+| 列名 | 必需 | 含义与边界 |
+| --- | --- | --- |
+| `sku` | 是 | 唯一编码。为空时系统会生成 `IMPORT-<行号>`，并记入待补 |
+| `productName` | 是 | 商品名。包含"包/bag/tote"或"灯/lamp"时必须与类目一致，否则整行判错 |
+| `category` | 是 | 一级类目，决定商品类型：`Bags & Accessories`→包、`Electronics`→灯、其余→瓶类 |
+| `color` | 是 | 颜色，支持中英与修饰词（`哑光黑`＝`Matte Black`＝`black`） |
+| `capacityMl` | 是 | 容量（毫升）。瓶类必须大于 0；缺失或为 0 记入待补 |
+| `material` | 是 | 材质，支持 `304不锈钢`＝`Stainless Steel` |
+| `hasStraw` | 是 | 是否带吸管：`true/false/1/0`。空值记入待补（别名 `straw` 亦可） |
+| `countryOfOrigin` | 是 | 原产国，用于税费估算。空值记入待补 |
+| `supplierCost` | 是 | 采购成本，决定定价。空值记入待补，售价显示"待补" |
+| `declaredValue` | 是 | 申报价值，用于税费。空值记入待补 |
+| `packagingWeightKg` | 否 | 包装重量（kg），定价与物流用；缺失则定价待补 |
+| `packageLengthCm` `packageWidthCm` `packageHeightCm` | 否 | 包装尺寸（cm），同上 |
+
+以下是**可选列**，按用途分三类：
+
+| 列名 | 是否被读取 | 用途 |
+| --- | --- | --- |
+| `images` | 读取 | 该行引用的图片文件名（分号分隔）。导入时在所选资料文件夹里按文件名匹配，匹配不上会报"缺少文件" |
+| `specs` | 读取 | 同上，用于规格 PDF |
+| `assetUrls` / `imageUrls` | 读取 | 图片或 PDF 的下载链接（分号分隔）。走服务端下载通道：仅 https、域名白名单、禁内网、逐跳校验重定向；列名写错会静默没有图 |
+| `model` `brand` `productType` `variant` `sourceRow` `estimatedFields` | 忽略 | 分析辅助列（型号、品牌、变体名、来源行号、哪些值是估算的）。可留可删，放进表格不会报错 |
+
+注意两点：一是**列名必须完全一致**，写成 `capacity` 而不是 `capacityMl` 会被当作缺列；二是**被读取的四列改名不会报错，只会静默失效**，整理数据时不要改它们。
+
+数据的准则是"**结构必须规范，格式可以宽容**"：类目与商品类型、瓶类容量这类**结构性问题**必须改数据，系统直接拒绝；全角/大小写/单位写法/同义词这类**格式差异**系统自己归一化；产地、材质、成本这类**缺失**记录为待补，不阻断流程。

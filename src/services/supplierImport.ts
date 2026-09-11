@@ -70,7 +70,7 @@ export async function parseSupplierFile(file: File, mode: ImportMode, _existing:
       if (!Number.isFinite(number) || (allowZero ? number < 0 : number <= 0) || (integer && !Number.isInteger(number))) { issue('number', column); return undefined; }
       return number;
     };
-    const capacity = numeric('capacityMl', true, false, true);
+    const capacity = numeric('capacityMl', true, true, true);
     const supplierCost = numeric('supplierCost', true, true);
     const declaredValue = numeric('declaredValue', true, true);
     const packagingWeight = numeric('packagingWeightKg', true);
@@ -87,7 +87,13 @@ export async function parseSupplierFile(file: File, mode: ImportMode, _existing:
     // Anything that looks like a link goes to the download channel; the rest is a local file name.
     const references = optionalValues.filter(entry => !/^https?:\/\//i.test(entry));
     const urls = optionalValues.filter(entry => /^https?:\/\//i.test(entry)).slice(0, 20);
-    if (issues.length) { preview.invalid++; preview.rows.push({ row: row + 1, sku, status: 'invalid', issues }); continue; }
+    // Type and name must agree; the category is authoritative. Bags and lamps carry no capacity,
+    // bottles must have one, which matches the server-side rule that guards the database.
+    const rawCategory = text(values.category);
+    const categoryVisual = rawCategory === 'Bags & Accessories' ? 'bag' : rawCategory === 'Electronics' ? 'lamp' : 'bottle';
+    const keywordVisual = /包|bag|tote|backpack/i.test(text(values.productName)) ? 'bag' : /灯|lamp|light/i.test(text(values.productName)) ? 'lamp' : 'bottle';
+    if (keywordVisual !== categoryVisual) issue('category', 'category');
+    if (categoryVisual === 'bottle' && !(capacity && capacity > 0)) issue('number', 'capacityMl');    if (issues.length) { preview.invalid++; preview.rows.push({ row: row + 1, sku, status: 'invalid', issues }); continue; }
     if (seen.has(sku)) {
       preview.duplicates++; preview.rows.push({ row: row + 1, sku, status: 'duplicate', issues: [{ code: 'duplicate', field: 'sku' }] }); continue;
     }
@@ -103,7 +109,7 @@ export async function parseSupplierFile(file: File, mode: ImportMode, _existing:
       packageLength: length, packageWidth: width, packageHeight: height,
       packagingDimensions: [length, width, height].every(n => n !== undefined) ? `${length} × ${width} × ${height} cm` : undefined,
       status: missing.length ? 'missing_data' : 'search_ready', duplicateStatus: 'unique', missing,
-      visual: /bag|tote|backpack|包/i.test(category + ' ' + text(values.productName)) || /包/.test(category) ? 'bag' : /lamp|light|灯/i.test(category + ' ' + text(values.productName)) ? 'lamp' : category === 'Bags & Accessories' ? 'bag' : category === 'Electronics' ? 'lamp' : 'bottle',
+      visual: category === 'Bags & Accessories' ? 'bag' : category === 'Electronics' ? 'lamp' : 'bottle',
       importSource: { fileName: file.name, sheetName, row: row + 1 },
       ...(references.length ? { assetReferences: references } : {}),
       ...(urls.length ? { assetUrls: urls } : {}),
