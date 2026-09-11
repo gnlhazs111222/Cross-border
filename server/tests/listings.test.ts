@@ -49,7 +49,7 @@ test('server creates independent template versions, stores fact revision and exp
   assert.equal(w.listings.amazon!.revision, 1); assert.equal(w.listings.shopify!.revision, 1);
   assert.equal(w.listings.amazon!.riskDemoInjected, true); assert.equal(w.listings.shopify!.riskDemoInjected, false);
   assert.match(w.listings.amazon!.bullets.join(' '), /100% leakproof/);
-  assert.equal(w.listings.amazon!.factRevision, s.factsRevision); assert.equal(w.listings.amazon!.generationMode, 'template');
+  assert.equal(w.listings.amazon!.factRevision, s.listingFactsRevision); assert.equal(w.listings.amazon!.generationMode, 'template');
   for (const p of ['amazon', 'shopify'] as const) {
     const listing = w.listings[p]!;
     assert.ok(listing.sources.every(f => f.status === 'Confirmed' && f.allowed));
@@ -58,6 +58,30 @@ test('server creates independent template versions, stores fact revision and exp
   }
   const reopened = createDb(config.DATABASE_URL);
   try { assert.equal(await reopened.listingDraft.count(), 2); } finally { await reopened.$disconnect(); }
+});
+
+test('missing pricing inputs do not block Listing generation or review, but do block publish', async () => {
+  const s = await setup('LM-KT-BTL-005-BLK-500');
+  assert.equal(s.pricingReadiness.ready, false);
+  assert.equal(s.listingReadiness.ready, true);
+  let w = await create(s, 'shopify');
+  assert.ok(w.listings.shopify);
+  w = await act(w, 'review', 'shopify');
+  assert.equal(w.reviews.shopify?.status, 'passed');
+  assert.equal(w.publishAllowed.shopify, false);
+  const response = await app.inject({ method: 'POST', url: `/api/listings/${w.listings.shopify!.recordId}/publish`, headers: { cookie }, payload: version(w, 'shopify') });
+  assert.equal(response.statusCode, 409);
+  assert.equal(response.json().error.code, 'pricing_required_for_publish');
+  const listingId = w.listings.shopify!.recordId;
+  const reviewId = w.reviews.shopify!.recordId;
+  const weight = s.facts.find(f => f.key === 'packagingWeight')!;
+  let updated = await call(`/api/facts/${weight.recordId}`, 'PATCH', { value: '0.42', expectedRevision: s.factsRevision });
+  updated = await call(`/api/facts/${weight.recordId}/confirm`, 'POST', { expectedRevision: updated.factsRevision });
+  assert.equal(updated.pricingReadiness.ready, true);
+  w = await call(`${path(s)}/listings`);
+  assert.equal(w.listings.shopify!.recordId, listingId);
+  assert.equal(w.reviews.shopify!.recordId, reviewId);
+  assert.equal(w.publishAllowed.shopify, true);
 });
 
 test('unconfirmed and rejected facts cannot enter server Listing; confirmation permits the field', async () => {

@@ -5,7 +5,7 @@ import type { WorkflowSnapshot, FactSnapshot, FactPreview } from '../../shared/c
 import { apiClient, SERVER_MODE } from './apiClient';
 import { enrichProductEvidence, makeTemplateListing, rankProducts, reviewAgainstTemplate } from '../../shared/domain';
 import { demoTask, products as builtInProducts } from '../data/mockData';
-import { PRICING_FACTS, REQUIRED_COPY_FACTS, editableFact, factEditor } from './factReview';
+import { COPY_FACTS, PRICING_FACTS, REQUIRED_COPY_FACTS, editableFact, factEditor } from './factReview';
 import { SUPPLIER_COLUMNS } from '../data/supplierTemplate';
 import type { DemoState, Evidence, Fact, FactCard, ImportMode, ImportPreview, Listing, Platform, Pricing, Product, Recommendation, Stage, Task, Workspace } from '../types';
 
@@ -65,7 +65,7 @@ async function refreshRecommendation() {
   serverRecommendation = serverOwner && current.task ? await apiClient.recommendations.get(current.task.recordId!) : null;
 }
 async function useServerTask(task: Task) {
-  current.task = task; current.platform = task.platform === 'Shopify US' ? 'shopify' : 'amazon'; current.selectedSku = null; current.v1 = null; current.v2 = null; current.pricing = null; current.factsRevision = undefined;
+  current.task = task; current.platform = task.platform === 'Shopify US' ? 'shopify' : 'amazon'; current.selectedSku = null; current.v1 = null; current.v2 = null; current.pricing = null; current.factsRevision = undefined; current.listingFactsRevision = undefined;
   current.listings = {}; current.reviews = {}; current.publications = {}; serverWorkflow = null; serverSnapshots = {};
   for (const snap of await apiClient.facts.list(task.recordId!)) serverSnapshots[snap.product.sku] = snap;
   await refreshRecommendation(); current.workspace = 'tasks'; advance('task_created'); return save();
@@ -76,7 +76,7 @@ function applyWorkflow(workflow: WorkflowSnapshot) {
   current.listings = clone(workflow.listings); current.reviews = clone(workflow.reviews); current.publications = clone(workflow.publications);
   const platform = current.platform;
   if (current.publications[platform]) advance('published');
-  else if (current.reviews[platform]) advance(workflow.publishAllowed[platform] ? 'review_passed' : current.reviews[platform]!.status === 'blocked' ? 'review_blocked' : 'listing_generated');
+  else if (current.reviews[platform]) advance(workflow.publishAllowed[platform] || (current.reviews[platform]!.status === 'passed' && current.pricing?.status !== 'ready') ? 'review_passed' : current.reviews[platform]!.status === 'blocked' ? 'review_blocked' : 'listing_generated');
   else if (current.listings[platform]) advance('listing_generated');
   else if (current.v2) advance(current.pricing?.status === 'ready' ? 'pricing_ready' : 'evidence_analyzed');
   else advance(current.selectedSku ? 'sku_selected' : current.task ? 'task_created' : 'materials_ready');
@@ -97,10 +97,10 @@ function activeServerListing() {
 function applySnapshot(snapshot: FactSnapshot) {
   serverSnapshots[snapshot.product.sku] = clone(snapshot);
   if (current.selectedSku !== snapshot.product.sku) return;
-  const changed = current.factsRevision !== snapshot.factsRevision;
+  const listingChanged = current.listingFactsRevision !== undefined && current.listingFactsRevision !== snapshot.listingFactsRevision;
   current.v1 = clone(snapshot.v1); current.v2 = clone(snapshot.v2); current.pricing = clone(snapshot.pricing);
-  current.factsRevision = snapshot.factsRevision; current.factEdits = {};
-  if (changed || snapshot.downstreamInvalidated) {
+  current.factsRevision = snapshot.factsRevision; current.listingFactsRevision = snapshot.listingFactsRevision; current.factEdits = {};
+  if (listingChanged || snapshot.downstreamInvalidated) {
     serverWorkflow = null; current.listings = {}; current.reviews = {}; current.publications = {};
     advance(snapshot.v2 ? snapshot.pricingReadiness.ready ? 'pricing_ready' : 'evidence_analyzed' : 'sku_selected');
   }
@@ -115,7 +115,6 @@ async function mutateServerFact(key: string, action: 'edit' | 'confirm' | 'rejec
     const snap = action === 'edit' ? await apiClient.facts.update(before.recordId!, value ?? '', current.factsRevision!) : await apiClient.facts[action](before.recordId!, current.factsRevision!);
     applySnapshot(snap);
     await refreshWorkflow(); await refreshRecommendation();
-    advance(snap.pricingReadiness.ready ? 'pricing_ready' : snap.v2 ? 'evidence_analyzed' : 'sku_selected');
     return save();
   } catch (error) { await refreshServerFacts(); throw error; }
 }
@@ -181,16 +180,20 @@ function changeFact(key: string, action: 'edit' | 'confirm' | 'reject', input?: 
   const sku = current.selectedSku!;
   current.factEdits = { ...current.factEdits, [sku]: { ...editsFor(sku), [key]: updated } };
   synchronizeFacts();
-  // Both platforms depend on this product's facts and price. Never retain an old approval.
-  current.listings = {}; current.reviews = {}; current.publications = {};
+  const pricingOnly = PRICING_FACTS.includes(key) && !COPY_FACTS.includes(key);
+  if (pricingOnly) current.publications = {};
+  else { current.listings = {}; current.reviews = {}; current.publications = {}; }
   current.pricing = pricingFor(selected());
-  advance(current.pricing.status === 'ready' ? 'pricing_ready' : current.v2 ? 'evidence_analyzed' : 'sku_selected');
+  const review = current.reviews[current.platform];
+  if (review) advance(review.status === 'passed' ? 'review_passed' : 'review_blocked');
+  else if (current.listings[current.platform]) advance('listing_generated');
+  else advance(current.pricing.status === 'ready' ? 'pricing_ready' : current.v2 ? 'evidence_analyzed' : 'sku_selected');
   return save();
 }
 function safeListing(platform: Platform, revision = 1): Listing {
-  if (!current.v2 || current.pricing?.status !== 'ready') throw new Error('Analyze evidence and resolve pricing before generating a listing.');
+  if (!current.v2 || !current.pricing) throw new Error('Analyze evidence before generating a listing.');
   if (selected().duplicateStatus !== 'unique' || selected().category !== (serverOwner ? current.task?.category : demoTask.category)) throw new Error('Duplicate or out-of-category products cannot generate listings for this task.');
-  return makeTemplateListing({ factCard: serverOwner ? serverSnapshots[current.selectedSku!].v2! : current.v2, pricing: current.pricing!, platform, revision, factRevision: factRevision(current.selectedSku!) });
+  return makeTemplateListing({ factCard: serverOwner ? serverSnapshots[current.selectedSku!].v2! : current.v2, pricing: current.pricing!, platform, revision, factRevision: factRevision(current.selectedSku!, COPY_FACTS) });
 }
 function reviewIssues(listing: Listing) { return reviewAgainstTemplate(listing, safeListing(listing.platform, listing.revision)); }
 
@@ -231,7 +234,7 @@ export const mockApi = {
   catalog: () => current.catalog.map(productView),
   async getCatalog() { await delay(180); return current.catalog.map(productView); },
   factEditor, editableFact,
-  listingReady() { return !!current.v2 && !!current.selectedSku && selected().duplicateStatus === 'unique' && selected().category === (serverOwner ? current.task?.category : demoTask.category) && current.pricing?.status === 'ready' && REQUIRED_COPY_FACTS.every(key => current.v2!.facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed)); },
+  listingReady() { return !!current.v2 && !!current.selectedSku && selected().duplicateStatus === 'unique' && selected().category === (serverOwner ? current.task?.category : demoTask.category) && REQUIRED_COPY_FACTS.every(key => current.v2!.facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed)); },
   getTaskTemplate: () => clone(demoTask),
   async ready() { synchronizeFacts(); if (current.pricing && current.selectedSku) current.pricing = pricingFor(selected()); if (current.stage === 'initial') advance('materials_ready'); return save(); },
   navigate(workspace: Workspace) { current.workspace = workspace; return save(); },
@@ -363,7 +366,7 @@ export const mockApi = {
     current.platform = platform;
     const review = current.reviews[platform];
     if (current.publications[platform]) advance('published');
-    else if (review) advance(serverOwner ? serverWorkflow?.publishAllowed[platform] ? 'review_passed' : review.status === 'blocked' ? 'review_blocked' : 'listing_generated' : review.status === 'passed' ? 'review_passed' : 'review_blocked');
+    else if (review) advance(serverOwner ? serverWorkflow?.publishAllowed[platform] || (review.status === 'passed' && current.pricing?.status !== 'ready') ? 'review_passed' : review.status === 'blocked' ? 'review_blocked' : 'listing_generated' : review.status === 'passed' ? 'review_passed' : 'review_blocked');
     else if (current.listings[platform]) advance('listing_generated');
     else if (current.pricing?.status === 'ready') advance('pricing_ready');
     return save();
@@ -420,7 +423,7 @@ export const mockApi = {
     if (serverOwner) return !!serverWorkflow?.publishAllowed[current.platform];
     if (!this.listingReady()) return false;
     const listing = current.listings[current.platform]; const review = current.reviews[current.platform];
-    return !!listing && (listing.factRevision ?? 0) === factRevision(current.selectedSku!) && review?.status === 'passed' && review.revision === listing.revision && current.pricing?.status === 'ready' && reviewIssues(listing).length === 0;
+    return !!listing && (listing.factRevision ?? 0) === factRevision(current.selectedSku!, COPY_FACTS) && review?.status === 'passed' && review.revision === listing.revision && current.pricing?.status === 'ready' && reviewIssues(listing).length === 0;
   },
   async publish() {
     await delay(750);

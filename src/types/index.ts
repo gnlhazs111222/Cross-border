@@ -33,7 +33,7 @@ export type ImportRow = { row: number; sku: string; status: 'ready' | 'missing_d
 export type ImportReport = { fileName: string; mode: ImportMode; processed: number; ready: number; missing: number; duplicates: number; invalid: number; rows: ImportRow[] };
 export type ImportPreview = ImportReport & { products: Product[] };
 export type DemoState = {
-  schemaVersion: 1; factsRevision?: number; serverRevision?: number; ownerId?: string; workspace: Workspace; stage: Stage; history: Stage[];
+  schemaVersion: 1; factsRevision?: number; listingFactsRevision?: number; serverRevision?: number; ownerId?: string; workspace: Workspace; stage: Stage; history: Stage[];
   catalog: Product[]; datasetSource: 'builtin' | 'imported' | 'mixed'; importReport: ImportReport | null;
   factEdits: Record<string, Record<string, Fact>>;
   task: Task | null; selectedSku: string | null; v1: FactCard | null; v2: FactCard | null;

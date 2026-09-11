@@ -30,23 +30,23 @@ async function current(db: DB, userId: string, id: string, input: VersionInput, 
   const row = await owned(db, userId, id); const head = await latest(db, row);
   if (head?.id !== row.id || row.revision !== input.expectedVersion) throw new AppError('listing_changed', 'Listing changed. Reload the current version before retrying.', 409);
   const snap = await factSnapshotTx(db, userId, row.taskId, row.productId); checkFacts(snap, input.expectedFactsRevision);
-  if (!allowStale && (!active(row) || row.factRevision !== snap.factsRevision)) throw new AppError('listing_stale', 'The listing is stale. Regenerate from the current facts.', 409);
+  if (!allowStale && (!active(row) || row.factRevision !== snap.listingFactsRevision)) throw new AppError('listing_stale', 'The listing is stale. Regenerate from the current facts.', 409);
   return { row, snap };
 }
 async function supported(snap: FactSnapshot, platform: Platform, revision: number) {
-  if (!snap.listingReadiness.ready) throw new AppError('listing_blocked', 'Confirm required facts and resolve pricing before generating a listing.', 409);
-  return domainProviders.listing.generate({ factCard: snap.v2!, pricing: snap.pricing, platform, revision, factRevision: snap.factsRevision });
+  if (!snap.listingReadiness.ready) throw new AppError('listing_blocked', 'Confirm the required listing facts before generating a listing.', 409);
+  return domainProviders.listing.generate({ factCard: snap.v2!, pricing: snap.pricing, platform, revision, factRevision: snap.listingFactsRevision });
 }
 const defaultListingRuntime: ListingRuntime = { requested: 'template', provider: domainProviders.listing };
 async function generationInput(db: DB, snap: FactSnapshot, platform: Platform, revision: number) {
-  if (!snap.listingReadiness.ready) throw new AppError('listing_blocked', 'Confirm required facts and resolve pricing before generating a listing.', 409);
+  if (!snap.listingReadiness.ready) throw new AppError('listing_blocked', 'Confirm the required listing facts before generating a listing.', 409);
   const task = await db.launchTask.findUniqueOrThrow({ where: { id: snap.taskId } });
-  return { factCard: snap.v2!, pricing: snap.pricing, platform, revision, factRevision: snap.factsRevision,
+  return { factCard: snap.v2!, pricing: snap.pricing, platform, revision, factRevision: snap.listingFactsRevision,
     context: { market: task.market, category: task.category, requirements: task.requirements as string[], product: { sku: snap.product.sku, name: snap.product.name } } };
 }
 async function reviewBaseline(snap: FactSnapshot, row: ListingDraft): Promise<Listing> {
   const data = row.data as unknown as AuthorizedListing;
-  if (row.generationMode === 'qwen' && data.authorization?.factsRevision === snap.factsRevision) {
+  if (row.generationMode === 'qwen' && data.authorization?.factsRevision === snap.listingFactsRevision) {
     const output = validateGeneratedListingAgainstFacts(listingOutputSchema(row.platform as Platform).parse(data.authorization.output), snap.facts);
     const { usedFacts: _used, ...copy } = output; void _used;
     return { ...toListing(row), ...copy, riskDemoInjected: false };
@@ -61,7 +61,7 @@ async function retire(db: DB, row: ListingDraft) {
 }
 async function insert(db: DB, userId: string, snap: FactSnapshot, listing: Listing, previous?: ListingDraft | null) {
   if (previous) await retire(db, previous);
-  return db.listingDraft.create({ data: { userId, taskId: snap.taskId, productId: snap.productId, platform: listing.platform, revision: listing.revision, factRevision: snap.factsRevision,
+  return db.listingDraft.create({ data: { userId, taskId: snap.taskId, productId: snap.productId, platform: listing.platform, revision: listing.revision, factRevision: snap.listingFactsRevision,
     status: 'review_required', generationMode: listing.generationMode ?? 'template', data: json(listing) } });
 }
 // Authorization is always computed from the current DB version and facts, never client flags.
@@ -69,7 +69,7 @@ export async function canPublishListing(db: DB, userId: string, id: string, know
   const row = await owned(db, userId, id); const head = await latest(db, row);
   if (head?.id !== row.id || !['review_passed', 'published'].includes(row.status)) return false;
   const snap = knownSnapshot ?? await factSnapshotTx(db, userId, row.taskId, row.productId);
-  if (snap.factsRevision !== row.factRevision || !snap.listingReadiness.ready) return false;
+  if (snap.listingFactsRevision !== row.factRevision || !snap.listingReadiness.ready || !snap.pricingReadiness.ready) return false;
   const review = await db.reviewResult.findFirst({ where: { listingDraftId: row.id, invalidatedAt: null }, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }] });
   if (!review || review.revision !== row.revision || review.status !== 'passed' || review.highRiskCount !== 0 || (review.issues as unknown[]).length !== 0) return false;
   if (review.reviewMode === 'rules_qwen') {
@@ -88,7 +88,7 @@ async function workflow(db: DB, userId: string, taskId: string, productId: strin
   for (const platform of ['amazon', 'shopify'] as const) {
     const row = await latest(db, { taskId: snap.taskId, productId: snap.productId, platform });
     if (!row) continue;
-    const valid = active(row) && row.factRevision === snap.factsRevision;
+    const valid = active(row) && row.factRevision === snap.listingFactsRevision;
     result.heads[platform] = { recordId: row.id, revision: row.revision, status: valid ? row.status : 'stale' };
     if (!valid) continue;
     result.listings[platform] = toListing(row);
@@ -125,7 +125,7 @@ export async function createListing(db: PrismaClient, userId: string, taskId: st
   });
   // Network generation runs outside SQLite transactions. Revalidate both revisions before committing.
   const listing = await runtime.provider.generate(prepared.providerInput);
-  if (runtime.requested === 'template' && input.platform === 'amazon' && (!prepared.previous || !active(prepared.previous) || prepared.previous.factRevision !== prepared.snap.factsRevision)) { listing.bullets[2] = '100% leakproof'; listing.riskDemoInjected = true; }
+  if (runtime.requested === 'template' && input.platform === 'amazon' && (!prepared.previous || !active(prepared.previous) || prepared.previous.factRevision !== prepared.snap.listingFactsRevision)) { listing.bullets[2] = '100% leakproof'; listing.riskDemoInjected = true; }
   return transaction(db, async tx => {
     const snap = await factSnapshotTx(tx, userId, taskId, productId); checkFacts(snap, input.expectedFactsRevision);
     const previous = await latest(tx, { taskId: snap.taskId, productId: snap.productId, platform: input.platform });
@@ -152,7 +152,7 @@ export async function reviseListing(db: PrismaClient, userId: string, id: string
 }
 async function semanticInput(db: DB, row: ListingDraft, snap: FactSnapshot): Promise<ReviewInput> {
   const task = await db.launchTask.findUniqueOrThrow({ where: { id: row.taskId } });
-  return { listing: toListing(row), facts: snap.facts, context: { market: task.market, category: task.category, taskRevision: task.revision }, listingRevision: row.revision, factsRevision: snap.factsRevision };
+  return { listing: toListing(row), facts: snap.facts, context: { market: task.market, category: task.category, taskRevision: task.revision }, listingRevision: row.revision, factsRevision: snap.listingFactsRevision };
 }
 // A process-local admission lock prevents two simultaneous attempts consuming model calls.
 // The persisted attempt ID and invalidatedAt guard final writes, including task/fact edits.
@@ -207,7 +207,8 @@ export async function reviewListing(db: PrismaClient, userId: string, id: string
 }
 export async function publishListing(db: PrismaClient, userId: string, id: string, input: VersionInput, reviewRuntime = rulesReviewRuntime) {
   return transaction(db, async tx => {
-    const { row } = await current(tx, userId, id, input);
+    const { row, snap } = await current(tx, userId, id, input);
+    if (!snap.pricingReadiness.ready) throw new AppError('pricing_required_for_publish', 'Complete pricing inputs before publishing.', 409);
     if (!await canPublishListing(tx, userId, id, undefined, reviewRuntime)) throw new AppError('publish_blocked', 'Publish blocked: the current revision must pass review.', 409);
     const existing = await tx.publishResult.findFirst({ where: { listingDraftId: id, revision: row.revision, invalidatedAt: null } });
     if (!existing) {

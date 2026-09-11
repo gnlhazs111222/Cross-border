@@ -1,6 +1,6 @@
 import type { Fact } from '../types';
 
-export const PRICING_FACTS = ['packagingWeight', 'packageLength', 'packageWidth', 'packageHeight', 'supplierCost'];
+export const PRICING_FACTS = ['packagingWeight', 'packageLength', 'packageWidth', 'packageHeight', 'supplierCost', 'declaredValue'];
 export const COPY_FACTS = ['color', 'capacity', 'material', 'straw', 'countryOfOrigin', 'packageIncludes', 'finish', 'lidType'];
 export const REQUIRED_COPY_FACTS = ['color', 'capacity', 'material'];
 const TEXT_FACTS = ['color', 'material', 'countryOfOrigin', 'packageIncludes', 'finish', 'lidType'];

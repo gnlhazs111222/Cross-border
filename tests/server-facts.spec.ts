@@ -53,7 +53,7 @@ for (const zh of [false, true]) test(`server facts survive all localStorage dele
   await page.getByRole('tab', { name: 'Shopify US' }).click();
   await page.getByRole('button', { name: 'Generate Shopify Listing' }).click();
   await expect(page.locator('.listing-copy')).not.toContainText('FORGED');
-  expect((await state(page)).listings.shopify.factRevision).toBe(snap.factsRevision);
+  expect((await state(page)).listings.shopify.factRevision).toBe(snap.listingFactsRevision);
 });
 
 test('server fact changed from another client clears old browser approval before publish', async ({ page }) => {
