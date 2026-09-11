@@ -5,6 +5,7 @@ import { baseFactCard, effectiveProduct, pricingFromFacts, productEvidence, revi
 import { PRICING_FACTS, REQUIRED_COPY_FACTS } from '../../src/services/factReview';
 import { AppError } from '../errors';
 import { domainProviders } from '../providers/domain';
+import { assetsForProduct } from './assets';
 import { toProduct } from './catalog';
 
 type DB = Prisma.TransactionClient;
@@ -35,11 +36,14 @@ export async function factSnapshotTx(db: DB, userId: string, taskId: string, pro
   const card = (row: typeof base): FactCard => ({ recordId: row.id, revision: row.revision, productRevision: row.productRevision, version: row.version as 1 | 2, sku: product.sku, ...(row.version === 2 ? { taskId: task.code } : {}), facts: row.facts.map(readFact) });
   const v1 = card(base); const v2 = enhanced ? card(enhanced) : null; const facts = (v2 ?? v1).facts;
   const p = toProduct(product); const view = effectiveProduct(p, facts); const pricing = pricingFromFacts(p, facts, facts.filter(f => PRICING_FACTS.includes(f.key)).reduce((sum, f) => sum + Math.max(0, (f.revision ?? 1) - 1), 0));
+  const assets = await assetsForProduct(db, userId, product.id);
   const blockedFacts = REQUIRED_COPY_FACTS.filter(key => !facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed));
   return { productId: product.id, taskId: task.id, product: view, v1, v2, facts, factsRevision: Math.max(base.revision, enhanced?.revision ?? 0), downstreamInvalidated: invalidated, pricing,
-    evidence: base.evidence.map(e => ({ ...(e.data as unknown as Evidence), recordId: e.id })),
+    evidence: base.evidence.map(e => ({ ...(e.data as unknown as Evidence), recordId: e.id })), assets,
     pricingReadiness: { ready: pricing.status === 'ready', missing: pricing.missing },
-    listingReadiness: { ready: !!v2 && pricing.status === 'ready' && !blockedFacts.length && p.duplicateStatus === 'unique' && p.category === task.category, blockedFacts } };
+    // The pricing status is deliberately absent here: incomplete commercial data must not block
+    // draft generation, it only leaves the suggested price pending.
+    listingReadiness: { ready: !!v2 && !blockedFacts.length && p.duplicateStatus === 'unique' && p.category === task.category, blockedFacts } };
 }
 export function factSnapshot(db: PrismaClient, userId: string, taskId: string, productId: string) {
   return db.$transaction(tx => factSnapshotTx(tx, userId, taskId, productId));

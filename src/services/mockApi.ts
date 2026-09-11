@@ -1,7 +1,8 @@
 import { eligibilityReason, type RecommendationSnapshot } from '../../shared/recommendation';
+import { matchAssetFiles } from '../../shared/asset-match';
 import { amazonCsv } from '../../shared/csv';
 import { baseFactCard, effectiveProduct, pricingFromFacts, productEvidence, reviewFact } from '../../shared/facts';
-import type { WorkflowSnapshot, FactSnapshot, FactPreview } from '../../shared/contracts';
+import type { WorkflowSnapshot, FactSnapshot, FactPreview, ProductAsset, AssetRole, ImportBatchDto, ImportBatchDetail, ImportBulkResult, ImportResolution, ImportRuleDto } from '../../shared/contracts';
 import { apiClient, SERVER_MODE } from './apiClient';
 import { enrichProductEvidence, makeTemplateListing, rankProducts, reviewAgainstTemplate } from '../../shared/domain';
 import { demoTask, products as builtInProducts } from '../data/mockData';
@@ -61,6 +62,19 @@ let serverPreviews: Record<string, FactPreview> = {};
 let serverSnapshots: Record<string, FactSnapshot> = {};
 let serverWorkflow: WorkflowSnapshot | null = null;
 let serverRecommendation: RecommendationSnapshot | null = null;
+let serverAssets: Record<string, ProductAsset[]> = {};
+let lastImportBatch: ImportBatchDto | null = null;
+let pendingSourceFile: { fileName: string; mimeType: string; contentBase64: string } | null = null;
+const SOURCE_MIME: Record<string, string> = { csv: 'text/csv', xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
+/** Keeps the uploaded spreadsheet so the server can store it alongside the parsed rows. */
+function readAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Could not read the selected file.'));
+    reader.onload = () => { const result = String(reader.result ?? ''); const comma = result.indexOf(','); resolve(comma < 0 ? '' : result.slice(comma + 1)); };
+    reader.readAsDataURL(file);
+  });
+}
 async function refreshRecommendation() {
   serverRecommendation = serverOwner && current.task ? await apiClient.recommendations.get(current.task.recordId!) : null;
 }
@@ -96,6 +110,7 @@ function activeServerListing() {
 
 function applySnapshot(snapshot: FactSnapshot) {
   serverSnapshots[snapshot.product.sku] = clone(snapshot);
+  serverAssets[snapshot.product.sku] = clone(snapshot.assets ?? []);
   if (current.selectedSku !== snapshot.product.sku) return;
   const changed = current.factsRevision !== snapshot.factsRevision;
   current.v1 = clone(snapshot.v1); current.v2 = clone(snapshot.v2); current.pricing = clone(snapshot.pricing);
@@ -188,7 +203,9 @@ function changeFact(key: string, action: 'edit' | 'confirm' | 'reject', input?: 
   return save();
 }
 function safeListing(platform: Platform, revision = 1): Listing {
-  if (!current.v2 || current.pricing?.status !== 'ready') throw new Error('Analyze evidence and resolve pricing before generating a listing.');
+  // Pricing, including the tariff estimate, only ever produces a reminder: an incomplete price
+  // leaves the suggested price pending and never stops a draft from being generated.
+  if (!current.v2) throw new Error('Analyze evidence before generating a listing.');
   if (selected().duplicateStatus !== 'unique' || selected().category !== (serverOwner ? current.task?.category : demoTask.category)) throw new Error('Duplicate or out-of-category products cannot generate listings for this task.');
   return makeTemplateListing({ factCard: serverOwner ? serverSnapshots[current.selectedSku!].v2! : current.v2, pricing: current.pricing!, platform, revision, factRevision: factRevision(current.selectedSku!) });
 }
@@ -210,7 +227,7 @@ export const mockApi = {
     serverOwner = userId;
     const task = tasks[0] ?? null;
     const selectedSku = corruptActiveCache ? null : task?.selectedSku ?? null;
-    serverPreviews = catalog.factPreviews; serverSnapshots = {}; serverWorkflow = null;
+    serverPreviews = catalog.factPreviews; serverSnapshots = {}; serverWorkflow = null; serverAssets = {};
     const importedCount = catalog.products.filter(p => p.importSource).length;
     current = { ...cached, catalog: catalog.products, serverRevision: catalog.revision, task, selectedSku, platform: cached.task?.recordId === task?.recordId ? cached.platform : task?.platform === 'Shopify US' ? 'shopify' : 'amazon', datasetSource: !importedCount ? 'builtin' : importedCount === catalog.products.length ? 'imported' : 'mixed' };
     if (!selectedSku) { current.v1 = null; current.v2 = null; current.pricing = null; current.listings = {}; current.reviews = {}; current.publications = {}; }
@@ -218,7 +235,7 @@ export const mockApi = {
     current.factEdits = {}; current.v1 = null; current.v2 = null; current.pricing = null;
     if (task) {
       const snapshots = await apiClient.facts.list(task.recordId);
-      for (const snap of snapshots) serverSnapshots[snap.product.sku] = snap;
+      for (const snap of snapshots) { serverSnapshots[snap.product.sku] = snap; serverAssets[snap.product.sku] = clone(snap.assets ?? []); }
       if (selectedSku) applySnapshot(serverSnapshots[selectedSku] ?? await apiClient.facts.createV1(task.recordId, selectedSku));
     }
     await refreshRecommendation();
@@ -226,26 +243,97 @@ export const mockApi = {
     else advance(task ? 'task_created' : 'materials_ready');
     return save();
   },
-  disconnectServer() { if (serverOwner) { try { localStorage.removeItem(STORAGE_KEY); } catch { /* in-memory logout */ } } serverOwner = null; serverRecommendation = null; serverSnapshots = {}; serverWorkflow = null; serverPreviews = {}; pendingImport = null; current = initialState(); },
+  disconnectServer() { if (serverOwner) { try { localStorage.removeItem(STORAGE_KEY); } catch { /* in-memory logout */ } } serverOwner = null; serverRecommendation = null; serverSnapshots = {}; serverWorkflow = null; serverPreviews = {}; serverAssets = {}; pendingImport = null; current = initialState(); },
   isStorageAvailable: () => storageAvailable,
   catalog: () => current.catalog.map(productView),
   async getCatalog() { await delay(180); return current.catalog.map(productView); },
   factEditor, editableFact,
-  listingReady() { return !!current.v2 && !!current.selectedSku && selected().duplicateStatus === 'unique' && selected().category === (serverOwner ? current.task?.category : demoTask.category) && current.pricing?.status === 'ready' && REQUIRED_COPY_FACTS.every(key => current.v2!.facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed)); },
+  // Pricing is not part of readiness: an incomplete price leaves the suggested price pending.
+  listingReady() { return !!current.v2 && !!current.selectedSku && selected().duplicateStatus === 'unique' && selected().category === (serverOwner ? current.task?.category : demoTask.category) && REQUIRED_COPY_FACTS.every(key => current.v2!.facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed)); },
   getTaskTemplate: () => clone(demoTask),
   async ready() { synchronizeFacts(); if (current.pricing && current.selectedSku) current.pricing = pricingFor(selected()); if (current.stage === 'initial') advance('materials_ready'); return save(); },
   navigate(workspace: Workspace) { current.workspace = workspace; return save(); },
-  async reset() { await delay(180); const data = serverOwner ? await apiClient.reset() : null; pendingImport = null; current = initialState(); serverRecommendation = null; serverSnapshots = {}; serverWorkflow = null; if (data) { serverPreviews = data.factPreviews; current.catalog = data.products; current.serverRevision = data.revision; } return save(); },
+  async reset() { await delay(180); const data = serverOwner ? await apiClient.reset() : null; pendingImport = null; current = initialState(); serverRecommendation = null; serverSnapshots = {}; serverWorkflow = null; serverAssets = {}; if (data) { serverPreviews = data.factPreviews; current.catalog = data.products; current.serverRevision = data.revision; } return save(); },
   async loadBuiltInDataset() { await this.reset(); advance('materials_ready'); return save(); },
   getSupplierTemplate: () => [...SUPPLIER_COLUMNS],
+  /** Classifies the pending file against the pool before anything is written. Server mode only. */
+  async previewImportAlignment(): Promise<import('../../server/services/imports').ImportPreviewResult | null> {
+    if (!serverOwner || !pendingImport) return null;
+    return clone(await apiClient.products.previewAlignment(pendingImport, current.serverRevision!));
+  },
+  /** Summary of the most recent import: how many rows were new, duplicated, conflicting or uncertain. */
+  importBatch: (): ImportBatchDto | null => lastImportBatch ? clone(lastImportBatch) : null,
+  /** Import history and the rows that still need a human decision. Server mode only. */
+  async importBatches(): Promise<ImportBatchDto[]> {
+    if (!serverOwner) return [];
+    return clone(await apiClient.imports.list());
+  },
+  async importBatchDetail(batchId: string): Promise<ImportBatchDetail> {
+    if (!serverOwner) throw new Error('Import review requires the server-backed workspace.');
+    return clone(await apiClient.imports.get(batchId));
+  },
+  async resolveOccurrence(occurrenceId: string, action: Exclude<ImportResolution, 'pending'>): Promise<ImportBatchDetail> {
+    if (!serverOwner) throw new Error('Import review requires the server-backed workspace.');
+    const detail = await apiClient.imports.resolve(occurrenceId, action, current.serverRevision!);
+    // Adopting or creating a product changes the pool, so refresh what the rest of the app reads.
+    const catalog = await apiClient.products.list();
+    serverPreviews = catalog.factPreviews; current.catalog = catalog.products; current.serverRevision = catalog.revision;
+    return clone(detail);
+  },
+  /** Bulk decisions and remembered rules. Both still require an explicit click; nothing auto-resolves. */
+  async resolveOccurrencesBulk(batchId: string, input: { action: Exclude<ImportResolution, 'pending'>; verdict?: 'conflict' | 'probable'; field?: string; remember?: boolean }): Promise<ImportBulkResult> {
+    if (!serverOwner) throw new Error('Import review requires the server-backed workspace.');
+    const result = await apiClient.imports.resolveBulk(batchId, { ...input, expectedRevision: current.serverRevision! });
+    const catalog = await apiClient.products.list();
+    serverPreviews = catalog.factPreviews; current.catalog = catalog.products; current.serverRevision = catalog.revision;
+    return clone(result);
+  },
+  async importRules(): Promise<ImportRuleDto[]> {
+    if (!serverOwner) return [];
+    return clone(await apiClient.imports.rules());
+  },
+  async deleteImportRule(ruleId: string): Promise<ImportRuleDto[]> {
+    if (!serverOwner) return [];
+    return clone(await apiClient.imports.deleteRule(ruleId));
+  },
+  /** Source assets live on the server per SKU. Offline competition mode keeps them unavailable instead of faking a local copy. */
+  assetsFor: (sku: string): ProductAsset[] => clone(serverAssets[sku] ?? []),
+  async listAssets(sku: string): Promise<ProductAsset[]> {
+    if (!serverOwner) throw new Error('Source assets require the server-backed workspace.');
+    const { assets } = await apiClient.assets.list(this.assetProductId(sku));
+    serverAssets[sku] = assets; return clone(assets);
+  },
+  async uploadAsset(sku: string, file: { fileName: string; mimeType: string; role?: AssetRole; contentBase64: string }) {
+    if (!serverOwner) throw new Error('Source assets require the server-backed workspace.');
+    const result = await apiClient.assets.upload(this.assetProductId(sku), file);
+    serverAssets[sku] = result.assets;
+    const snapshot = serverSnapshots[sku]; if (snapshot) snapshot.assets = clone(result.assets);
+    return { asset: clone(result.asset), duplicate: result.duplicate, assets: clone(result.assets) };
+  },
+  async deleteAsset(sku: string, assetId: string): Promise<ProductAsset[]> {
+    if (!serverOwner) throw new Error('Source assets require the server-backed workspace.');
+    const { assets } = await apiClient.assets.remove(assetId);
+    serverAssets[sku] = assets;
+    const snapshot = serverSnapshots[sku]; if (snapshot) snapshot.assets = clone(assets);
+    return clone(assets);
+  },
+  assetContentUrl: (assetId: string) => SERVER_MODE ? apiClient.assets.contentUrl(assetId) : '',
+  assetProductId(sku: string) {
+    const product = current.catalog.find(p => p.sku === sku);
+    if (!product?.recordId) throw new Error('Unknown SKU');
+    return product.recordId;
+  },
   async previewSupplierFile(file: File, mode: ImportMode): Promise<ImportPreview> {
     pendingImport = null;
+    pendingSourceFile = null;
     const { parseSupplierFile } = await import('./supplierImport');
     pendingImport = await parseSupplierFile(file, mode, current.catalog);
     if (mode === 'append' && current.catalog.length + pendingImport.products.length > 500) {
       pendingImport = null;
       throw new Error('Too many products. Keep the dataset within 500 products.');
     }
+    const extension = file.name.toLowerCase().split('.').at(-1) ?? '';
+    if (SERVER_MODE) pendingSourceFile = { fileName: file.name, mimeType: SOURCE_MIME[extension] ?? 'application/octet-stream', contentBase64: await readAsBase64(file) };
     return clone(pendingImport);
   },
   async importSupplierFile() {
@@ -253,10 +341,11 @@ export const mockApi = {
     const preview = pendingImport;
     if (!preview?.products.length) throw new Error('No valid new products to import. The current dataset is unchanged.');
     if (serverOwner) {
-      const result = await apiClient.products.import(preview, current.serverRevision!);
-      serverSnapshots = {}; serverWorkflow = null; serverRecommendation = null; serverPreviews = result.factPreviews;
+      const result = await apiClient.products.import(preview, current.serverRevision!, pendingSourceFile ?? undefined);
+      serverSnapshots = {}; serverWorkflow = null; serverRecommendation = null; serverPreviews = result.factPreviews; serverAssets = {};
+      lastImportBatch = result.batch ?? null;
       current = { ...initialState(), catalog: result.products, serverRevision: result.revision, datasetSource: preview.mode === 'append' ? 'mixed' : 'imported', importReport: clone(result.report ?? preview) };
-      advance('materials_ready'); pendingImport = null; return save();
+      advance('materials_ready'); pendingImport = null; pendingSourceFile = null; return save();
     }
     const catalog = preview.mode === 'append' ? [...current.catalog, ...preview.products] : preview.products;
     if (new Set(catalog.map(p => p.sku)).size !== catalog.length) throw new Error('The dataset changed. Preview the file again.');
@@ -265,6 +354,30 @@ export const mockApi = {
     current = { ...initialState(), catalog: clone(catalog), datasetSource: preview.mode === 'append' ? 'mixed' : 'imported', importReport: clone(report) };
     advance('materials_ready'); pendingImport = null;
     return save();
+  },
+  /**
+   * Uploads the files a spreadsheet referenced. Matching is by file name, so the operator picks the
+   * folder once instead of attaching images product by product.
+   */
+  async attachReferencedAssets(files: File[]): Promise<{ attached: number; missing: string[]; unreferenced: string[]; grouped: string[] }> {
+    if (!serverOwner) return { attached: 0, missing: [], unreferenced: [], grouped: [] };
+    // Which file belongs to which SKU is decided by a pure, tested function; this only uploads.
+    const match = matchAssetFiles(current.catalog.map(product => ({ sku: product.sku, assetReferences: product.assetReferences })), files.map(file => file.name));
+    const byName = new Map(files.map(file => [file.name, file]));
+    let attached = 0;
+    for (const assignment of match.assignments) {
+      const file = byName.get(assignment.fileName);
+      if (!file) continue;
+      const extension = file.name.toLowerCase().split('.').at(-1) ?? '';
+      await apiClient.assets.upload(this.assetProductId(assignment.sku), {
+        fileName: file.name, mimeType: SOURCE_MIME[extension] ?? (extension === 'pdf' ? 'application/pdf' : `image/${extension === 'jpg' ? 'jpeg' : extension}`),
+        contentBase64: await readAsBase64(file),
+      });
+      attached++;
+    }
+    const catalog = await apiClient.products.list();
+    serverPreviews = catalog.factPreviews; current.catalog = catalog.products; current.serverRevision = catalog.revision;
+    return { attached, missing: [...new Set(match.missing)], unreferenced: match.unreferenced, grouped: match.grouped };
   },
   async createTask() {
     await delay();
@@ -420,7 +533,7 @@ export const mockApi = {
     if (serverOwner) return !!serverWorkflow?.publishAllowed[current.platform];
     if (!this.listingReady()) return false;
     const listing = current.listings[current.platform]; const review = current.reviews[current.platform];
-    return !!listing && (listing.factRevision ?? 0) === factRevision(current.selectedSku!) && review?.status === 'passed' && review.revision === listing.revision && current.pricing?.status === 'ready' && reviewIssues(listing).length === 0;
+    return !!listing && (listing.factRevision ?? 0) === factRevision(current.selectedSku!) && review?.status === 'passed' && review.revision === listing.revision && reviewIssues(listing).length === 0;
   },
   async publish() {
     await delay(750);
@@ -441,6 +554,6 @@ export const mockApi = {
     await refreshServerFacts();
     if (current.platform !== 'amazon' || !current.publications.amazon || !this.canPublish()) throw new Error('Publish the reviewed Amazon draft before exporting.');
     const listing = current.listings.amazon!;
-    return amazonCsv(current.selectedSku!, listing, current.pricing!.suggestedPrice!);
+    return amazonCsv(current.selectedSku!, listing, current.pricing?.suggestedPrice ?? null);
   },
 };

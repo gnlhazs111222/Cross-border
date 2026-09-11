@@ -34,12 +34,12 @@ async function current(db: DB, userId: string, id: string, input: VersionInput, 
   return { row, snap };
 }
 async function supported(snap: FactSnapshot, platform: Platform, revision: number) {
-  if (!snap.listingReadiness.ready) throw new AppError('listing_blocked', 'Confirm required facts and resolve pricing before generating a listing.', 409);
+  if (!snap.listingReadiness.ready) throw new AppError('listing_blocked', 'Confirm the required copy facts before generating a listing.', 409);
   return domainProviders.listing.generate({ factCard: snap.v2!, pricing: snap.pricing, platform, revision, factRevision: snap.factsRevision });
 }
 const defaultListingRuntime: ListingRuntime = { requested: 'template', provider: domainProviders.listing };
 async function generationInput(db: DB, snap: FactSnapshot, platform: Platform, revision: number) {
-  if (!snap.listingReadiness.ready) throw new AppError('listing_blocked', 'Confirm required facts and resolve pricing before generating a listing.', 409);
+  if (!snap.listingReadiness.ready) throw new AppError('listing_blocked', 'Confirm the required copy facts before generating a listing.', 409);
   const task = await db.launchTask.findUniqueOrThrow({ where: { id: snap.taskId } });
   return { factCard: snap.v2!, pricing: snap.pricing, platform, revision, factRevision: snap.factsRevision,
     context: { market: task.market, category: task.category, requirements: task.requirements as string[], product: { sku: snap.product.sku, name: snap.product.name } } };
@@ -226,6 +226,6 @@ export async function publishedAmazonCsv(db: PrismaClient, userId: string, publi
     const row = result.listingDraft;
     if (result.platform !== 'amazon' || result.invalidatedAt || result.revision !== row.revision || !await canPublishListing(tx, userId, row.id, undefined, reviewRuntime)) throw new AppError('export_blocked', 'Publish the current reviewed Amazon draft before exporting.', 409);
     const snap = await factSnapshotTx(tx, userId, row.taskId, row.productId);
-    return { filename: `PrismLaunch-${row.product.sku.replace(/[^a-zA-Z0-9_-]/g, '_')}-Amazon.csv`, csv: amazonCsv(row.product.sku, toListing(row), snap.pricing.suggestedPrice!) };
+    return { filename: `PrismLaunch-${row.product.sku.replace(/[^a-zA-Z0-9_-]/g, '_')}-Amazon.csv`, csv: amazonCsv(row.product.sku, toListing(row), snap.pricing.suggestedPrice) };
   });
 }

@@ -27,7 +27,12 @@
     "security:check": "node scripts/check-secrets.mjs",
     "ai:listing-smoke": "tsx server/scripts/listing-smoke.ts",
     "eval:recommendation": "tsx evaluation/recommendation/run.ts",
-    "eval:review": "tsx evaluation/review/run.ts"
+    "eval:review": "tsx evaluation/review/run.ts",
+    "align:report": "tsx scripts/align-report.ts",
+    "align:catalog": "tsx scripts/align-catalog.ts",
+    "split:variants": "tsx scripts/split-variants.ts",
+    "make:test-images": "tsx scripts/make-test-images.ts",
+    "attach:images": "tsx scripts/attach-images.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",

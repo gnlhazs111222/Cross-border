@@ -1,5 +1,6 @@
 import type { RecommendationSnapshot } from '../../shared/recommendation';
-import type { WorkflowSnapshot, FactSnapshot, Capabilities, CatalogResponse, PublicUser, ServerProduct, ServerTask } from '../../shared/contracts';
+import type { WorkflowSnapshot, FactSnapshot, Capabilities, CatalogResponse, PublicUser, ServerProduct, ServerTask, ProductAsset, AssetRole, ImportBatchDto, ImportBatchDetail, ImportBulkResult, ImportResolution, ImportRuleDto } from '../../shared/contracts';
+import type { ImportPreviewResult } from '../../server/services/imports';
 import type { ImportPreview, Listing, Platform, Task } from '../types';
 
 export const SERVER_MODE = typeof window !== 'undefined' && import.meta.env?.MODE !== 'competition' && new URLSearchParams(window.location.search).get('mode') !== 'local';
@@ -11,7 +12,9 @@ async function request<T>(path: string, method = 'GET', body?: unknown, format: 
     const json = format === 'text' && response.ok ? new TextDecoder('utf-8', { ignoreBOM: true }).decode(await response.arrayBuffer()) : await response.json().catch(() => null);
     if (!response.ok) {
       if (response.status === 401 && path !== '/auth/login') window.dispatchEvent(new Event('prismlaunch:unauthorized'));
-      throw new ApiError(json?.error?.code ?? 'api_unavailable', json?.error?.message ?? 'The local API is unavailable.', response.status);
+      const fields = Array.isArray(json?.error?.fields) ? json.error.fields as { path?: string; message?: string }[] : [];
+      const details = fields.slice(0, 4).map(field => String(field.path ?? '?') + ': ' + String(field.message ?? '')).join('; ');
+      throw new ApiError(json?.error?.code ?? 'api_unavailable', (json?.error?.message ?? 'The local API is unavailable.') + (details ? ' (' + details + ')' : ''), response.status);
     }
     return (format === 'text' ? json : json?.data ?? json) as T;
   } catch (error) { if (error instanceof ApiError) throw error; throw new ApiError('api_unavailable', 'The local API is unavailable.'); }
@@ -28,10 +31,32 @@ export const apiClient = {
   products: {
     list: () => request<CatalogResponse>('/products'),
     get: (id: string) => request<ServerProduct>(`/products/${encodeURIComponent(id)}`),
-    import: (preview: ImportPreview, expectedRevision: number) => {
+    import: (preview: ImportPreview, expectedRevision: number, sourceFile?: { fileName: string; mimeType: string; contentBase64: string }) => {
       const { products, ...report } = preview;
-      return request<CatalogResponse>('/products/import', 'POST', { mode: preview.mode, products, expectedRevision, report });
+      return request<CatalogResponse>('/products/import', 'POST', { mode: preview.mode, products, expectedRevision, report, ...(sourceFile ? { sourceFile } : {}) });
     },
+    /** Read-only: classifies every row against the pool without writing anything. */
+    previewAlignment: (preview: ImportPreview, expectedRevision: number) => {
+      const { products, ...report } = preview;
+      return request<ImportPreviewResult>('/products/import/preview', 'POST', { mode: preview.mode, products, expectedRevision, report });
+    },
+  },
+  assets: {
+    list: (productId: string) => request<{ sku: string; assets: ProductAsset[] }>(`/products/${encodeURIComponent(productId)}/assets`),
+    upload: (productId: string, input: { fileName: string; mimeType: string; role?: AssetRole; contentBase64: string }) =>
+      request<{ asset: ProductAsset; duplicate: boolean; assets: ProductAsset[] }>(`/products/${encodeURIComponent(productId)}/assets`, 'POST', input),
+    remove: (assetId: string) => request<{ deleted: true; assets: ProductAsset[] }>(`/assets/${encodeURIComponent(assetId)}`, 'DELETE'),
+    contentUrl: (assetId: string) => `/api/assets/${encodeURIComponent(assetId)}/content`,
+  },
+  imports: {
+    list: (limit = 20) => request<ImportBatchDto[]>(`/imports?limit=${limit}`),
+    get: (id: string) => request<ImportBatchDetail>(`/imports/${encodeURIComponent(id)}`),
+    resolve: (occurrenceId: string, action: Exclude<ImportResolution, 'pending'>, expectedRevision: number) =>
+      request<ImportBatchDetail>(`/imports/occurrences/${encodeURIComponent(occurrenceId)}/resolve`, 'POST', { action, expectedRevision }),
+    resolveBulk: (batchId: string, input: { action: Exclude<ImportResolution, 'pending'>; verdict?: 'conflict' | 'probable'; field?: string; remember?: boolean; expectedRevision: number }) =>
+      request<ImportBulkResult>(`/imports/${encodeURIComponent(batchId)}/resolve-bulk`, 'POST', input),
+    rules: () => request<ImportRuleDto[]>('/imports/rules'),
+    deleteRule: (ruleId: string) => request<ImportRuleDto[]>(`/imports/rules/${encodeURIComponent(ruleId)}`, 'DELETE'),
   },
   tasks: {
     list: () => request<ServerTask[]>('/tasks'),

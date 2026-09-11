@@ -12,9 +12,13 @@ import type { Capabilities, PublicUser } from '../shared/contracts';
 import type { ServerConfig } from './config';
 import { AppError } from './errors';
 import { credentialsSchema, importSchema, registerSchema, taskSchema } from './validation';
+import { bulkResolveImportSchema, resolveImportSchema } from './validation';
 import { hashPassword, newSessionToken, tokenHash, verifyPassword } from './auth/password';
-import { catalog, importProducts, resetCatalog, seedProducts, toProduct } from './services/catalog';
+import { catalog, resetCatalog, seedProducts, toProduct } from './services/catalog';
+import { deleteImportRule, importBatchDetail, importBatchSourceFile, importWithAlignment, listImportBatches, listImportRules, previewImportAlignment, resolveImportOccurrence, resolveImportOccurrencesBulk } from './services/imports';
 import { createTask, selectProduct, tasks, updateTask } from './services/tasks';
+import { ASSET_MIME_TYPES, deleteProductAsset, listProductAssets, pruneOrphanAssetFiles, readProductAsset, storeProductAsset } from './services/assets';
+import { assetUploadSchema } from './validation';
 import { createTextProviders } from './providers/text';
 
 declare module 'fastify' { interface FastifyRequest { user: PublicUser | null } }
@@ -80,10 +84,44 @@ export async function buildApp(config: ServerConfig, db: PrismaClient, options: 
     const row = await db.product.findFirst({ where: { userId: request.user!.id, OR: [{ id }, { sku: id }] } });
     if (!row) throw new AppError('not_found', 'Product not found.', 404); return { data: toProduct(row) };
   });
-  app.post('/api/products/import', protectedRoute, async request => ({ data: await importProducts(db, request.user!.id, importSchema.parse(request.body)) }));
+  app.post('/api/products/import', { preHandler: requireUser, bodyLimit: Math.ceil(config.ASSET_MAX_BYTES * 1.4) + 8192 }, async request => {
+    const data = await importWithAlignment(db, config, request.user!.id, importSchema.parse(request.body));
+    await pruneOrphanAssetFiles(db, config, request.user!.id);
+    return { data };
+  });
+  app.get('/api/imports', protectedRoute, async request => ({ data: await listImportBatches(db, request.user!.id, Number((request.query as { limit?: string } | undefined)?.limit ?? 20)) }));
+  app.post('/api/products/import/preview', protectedRoute, async request => ({ data: await previewImportAlignment(db, request.user!.id, importSchema.parse(request.body)) }));
+  app.get('/api/imports/rules', protectedRoute, async request => ({ data: await listImportRules(db, request.user!.id) }));
+  app.get('/api/imports/:id/source', protectedRoute, async (request, reply) => {
+    const file = await importBatchSourceFile(db, config, request.user!.id, productParams.parse(request.params).id);
+    return reply.type(file.mimeType).header('Content-Disposition', `attachment; filename="${file.fileName.replace(/["\\]/g, '')}"`).send(file.bytes);
+  });
+  app.delete('/api/imports/rules/:id', protectedRoute, async request => ({ data: await deleteImportRule(db, request.user!.id, productParams.parse(request.params).id) }));
+  app.get('/api/imports/:id', protectedRoute, async request => ({ data: await importBatchDetail(db, request.user!.id, productParams.parse(request.params).id) }));
+  app.post('/api/imports/:id/resolve-bulk', protectedRoute, async request => {
+    const input = bulkResolveImportSchema.parse(request.body);
+    return { data: await resolveImportOccurrencesBulk(db, request.user!.id, productParams.parse(request.params).id, input, input.expectedRevision) };
+  });
+  app.post('/api/imports/occurrences/:id/resolve', protectedRoute, async request => {
+    const input = resolveImportSchema.parse(request.body);
+    return { data: await resolveImportOccurrence(db, request.user!.id, productParams.parse(request.params).id, input.action, input.expectedRevision) };
+  });
+  const productParams = z.object({ id: z.string().min(1).max(220) });
+  // Source assets keep zero extra dependencies: base64 JSON in, SQLite metadata plus a hashed file on disk out.
+  const assetUploadRoute = { preHandler: requireUser, bodyLimit: Math.ceil(config.ASSET_MAX_BYTES * 1.4) + 8192 };
+  app.get('/api/products/:id/assets', protectedRoute, async request => ({ data: await listProductAssets(db, request.user!.id, productParams.parse(request.params).id) }));
+  app.post('/api/products/:id/assets', assetUploadRoute, async request => ({ data: await storeProductAsset(db, config, request.user!.id, productParams.parse(request.params).id, assetUploadSchema.parse(request.body)) }));
+  app.get('/api/assets/:id/content', protectedRoute, async (request, reply) => {
+    const file = await readProductAsset(db, config, request.user!.id, productParams.parse(request.params).id);
+    return reply.type(file.mimeType).header('Content-Disposition', `inline; filename="${file.fileName.replace(/["\\]/g, '')}"`).send(file.bytes);
+  });
+  app.delete('/api/assets/:id', protectedRoute, async request => ({ data: await deleteProductAsset(db, config, request.user!.id, productParams.parse(request.params).id) }));
   app.post('/api/demo/reset', protectedRoute, async request => {
     if (!config.ENABLE_DEMO_RESET || config.NODE_ENV === 'production') throw new AppError('demo_reset_disabled', 'Demo reset is disabled.', 403);
-    z.object({}).strict().parse(request.body ?? {}); return { data: await resetCatalog(db, request.user!.id) };
+    z.object({}).strict().parse(request.body ?? {});
+    const data = await resetCatalog(db, request.user!.id);
+    await pruneOrphanAssetFiles(db, config, request.user!.id);
+    return { data };
   });
   app.post('/api/tasks', protectedRoute, async request => ({ data: await createTask(db, request.user!.id, taskSchema.parse(request.body)) }));
   app.get('/api/tasks', protectedRoute, async request => ({ data: await tasks(db, request.user!.id) }));
@@ -172,7 +210,8 @@ export async function buildApp(config: ServerConfig, db: PrismaClient, options: 
     await db.$queryRaw`SELECT 1`;
     const available = config.AI_LIVE_ENABLED && !!config.BAILIAN_API_KEY;
     const result: Capabilities = { backend: true, database: true, authentication: true,
-      storage: { server: ['User', 'Product', 'LaunchTask', 'TaskSelection', 'FactCard', 'Fact', 'Evidence', 'ListingDraft', 'ReviewResult', 'PublishResult'], browser: ['Language', 'UI preferences', 'Non-authoritative cache'] },
+      storage: { server: ['User', 'Product', 'ProductAsset', 'LaunchTask', 'TaskSelection', 'FactCard', 'Fact', 'Evidence', 'ListingDraft', 'ReviewResult', 'PublishResult'], browser: ['Language', 'UI preferences', 'Non-authoritative cache'] },
+      assets: { storage: 'server', acceptedTypes: [...ASSET_MIME_TYPES], maxBytesPerFile: config.ASSET_MAX_BYTES, maxPerProduct: config.ASSET_MAX_PER_PRODUCT },
       textModel: { activeProvider: 'mock', liveAvailable: available, configured: !!config.BAILIAN_API_KEY, liveEnabled: config.AI_LIVE_ENABLED, model: config.BAILIAN_TEXT_MODEL, remainingCalls: providers.bailian.remainingCalls },
       recommendation: { activeProvider: config.RECOMMENDATION_PROVIDER === 'qwen' && available ? 'qwen' : 'rule', liveAvailable: available, liveImplemented: true, liveModel: config.BAILIAN_TEXT_MODEL }, evidence: { activeProvider: 'mock', liveAvailable: available, liveImplemented: false },
       listing: { activeProvider: config.LISTING_PROVIDER === 'qwen' && available ? 'qwen' : 'template', liveAvailable: available, liveImplemented: true, liveModel: config.BAILIAN_TEXT_MODEL }, review: { activeProvider: reviewRuntime.mode, liveAvailable: available, liveImplemented: true, liveModel: config.BAILIAN_TEXT_MODEL },

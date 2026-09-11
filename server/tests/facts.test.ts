@@ -138,3 +138,12 @@ test('another user cannot read, analyze, create or mutate owned facts; reset pre
   assert.deepEqual(await call(`${route(s)}/fact-snapshot`), s);
   await call('/api/demo/reset', 'POST', {}); assert.equal(await db.fact.count(), 0); assert.equal(await db.evidence.count(), 0);
 });
+
+test('incomplete pricing no longer blocks draft generation', async () => {
+  const snap = await select(missing);
+  assert.equal(snap.pricing.status, 'blocked', 'this demo product really is missing pricing data');
+  const analyzed = await analyze(snap);
+  assert.equal(analyzed.pricing.suggestedPrice, null);
+  const draft = await template(analyzed);
+  assert.ok(draft.title.length > 0, 'a draft is produced even though the price is still pending');
+});

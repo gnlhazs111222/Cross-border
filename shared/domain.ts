@@ -22,7 +22,8 @@ export function enrichProductEvidence(p: Product, v1: FactCard, task: Task): Fac
 }
 export type ListingInput = { factCard: FactCard; pricing: Pricing; platform: Platform; revision: number; factRevision: number; context?: { market: string; category: string; requirements: string[]; product: { sku: string; name: string } } };
 export function makeTemplateListing(input: ListingInput): Listing {
-  if (input.pricing.status !== 'ready') throw new Error('Analyze evidence and resolve pricing before generating a listing.');
+  // Pricing is an optional enhancement: a draft is generated from confirmed facts even when the
+  // commercial data is incomplete, in which case the price stays "to be completed".
   const sources = input.factCard.facts.filter(f => f.allowed && f.status === 'Confirmed');
   const value = (key: string) => sources.find(f => f.key === key)?.value;
   const color = value('color'); const capacity = value('capacity'); const material = value('material');

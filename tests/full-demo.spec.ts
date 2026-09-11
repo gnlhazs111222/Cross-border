@@ -23,7 +23,7 @@ publicTest('real login UI, HttpOnly session, wrong password and logout', async (
   expect(session?.httpOnly).toBe(true); expect(session?.sameSite).toBe('Lax');
   expect(await page.evaluate(() => document.cookie)).not.toContain('prismlaunch_session');
   expect(await page.evaluate(() => JSON.stringify(localStorage))).not.toContain(session!.value);
-  await page.getByRole('button', { name: 'Logout', exact: true }).click();
+  await page.locator('.account-menu .button').click();
   await expect(page.locator('.login-experience-frame')).toBeVisible();
   expect((await page.context().request.get('/api/auth/me')).status()).toBe(401);
   expect(await page.evaluate(() => localStorage.getItem('prismlaunch.demo.v1'))).toBeNull();

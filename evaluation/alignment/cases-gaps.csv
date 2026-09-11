@@ -1,0 +1,19 @@
+sku,productName,category,color,capacityMl,material,hasStraw,countryOfOrigin,supplierCost,declaredValue,packagingWeightKg,packageLengthCm,packageWidthCm,packageHeightCm
+GAP-A-001,Black Stainless Steel Travel Bottle,Home & Kitchen,Black,500,Stainless Steel,false,China,8.20,8.20,0.38,8,8,25
+GAP-A-001,Black Stainless Steel Travel Bottle,Home & Kitchen,Black,500,Glass,false,China,8.20,8.20,0.38,8,8,25
+GAP-A-001,Black Stainless Steel Travel Bottle,Home & Kitchen,White,500,Stainless Steel,false,China,8.20,8.20,0.38,8,8,25
+GAP-A-001,Black Stainless Steel Travel Bottle,Home & Kitchen,Black,500,Stainless Steel,false,China,9.90,9.90,0.38,8,8,25
+GAP-B-002,黑色不锈钢水瓶 600ml,家居与厨房,黑色,600,不锈钢,false,中国,8.50,8.50,0.42,9,9,26
+GAP-B-002,Black Stainless Steel Bottle 600ml,Home & Kitchen,Black,600,Stainless Steel,false,China,8.50,8.50,0.42,9,9,26
+GAP-B-003,黑色不锈钢水瓶 650ml,家居与厨房,黑色,650,不锈钢,false,中国,8.60,8.60,0.43,9,9,26
+GAP-B-004,Black Stainless Steel Bottle 650ml,Home & Kitchen,Black,650,Stainless Steel,false,China,8.60,8.60,0.43,9,9,26
+GAP-C-010,Black Commuter Bottle 700ml,Home & Kitchen,Black,700,Stainless Steel,false,China,9.00,9.00,0.45,10,10,27
+GAP-C-011,Black Commuter Bottle 700ml,Home & Kitchen,Black,700,Stainless Steel,false,China,9.00,9.00,0.45,10,10,27
+GAP-C-012,黑色通勤水瓶 700ml,家居与厨房,黑色,700,不锈钢,false,中国,9.00,9.00,0.45,10,10,27
+GAP-D-020,Black Unit Test Bottle,Home & Kitchen,Black,500ml,Stainless Steel,false,China,7.50,7.50,0.30,7,7,24
+GAP-D-020,Black Unit Test Bottle,Home & Kitchen,Black,16.9 fl oz,Stainless Steel,false,China,7.50,7.50,0.30,7,7,24
+ＧＡＰ－Ｅ－０３０,黑色不锈钢随行水瓶 ４５０ｍｌ,家居与厨房,黑色,４５０ｍｌ,不锈钢,false,中国,7.00,7.00,0.28,6,6,20
+GAP-E-030,黑色不锈钢随行水瓶 450ml,家居与厨房,黑色,450ml,不锈钢,false,中国,7.00,7.00,0.28,6,6,20
+,蓝色保温杯 500ml,家居与厨房,蓝色,500,不锈钢,false,中国,6.50,6.50,0.32,8,8,25
+,Blue Insulated Bottle 500ml,Home & Kitchen,Blue,500,Stainless Steel,false,China,6.50,6.50,0.32,8,8,25
+,蓝色保温杯 500ml,家居与厨房,蓝色,750,不锈钢,false,中国,6.50,6.50,0.32,8,8,25

@@ -15,6 +15,10 @@ model User {
   updatedAt       DateTime @updatedAt
   sessions        Session[]
   products        Product[]
+  assets          ProductAsset[]
+  importBatches   ImportBatch[]
+  occurrences     ImportOccurrence[]
+  importRules     ImportResolutionRule[]
   tasks           LaunchTask[]
   factCards       FactCard[]
   listings        ListingDraft[]
@@ -44,8 +48,84 @@ model Product {
   selections TaskSelection[]
   factCards FactCard[]
   listings  ListingDraft[]
+  assets    ProductAsset[]
   @@unique([userId, sku])
   @@unique([userId, id])
+}
+model ProductAsset {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku         String
+  kind        String
+  role        String
+  fileName    String
+  mimeType    String
+  byteSize    Int
+  sha256      String
+  storageKey  String
+  parseStatus String   @default("pending")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@unique([productId, sha256])
+  @@index([userId, sku])
+}
+model ImportBatch {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileName        String
+  mode            String
+  status          String   @default("completed")
+  rowCount        Int      @default(0)
+  createdProducts Int      @default(0)
+  counts          Json
+  report          Json?
+  sourceKey       String?
+  sourceHash      String?
+  sourceBytes     Int?
+  sourceMime      String?
+  urlResults      Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  occurrences     ImportOccurrence[]
+  @@index([userId, createdAt])
+}
+model ImportOccurrence {
+  id                String      @id @default(cuid())
+  batchId           String
+  batch             ImportBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  userId            String
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rowNumber         Int
+  sku               String      @default("")
+  name              String      @default("")
+  verdict           String
+  matchedProductId  String?
+  matchedSku        String?
+  conflicts         Json?
+  payload           Json
+  resolution        String      @default("pending")
+  resolvedProductId String?
+  resolvedAt        DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  @@index([userId, resolution])
+  @@index([batchId])
+}
+model ImportResolutionRule {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verdict      String
+  field        String
+  action       String
+  appliedCount Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  @@unique([userId, verdict, field])
 }
 model LaunchTask {
   recommendationSnapshot Json?

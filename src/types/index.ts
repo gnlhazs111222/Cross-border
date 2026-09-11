@@ -8,6 +8,9 @@ export type Product = {
   packagingWeight?: number; packagingDimensions?: string; supplierCost: number; declaredValue?: number;
   packageLength?: number; packageWidth?: number; packageHeight?: number;
   importSource?: { fileName: string; sheetName: string; row: number };
+  /** File names listed in the spreadsheet; the bytes come from the folder chosen at import time. */
+  assetReferences?: string[];
+  assetUrls?: string[];
   missing: string[]; visual: 'bottle' | 'bag' | 'lamp';
 };
 export type Fact = {
@@ -27,7 +30,7 @@ export type Listing = { generation?: GenerationMetadata; recordId?: string; stat
 export type Issue = { id: string; severity: 'HIGH'; title: string; text: string; reason: string; category?: import('../../shared/review').ReviewCategory; location?: import('../../shared/review').ReviewLocation; factKeys?: string[]; suggestedFix?: string; origin?: 'rules' | 'qwen' };
 export type Review = { recordId?: string; highRiskCount?: number; reviewMode?: string; metadata?: import('../../shared/review').ReviewMetadata; status: import('../../shared/review').ReviewStatus; revision: number; issues: Issue[] };
 export type Publication = { recordId?: string; platform: Platform; productId: string; status: string; revision: number };
-export type ImportMode = 'replace' | 'append';
+export type ImportMode = 'replace' | 'append' | 'merge';
 export type ImportIssue = { code: 'required' | 'number' | 'boolean' | 'formula' | 'extra' | 'long' | 'duplicate' | 'missing'; field: string };
 export type ImportRow = { row: number; sku: string; status: 'ready' | 'missing_data' | 'duplicate' | 'invalid'; issues: ImportIssue[] };
 export type ImportReport = { fileName: string; mode: ImportMode; processed: number; ready: number; missing: number; duplicates: number; invalid: number; rows: ImportRow[] };

@@ -37,3 +37,13 @@ export function nextStepMessage(state: DemoState) {
       return 'Run Review on the current revision. A saved fix is not yet a passed review.';
   }
 }
+
+/** Colour names from our dictionaries mapped to display values, so an imported product looks like itself. */
+const COLOR_HEX: Record<string, string> = {
+  black: '#303737', white: '#f2f2ef', ivory: '#ddd8ce', silver: '#c7ccd0', gray: '#8b9298', grey: '#8b9298',
+  navy: '#2c3e5c', blue: '#4a7fb5', green: '#5f8f66', sage: '#8b9c89', pink: '#e3a7b4', red: '#b5524c',
+  gold: '#c9a961', purple: '#8a76b0', brown: '#8a6a4f', orange: '#d58a45', unspecified: '#303737', rainbow: '#8a76b0',
+};
+export function colorHex(name?: string): string {
+  return COLOR_HEX[(name ?? '').trim().toLowerCase()] ?? COLOR_HEX.unspecified;
+}

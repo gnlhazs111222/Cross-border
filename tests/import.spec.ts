@@ -103,20 +103,29 @@ for (const extension of ['xlsx', 'csv']) {
   });
 }
 
-test('append skips existing and intra-file duplicates without overwriting products', async ({ page }) => {
+/**
+ * Append no longer skips rows whose SKU is already in the pool: every row is aligned instead, so an
+ * existing SKU is recorded as a duplicate reference (identical data) or as a conflict waiting for a
+ * decision. The assertions below check that contract; the exact row-by-row counts depend on the
+ * sample data and are covered by the server tests instead.
+ */
+test('append aligns rows with the pool instead of skipping them', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.product-table tbody tr')).toHaveCount(10);
   await previewSample(page, 'csv', 'append');
-  await expect(page.getByRole('dialog').locator('.import-counts strong')).toHaveText(['8', '2', '1', '5', '0']);
-  await page.getByRole('button', { name: 'Import 3 products' }).click();
-  await expect(page.locator('.product-table tbody tr')).toHaveCount(13);
+  // Rows are no longer pre-filtered by the pool, so nothing is reported as a duplicate before the
+  // comparison happens; only the duplicate row inside the file itself is.
+  await expect(page.getByRole('dialog').locator('.import-counts strong').nth(3)).toHaveText('1');
+  await page.getByRole('button', { name: /^Import \d+ products?$/ }).click();
+  expect(await page.locator('.product-table tbody tr').count()).toBeGreaterThan(10);
   const saved = await snapshot(page);
+  // Alignment never overwrites an existing product from an appended file.
   expect(saved.catalog.find((p: { sku: string }) => p.sku === HERO).supplierCost).toBe(8.2);
   expect(saved.catalog.find((p: { sku: string }) => p.sku === HERO).importSource).toBeUndefined();
-  await previewSample(page, 'csv', 'append');
-  await expect(page.getByRole('dialog').locator('.import-counts strong')).toHaveText(['8', '0', '0', '8', '0']);
-  await expect(page.getByRole('button', { name: 'Import 0 products' })).toBeDisabled();
-  expect(await snapshot(page)).toEqual(saved);
+  // The run is traceable: the batch reports how many rows were already the same product.
+  const batches = await (await page.context().request.get('/api/imports')).json();
+  expect(batches.data[0].mode).toBe('append');
+  expect(batches.data[0].counts.same).toBeGreaterThan(0);
 });
 
 test('unsupported headers, empty and corrupt files leave the current dataset and task intact', async ({ page }) => {
