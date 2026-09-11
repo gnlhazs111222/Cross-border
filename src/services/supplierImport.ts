@@ -62,13 +62,16 @@ export async function parseSupplierFile(file: File, mode: ImportMode, existing: 
       if (!Number.isFinite(number) || (allowZero ? number < 0 : number <= 0) || (integer && !Number.isInteger(number))) { issue('number', column); return undefined; }
       return number;
     };
-    const capacity = numeric('capacityMl', false, false, true);
+    const category = text(values.category);
+    const visual: Product['visual'] = category === 'Bags & Accessories' ? 'bag' : category === 'Electronics' ? 'lamp' : 'bottle';
+    const capacity = numeric('capacityMl', visual !== 'bottle', false, true);
     const supplierCost = numeric('supplierCost', false, true);
     const declaredValue = numeric('declaredValue', false, true);
     const packagingWeight = numeric('packagingWeightKg', true);
     const length = numeric('packageLengthCm', true); const width = numeric('packageWidthCm', true); const height = numeric('packageHeightCm', true);
     const strawValue = text(values.hasStraw).toLowerCase();
-    if (!['true', 'false', '1', '0'].includes(strawValue)) issue('boolean', 'hasStraw');
+    if (visual === 'bottle' && !['true', 'false', '1', '0'].includes(strawValue)) issue('boolean', 'hasStraw');
+    else if (visual !== 'bottle' && strawValue && !['true', 'false', '1', '0'].includes(strawValue)) issue('boolean', 'hasStraw');
     const sku = text(values.sku);
     if (issues.length) { preview.invalid++; preview.rows.push({ row: row + 1, sku, status: 'invalid', issues }); continue; }
     if (seen.has(sku)) {
@@ -76,16 +79,15 @@ export async function parseSupplierFile(file: File, mode: ImportMode, existing: 
     }
     seen.add(sku);
     const missing = [...(packagingWeight === undefined ? ['Packaging Weight'] : []), ...([length, width, height].some(n => n === undefined) ? ['Packaging Dimensions'] : [])];
-    const category = text(values.category);
     const product: Product = {
-      sku, name: text(values.productName), category, color: text(values.color), capacity: capacity!,
-      localizedCapacity: `${(capacity! / 29.5735295625).toFixed(1)} fl oz`, material: text(values.material),
+      sku, name: text(values.productName), category, color: text(values.color), capacity: capacity ?? 0,
+      localizedCapacity: capacity ? `${(capacity / 29.5735295625).toFixed(1)} fl oz` : '—', material: text(values.material),
       straw: strawValue === 'true' || strawValue === '1', countryOfOrigin: text(values.countryOfOrigin),
       supplierCost: supplierCost!, declaredValue: declaredValue!, packagingWeight,
       packageLength: length, packageWidth: width, packageHeight: height,
       packagingDimensions: [length, width, height].every(n => n !== undefined) ? `${length} × ${width} × ${height} cm` : undefined,
       status: missing.length ? 'missing_data' : 'search_ready', duplicateStatus: 'unique', missing,
-      visual: category === 'Bags & Accessories' ? 'bag' : category === 'Electronics' ? 'lamp' : 'bottle',
+      visual,
       importSource: { fileName: file.name, sheetName, row: row + 1 },
     };
     preview.products.push(product);

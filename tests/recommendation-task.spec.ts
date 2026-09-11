@@ -27,7 +27,7 @@ for (const zh of [false, true]) test(`editable task save and explicit recommenda
   expect(stale.status).toBe('stale');
   await page.getByRole('button', { name: text('Run Recommendation', '运行推荐'), exact: true }).click();
   await expect(page.getByTestId('recommendation-1')).toContainText('LM-KT-BTL-003-BLK-750');
-  await page.getByRole('button', { name: text('Load Demo Task', '载入演示任务'), exact: true }).click();
+  await page.getByRole('button', { name: text('Load Bottle Demo', '载入水杯演示'), exact: true }).click();
   await expect(page.getByTestId('recommendation-1')).toContainText('LM-KT-BTL-001-BLK-500'); expect((await state(page)).task.id).toBe('PL-DEMO-001');
   await navigation(page, text('Materials', '商品资料')); await expect(page.locator('.product-table tbody tr')).toHaveCount(10);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

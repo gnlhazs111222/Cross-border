@@ -16,7 +16,7 @@ for (const c of dataset.cases) {
   const entry = manifest.cases.find(m => m.id === c.id);
   if (!entry || entry.inputHash !== hash(c.input) || entry.labelHash !== hash({ expected: c.expected, expectedIssues: c.expectedIssues, rationale: c.rationale })) throw new Error(`Case integrity failed: ${c.id}`);
 }
-if (REVIEW_PROMPT_VERSION !== "review-qwen-v13" || REVIEW_RULE_VERSION !== "review-hard-v10") throw new Error("Frozen baseline version mismatch.");
+if (String(REVIEW_PROMPT_VERSION) !== "review-qwen-v13" || String(REVIEW_RULE_VERSION) !== "review-hard-v10") throw new Error("Frozen baseline version mismatch.");
 const args = process.argv.slice(2);
 const first = new Set(['R3-01', 'R3-08', 'R3-12', 'R3-16']);
 if (args.length === 1 && args[0] === '--check') {

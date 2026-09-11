@@ -6,7 +6,7 @@ import { MockTextModelProvider, BailianTextModelProvider, type TextRequest, type
 import { listingOutputSchema, validateGeneratedListingAgainstFacts } from '../providers/listingValidation';
 import { baseFactCard, pricingFromFacts } from '../../shared/facts';
 import { enrichProductEvidence, type ListingInput } from '../../shared/domain';
-import { products, demoTask } from '../../src/data/mockData';
+import { bagDemoTask, products, demoTask } from '../../src/data/mockData';
 import { readConfig } from '../config';
 import { AppError } from '../errors';
 const input = (): ListingInput => ({ factCard: enrichProductEvidence(products[0], baseFactCard(products[0]), demoTask), pricing: pricingFromFacts(products[0], baseFactCard(products[0]).facts), platform: 'amazon', revision: 1, factRevision: 2,
@@ -16,6 +16,23 @@ class CountingText extends MockTextModelProvider {
   override async generateStructured<T>(request: TextRequest & { schema: z.ZodType<T>; example: T }) { this.calls++; this.prompts.push(request); return super.generateStructured(request); }
 }
 const options = (): QwenOptions => ({ model: 'qwen3.6-flash', liveEnabled: true, configured: true });
+
+test('Qwen bag input and output use bag facts without bottle fields', async () => {
+  const bag = products.find(p => p.visual === 'bag')!;
+  const factCard = enrichProductEvidence(bag, baseFactCard(bag), bagDemoTask);
+  for (const fact of factCard.facts.filter(f => ['closureType', 'strapType'].includes(f.key))) { fact.status = 'Confirmed'; fact.allowed = true; }
+  const bagInput: ListingInput = { factCard, pricing: pricingFromFacts(bag, factCard.facts), platform: 'amazon', revision: 1, factRevision: 2,
+    context: { market: 'United States', category: bagDemoTask.category, requirements: bagDemoTask.requirements, product: { sku: bag.sku, name: bag.name } } };
+  const text = new CountingText();
+  const result = await new QwenListingProvider(text, options()).generate(bagInput);
+  const prompt = JSON.parse(text.prompts[0].prompt);
+  assert.equal(result.generationMode, 'qwen');
+  assert.equal(result.title, 'Black Canvas Tote Bag');
+  assert.ok(prompt.ALLOWED_FACTS.some((f: { field: string }) => f.field === 'bagType'));
+  assert.ok(prompt.ALLOWED_FACTS.some((f: { field: string }) => f.field === 'closureType'));
+  assert.ok(!prompt.ALLOWED_FACTS.some((f: { field: string }) => ['capacity', 'straw', 'lidType'].includes(f.field)));
+  assert.doesNotMatch(JSON.stringify(result), /\b(?:500ml|straw|bottle|leakproof)\b/i);
+});
 
 test('Qwen inputs contain only authorized public facts, scrubbed sources, no credentials or costs', async () => {
   const s = input();

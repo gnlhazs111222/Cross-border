@@ -34,7 +34,7 @@ export function validateGeneratedListingAgainstFacts(output: GeneratedListing, f
   for (const match of text.matchAll(/\d+(?:\.\d+)?/g)) if (!allowedNumbers.has(match[0])) fail('unsupported_quantity');
   // Disallow undeclared or contradictory common spec tokens, including a made-up value hidden outside usedFacts.
   const groups: Record<string, RegExp> = { color: /\b(?:black|white|ivory|navy|blue|green|red|pink|silver|gold)\b/gi,
-    material: /\b(?:stainless steel|plastic|glass|aluminum|silicone|ceramic|titanium)\b/gi };
+    material: /\b(?:stainless steel|plastic|glass|aluminum|silicone|ceramic|titanium|canvas|leather|nylon|polyester)\b/gi };
   for (const [key, expression] of Object.entries(groups)) for (const match of text.matchAll(expression)) {
     if (!seen.has(key) || !normalized(byKey.get(key)?.value ?? '').includes(normalized(match[0]))) fail('unsupported_specification');
   }
@@ -45,6 +45,10 @@ export function validateGeneratedListingAgainstFacts(output: GeneratedListing, f
     }
   } else if (byKey.get('straw')?.value === 'Included' && /no straw|straw[- ]free|without (?:a )?straw/i.test(text)) fail('unsupported_specification');
   if (/\b(?:ml|fl oz)\b/i.test(text) && !seen.has('capacity')) fail('unauthorized_fact');
+  const bagGroups: Record<string, RegExp> = { bagType: /\btote bag\b/gi, strapType: /\b(?:dual )?shoulder straps?\b/gi, closureType: /\bopen top\b/gi };
+  for (const [key, expression] of Object.entries(bagGroups)) for (const match of text.matchAll(expression)) {
+    if (!seen.has(key) || !normalized(byKey.get(key)?.value ?? '').includes(normalized(match[0]))) fail('unauthorized_fact');
+  }
   if (/\b(?:in the box|includes?|contents)\b/i.test(text) && !seen.has('packageIncludes') && !seen.has('straw')) fail('unauthorized_fact');
   return output;
 }

@@ -7,6 +7,7 @@ import { hardFilter, type RecommendationContext } from '../../shared/recommendat
 import { recommendationCases } from '../../evaluation/recommendation/cases';
 import { caseMetrics, summarizeMetrics, validateExpected } from '../../evaluation/recommendation/metrics';
 import { baseFactCard } from '../../shared/facts';
+import { bagDemoTask, products } from '../../src/data/mockData';
 import { AppError } from '../errors';
 import { reasonConflict, type RankedOutput } from '../providers/recommendationValidation';
 const example = recommendationCases[0];
@@ -26,6 +27,15 @@ test('hard filter uses candidate facts and ignores pricing readiness and the pri
   const higherTarget = hardFilter(example.candidates, { ...example.task, minProfit: 1000 });
   assert.deepEqual(higherTarget.eligible.map(p => p.sku), filtered.eligible.map(p => p.sku));
   assert.equal(hardFilter(example.candidates, { ...example.task, category: 'home & kitchen' }).eligible.length, 0); // Same canonical category contract as the existing Fact / Listing workflow.
+});
+test('bag recommendation input uses category fields and keeps lamps excluded', () => {
+  const bag = products.find(p => p.visual === 'bag')!;
+  const lamp = products.find(p => p.visual === 'lamp')!;
+  const filtered = hardFilter([bag, lamp], bagDemoTask);
+  assert.deepEqual(filtered.eligible.map(p => p.sku), [bag.sku]);
+  const payload = normalizedRecommendationInput(filtered.eligible, bagDemoTask);
+  assert.deepEqual(payload.candidates[0].attributes, { productType: 'Tote bag', color: 'Black', material: 'Canvas' });
+  assert.doesNotMatch(JSON.stringify(payload), /capacityMl|capacityLocalized|hasStraw/);
 });
 test('Qwen receives only eligible public confirmed facts and returns authorized structured Top3 metadata', async () => {
   const text = new Text(); const c = context(); c.facts[example.candidates[0].sku].push({ key: 'finish', label: 'finish', value: 'PRIVATE_PENDING', source: 'PRIVATE_FILE', anchor: '/private', status: 'Requires Confirmation', allowed: false });

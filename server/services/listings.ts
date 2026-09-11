@@ -9,6 +9,7 @@ import { domainProviders } from '../providers/domain';
 import { factSnapshotTx } from './facts';
 import { hardReviewIssues, reviewInputHash, rulesReviewRuntime } from '../providers/qwenReview';
 import { REVIEW_PROMPT_VERSION, REVIEW_RULE_VERSION, type ReviewInput, type ReviewMetadata } from '../../shared/review';
+import { demoRiskClaim } from '../../shared/domain';
 
 type DB = Prisma.TransactionClient;
 export type VersionInput = { expectedVersion: number; expectedFactsRevision: number };
@@ -125,7 +126,7 @@ export async function createListing(db: PrismaClient, userId: string, taskId: st
   });
   // Network generation runs outside SQLite transactions. Revalidate both revisions before committing.
   const listing = await runtime.provider.generate(prepared.providerInput);
-  if (runtime.requested === 'template' && input.platform === 'amazon' && (!prepared.previous || !active(prepared.previous) || prepared.previous.factRevision !== prepared.snap.listingFactsRevision)) { listing.bullets[2] = '100% leakproof'; listing.riskDemoInjected = true; }
+  if (runtime.requested === 'template' && input.platform === 'amazon' && (!prepared.previous || !active(prepared.previous) || prepared.previous.factRevision !== prepared.snap.listingFactsRevision)) { listing.bullets[2] = demoRiskClaim(prepared.snap.product.visual); listing.riskDemoInjected = true; }
   return transaction(db, async tx => {
     const snap = await factSnapshotTx(tx, userId, taskId, productId); checkFacts(snap, input.expectedFactsRevision);
     const previous = await latest(tx, { taskId: snap.taskId, productId: snap.productId, platform: input.platform });
@@ -145,7 +146,7 @@ export async function reviseListing(db: PrismaClient, userId: string, id: string
     if (action === 'edit' || action === 'inject-risk') {
       listing = { ...(row.data as unknown as AuthorizedListing), generationMode: row.generationMode, revision: row.revision + 1 };
       if (action === 'edit') Object.assign(listing, { title: input.title!, bullets: input.bullets!, description: input.description! });
-      else { listing.bullets = [...listing.bullets]; listing.bullets[Math.min(2, listing.bullets.length)] = '100% leakproof'; listing.riskDemoInjected = true; }
+      else { listing.bullets = [...listing.bullets]; listing.bullets[Math.min(2, listing.bullets.length)] = demoRiskClaim(snap.product.visual); listing.riskDemoInjected = true; }
     } else { listing = await supported(snap, row.platform as Platform, row.revision + 1); listing.generationMode = 'template'; }
     await insert(tx, userId, snap, listing, row); return workflow(tx, userId, row.taskId, row.productId, reviewRuntime);
   });

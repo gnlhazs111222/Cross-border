@@ -3,9 +3,9 @@ import { amazonCsv } from '../../shared/csv';
 import { baseFactCard, effectiveProduct, pricingFromFacts, productEvidence, reviewFact } from '../../shared/facts';
 import type { WorkflowSnapshot, FactSnapshot, FactPreview } from '../../shared/contracts';
 import { apiClient, SERVER_MODE } from './apiClient';
-import { enrichProductEvidence, makeTemplateListing, rankProducts, reviewAgainstTemplate } from '../../shared/domain';
-import { demoTask, products as builtInProducts } from '../data/mockData';
-import { COPY_FACTS, PRICING_FACTS, REQUIRED_COPY_FACTS, editableFact, factEditor } from './factReview';
+import { demoRiskClaim, enrichProductEvidence, makeTemplateListing, rankProducts, reviewAgainstTemplate } from '../../shared/domain';
+import { bagDemoTask, demoTask, products as builtInProducts } from '../data/mockData';
+import { COPY_FACTS, PRICING_FACTS, requiredCopyFactsFor, editableFact, factEditor } from './factReview';
 import { SUPPLIER_COLUMNS } from '../data/supplierTemplate';
 import type { DemoState, Evidence, Fact, FactCard, ImportMode, ImportPreview, Listing, Platform, Pricing, Product, Recommendation, Stage, Task, Workspace } from '../types';
 
@@ -233,7 +233,7 @@ export const mockApi = {
   catalog: () => current.catalog.map(productView),
   async getCatalog() { await delay(180); return current.catalog.map(productView); },
   factEditor, editableFact,
-  listingReady() { return !!current.v2 && !!current.selectedSku && selected().duplicateStatus === 'unique' && selected().category === (serverOwner ? current.task?.category : demoTask.category) && REQUIRED_COPY_FACTS.every(key => current.v2!.facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed)); },
+  listingReady() { return !!current.v2 && !!current.selectedSku && selected().duplicateStatus === 'unique' && selected().category === (serverOwner ? current.task?.category : demoTask.category) && requiredCopyFactsFor(selected().visual).every(key => current.v2!.facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed)); },
   getTaskTemplate: () => clone(demoTask),
   async ready() { synchronizeFacts(); if (current.pricing && current.selectedSku) current.pricing = pricingFor(selected()); if (current.stage === 'initial') advance('materials_ready'); return save(); },
   navigate(workspace: Workspace) { current.workspace = workspace; return save(); },
@@ -284,6 +284,12 @@ export const mockApi = {
     if (!serverOwner) return this.createTask();
     const task = await apiClient.tasks.create(demoTask);
     const restored = await apiClient.tasks.update(task.recordId, demoTask, task.revision!);
+    await useServerTask(restored); serverRecommendation = await apiClient.recommendations.run(restored.recordId, restored.revision!, 'rule'); return save();
+  },
+  async loadBagDemoTask() {
+    if (!serverOwner) throw new Error('Bag demo task requires Full Demo mode.');
+    const task = await apiClient.tasks.create(bagDemoTask);
+    const restored = await apiClient.tasks.update(task.recordId, bagDemoTask, task.revision!);
     await useServerTask(restored); serverRecommendation = await apiClient.recommendations.run(restored.recordId, restored.revision!, 'rule'); return save();
   },
   async runRecommendation() {
@@ -379,7 +385,7 @@ export const mockApi = {
     const previous = current.listings[current.platform];
     const listing = safeListing(current.platform, (previous?.revision ?? 0) + 1);
     // Intentional isolated demo fixture: the only generated claim outside the allowlist.
-    if (current.platform === 'amazon' && !previous) { listing.bullets[2] = '100% leakproof'; listing.riskDemoInjected = true; }
+    if (current.platform === 'amazon' && !previous) { listing.bullets[2] = demoRiskClaim(selected().visual); listing.riskDemoInjected = true; }
     current.listings[current.platform] = listing;
     delete current.reviews[current.platform]; delete current.publications[current.platform];
     advance('listing_generated'); return save();

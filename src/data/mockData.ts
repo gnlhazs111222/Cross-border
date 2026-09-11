@@ -23,3 +23,7 @@ export const demoTask: Task = {
   id: 'PL-DEMO-001', platform: 'Amazon US', market: 'United States', category: 'Home & Kitchen',
   requirements: ['Black', 'Minimal commuter style', 'Around 16 oz', 'No straw', 'Prefer complete packaging and accessory information'], minProfit: 5,
 };
+export const bagDemoTask: Task = {
+  id: 'PL-DEMO-BAG-001', platform: 'Amazon US', market: 'United States', category: 'Bags & Accessories',
+  requirements: ['Black canvas tote bag', 'Simple everyday carry', 'Prefer visible shoulder straps and an open top'], minProfit: 5,
+};

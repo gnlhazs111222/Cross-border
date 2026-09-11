@@ -41,11 +41,11 @@ BAILIAN_LISTING_MAX_TOKENS=1800
 
 ## 3. Prompt 与结构
 
-Prompt 位于 `server/prompts/listing-v1.ts`，版本 **listing-qwen-v1**。Amazon / Shopify 使用不同的格式要求，共用事实授权原则。
+Prompt 位于 `server/prompts/listing-v1.ts`，当前版本 **listing-qwen-v2**。v2 增加水杯/托特包的品类隔离规则；既有真实调用验收来自 v1，本次包类扩展只做了 Mock Provider、模板回退和授权校验测试，尚不能作为真实 Qwen 包类效果证据。Amazon / Shopify 使用不同的格式要求，共用事实授权原则。
 
 模型只接收服务端构造的：platform、market、category、去掉成本 / 利润要求后的 task requirements、商品身份、factsRevision，以及已确认且允许使用的消费文案字段。
 
-ALLOWED_FACTS 进一步受字段白名单约束：color、capacity、material、straw、countryOfOrigin、packageIncludes、finish、lidType。仅给出字段、标签、值和泛化来源类别，不发送私有文件名、行号、previousSource、数据库用户 ID 或认证信息。前端不能提交任意 Facts 作为可信生成输入。
+ALLOWED_FACTS 进一步受字段白名单约束：公共字段 color、material、countryOfOrigin、packageIncludes、finish；水杯字段 capacity、straw、lidType；包类字段 bagType、closureType、strapType。仅给出字段、标签、值和泛化来源类别，不发送私有文件名、行号、previousSource、数据库用户 ID 或认证信息。前端不能提交任意 Facts 作为可信生成输入。
 
 不发送密码、Cookie、Session、供应商成本、申报价值、包装重量尺寸、运费、关税，也不发送 Rejected / Missing / Requires Confirmation 的事实记录。
 

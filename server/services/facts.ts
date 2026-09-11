@@ -2,7 +2,7 @@ import type { Prisma, PrismaClient, Fact as StoredFact } from '@prisma/client';
 import type { Fact, FactCard, Evidence, Platform } from '../../src/types';
 import type { FactSnapshot } from '../../shared/contracts';
 import { baseFactCard, effectiveProduct, pricingFromFacts, productEvidence, reviewFact } from '../../shared/facts';
-import { COPY_FACTS, PRICING_FACTS, REQUIRED_COPY_FACTS } from '../../src/services/factReview';
+import { COPY_FACTS, PRICING_FACTS, requiredCopyFactsFor } from '../../src/services/factReview';
 import { AppError } from '../errors';
 import { domainProviders } from '../providers/domain';
 import { toProduct } from './catalog';
@@ -40,7 +40,7 @@ export async function factSnapshotTx(db: DB, userId: string, taskId: string, pro
   const card = (row: typeof base): FactCard => ({ recordId: row.id, revision: row.revision, productRevision: row.productRevision, version: row.version as 1 | 2, sku: product.sku, ...(row.version === 2 ? { taskId: task.code } : {}), facts: row.facts.map(readFact) });
   const v1 = card(base); const v2 = enhanced ? card(enhanced) : null; const facts = (v2 ?? v1).facts;
   const p = toProduct(product); const view = effectiveProduct(p, facts); const pricing = pricingFromFacts(p, facts, facts.filter(f => PRICING_FACTS.includes(f.key)).reduce((sum, f) => sum + Math.max(0, (f.revision ?? 1) - 1), 0), task.minimumProfit);
-  const blockedFacts = REQUIRED_COPY_FACTS.filter(key => !facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed));
+  const blockedFacts = requiredCopyFactsFor(p.visual).filter(key => !facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed));
   const listingFactsRevision = facts.filter(f => COPY_FACTS.includes(f.key)).reduce((sum, f) => sum + (f.revision ?? 1), 0);
   return { productId: product.id, taskId: task.id, product: view, v1, v2, facts, factsRevision: Math.max(base.revision, enhanced?.revision ?? 0), listingFactsRevision, downstreamInvalidated: invalidated, pricing,
     evidence: base.evidence.map(e => ({ ...(e.data as unknown as Evidence), recordId: e.id })),

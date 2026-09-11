@@ -17,7 +17,7 @@ export function TaskEditor({ task, editing, close }: { task: Task; editing: bool
       </div>
       <label className="form-field">{t('Requirements')}<textarea aria-label={t('Requirements')} required rows={5} maxLength={5000} value={requirements} onChange={e => setRequirements(e.target.value)} /></label>
       <Notice>{t('Saving changed requirements clears the current selection and invalidates prior recommendation and downstream results. Products are preserved.')}</Notice>
-      <p className="footnote">{t('The price target is used only for the selected SKU’s later pricing calculation. It does not filter or rank products. This demo listing workflow supports bottles.')}</p>
+      <p className="footnote">{t('The price target is used only for later pricing and does not affect selection. The complete demo supports bottles and tote bags; lamps remain outside scope.')}</p>
       <div className="modal-actions"><Button type="button" variant="secondary" disabled={!!busy} onClick={close}>{t('Cancel')}</Button><Button type="submit" busy={busy === 'save-task'} disabled={!!busy || !requirements.trim()}>{t(editing ? 'Save Task' : 'Create Task')}</Button></div>
     </form>
   </Modal>;

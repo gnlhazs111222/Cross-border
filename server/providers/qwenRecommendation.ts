@@ -12,7 +12,7 @@ export function normalizedRecommendationInput(products: Product[], task: Task, c
   return { task: { platform: task.platform, market: task.market, category: task.category, requirements: task.requirements.map(r => r.trim().replace(/\s+/g, ' ')) },
     taskRevision: context?.taskRevision ?? task.revision ?? 1, catalogRevision: context?.catalogRevision ?? 1, candidateVersion: context?.candidateVersion ?? 'fixture',
     candidates: products.map(p => ({ productId: p.recordId ?? p.sku, sku: p.sku, productName: p.name, category: p.category,
-      attributes: { color: p.color, capacityMl: p.capacity, capacityLocalized: p.localizedCapacity, material: p.material, hasStraw: p.straw },
+      attributes: p.visual === 'bag' ? { productType: 'Tote bag', color: p.color, material: p.material } : { productType: 'Bottle', color: p.color, capacityMl: p.capacity, capacityLocalized: p.localizedCapacity, material: p.material, hasStraw: p.straw },
       completeness: 'Core product facts are available for selection; pricing readiness is evaluated only after selection',
       confirmedFacts: (context?.facts[p.sku] ?? baseFactCard(p).facts).filter(f => f.status === 'Confirmed' && f.allowed && RECOMMENDATION_FACT_KEYS.has(f.key)).map((f: Fact) => ({ field: f.key, value: f.value })).sort((a, b) => a.field.localeCompare(b.field)),
     })).sort((a, b) => a.sku.localeCompare(b.sku)) };

@@ -36,7 +36,7 @@ export async function importProducts(db: PrismaClient, userId: string, input: z.
       if (seen.has(p.sku)) throw new AppError('duplicate_sku', 'Duplicate SKU. Preview the file again.', 409);
       seen.add(p.sku);
       const missing = [...(!p.packagingWeight ? ['Packaging Weight'] : []), ...([p.packageLength, p.packageWidth, p.packageHeight].some(n => n === undefined) ? ['Packaging Dimensions'] : [])];
-      accepted.push({ ...p, missing, status: missing.length ? 'missing_data' : 'search_ready', localizedCapacity: `${(p.capacity / 29.5735295625).toFixed(1)} fl oz`, packagingDimensions: missing.includes('Packaging Dimensions') ? undefined : `${p.packageLength} × ${p.packageWidth} × ${p.packageHeight} cm` });
+      accepted.push({ ...p, missing, status: missing.length ? 'missing_data' : 'search_ready', localizedCapacity: p.visual === 'bottle' ? `${(p.capacity / 29.5735295625).toFixed(1)} fl oz` : '—', packagingDimensions: missing.includes('Packaging Dimensions') ? undefined : `${p.packageLength} × ${p.packageWidth} × ${p.packageHeight} cm` });
     }
     if (seen.size > 500) throw new AppError('catalog_limit', 'Keep the dataset within 500 products.');
     await tx.launchTask.deleteMany({ where: { userId } });
