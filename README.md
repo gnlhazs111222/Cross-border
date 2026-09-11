@@ -45,6 +45,7 @@ npm run preview:local
 - 浏览器只保存界面偏好和非权威业务快照；文案绑定服务端 factsRevision，刷新 / 清空 localStorage 后仍可恢复数据库中的审核和发布。
 - 目录 / 任务 / 事实在浏览器中仅有兼容性快照；会话初始化从 API 覆盖，清空 localStorage 后仍可恢复。旧 factEdits 不会自动升级成可信的服务端事实。
 - XLSX / CSV 继续在浏览器按固定模板解析，服务端再校验并保存；替换 / 追加、重复处理和原始顺序保留。
+- 当前完整流程支持水杯与托特包，台灯继续在推荐前明确排除。托特包有独立的选品展示、事实字段、文案模板和承重风险审核；不是套用水杯容量、吸管或防漏规则。
 - 模板生成、规则审核、发布授权与 CSV 下载全部由后端执行。事实变化使历史结果 stale；文案修改创建新版本并使该平台旧结果失效，保留历史。
 - Key 只存服务端 `.env`，不提交、不打包到浏览器。默认 `AI_LIVE_ENABLED=false`。
 - 推荐默认规则、文案默认模板、审核默认规则；三者均支持单独显式开启 Qwen。证据补充仍为 Mock，发布仍为模拟。
@@ -88,6 +89,7 @@ AI_LIVE_ENABLED=true NODE_TLS_REJECT_UNAUTHORIZED=1 npm run ai:smoke -- --live
 - [上一轮事实迁移验收](docs/FACT_SERVER_MIGRATION.md)
 - [上一轮后端基础验收](artifacts/full-demo/VERIFICATION.md)
 - [供应商导入说明](SUPPLIER_IMPORT.md)
+- [托特包完整演示说明](docs/BAG_DEMO.md)
 - [人工事实核对](FACT_REVIEW.md)
 - [比赛版 3 / 5 分钟讲稿](docs/DEMO_SCRIPT.md)
 - [比赛版问答](docs/DEMO_QA.md)

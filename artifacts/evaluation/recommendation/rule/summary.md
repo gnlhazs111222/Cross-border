@@ -1,6 +1,6 @@
 # Recommendation evaluation: rule
 
-Date: 2026-09-08T09:17:39.736Z
+Date: 2026-09-11T06:53:34.516Z
 
 Small synthetic demo evaluation, not a statistical benchmark or sales forecast.
 
@@ -10,7 +10,7 @@ Cases: 12; rank-labelled: 11; real calls in this run: 0.
 | --- | ---: |
 | Top1 Accuracy | 81.8% |
 | Hit@3 | 100.0% |
-| NDCG@3 | 0.9491 |
+| NDCG@3 | 0.9379 |
 | Invalid Candidate Rate | 0.0% |
 | Unsupported Reason Rate (limited checks) | 0.0% |
 
@@ -18,7 +18,7 @@ Hit@3 means a preferred Top1 appears in the returned Top3. Empty cases are exclu
 
 | Case | Preferred Top1 | Actual Top1 | Mode |
 | --- | --- | --- | --- |
-| classic-black-500 | LM-KT-BTL-001-BLK-500 | LM-KT-BTL-001-BLK-500 | rule |
+| classic-black-500 | LM-KT-BTL-001-BLK-500, LM-KT-BTL-005-BLK-500 | LM-KT-BTL-001-BLK-500 | rule |
 | explicit-straw | LM-KT-BTL-002-BLK-500 | LM-KT-BTL-002-BLK-500 | rule |
 | large-capacity | LARGE-1000 | LARGE-1000 | rule |
 | small-commuter | COMMUTER-350 | COMMUTER-350 | rule |
@@ -29,4 +29,4 @@ Hit@3 means a preferred Top1 appears in the returned Top3. Empty cases are exclu
 | no-perfect-match | LM-KT-BTL-001-BLK-500 | BLACK-350-STRAW | rule |
 | close-finish-preference | ZZZ-MATTE | AAA-GLOSS | rule |
 | no-eligible-products | none | none | rule |
-| demo-profit-threshold | LM-KT-BTL-001-BLK-500 | LM-KT-BTL-001-BLK-500 | rule |
+| price-target-independent | LM-KT-BTL-001-BLK-500, LM-KT-BTL-005-BLK-500 | LM-KT-BTL-001-BLK-500 | rule |

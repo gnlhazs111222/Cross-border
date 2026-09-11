@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import type { Prisma, PrismaClient } from '@prisma/client';
 import type { Product, Task, Fact, Recommendation } from '../../src/types';
-import { hardFilter, type RecommendationContext, type RecommendationSnapshot } from '../../shared/recommendation';
+import { hardFilter, RECOMMENDATION_FACT_KEYS, type RecommendationContext, type RecommendationSnapshot } from '../../shared/recommendation';
 import { baseFactCard } from '../../shared/facts';
 import { catalog } from './catalog';
 import { factSnapshotTx } from './facts';
@@ -20,7 +20,8 @@ export async function recommendationContext(db: Prisma.TransactionClient, userId
   for (const p of data.products) {
     const snap = ids.has(p.recordId) ? await factSnapshotTx(db, userId, row.id, p.recordId) : null;
     products.push(snap?.product ?? p); facts[p.sku] = snap?.facts ?? baseFactCard(p).facts;
-    versions.push({ id: p.recordId, sku: p.sku, factsRevision: snap?.factsRevision ?? 0, status: p.status, duplicate: p.duplicateStatus, category: p.category });
+    versions.push({ id: p.recordId, sku: p.sku, duplicate: p.duplicateStatus, category: p.category, visual: p.visual,
+      facts: facts[p.sku].filter(f => RECOMMENDATION_FACT_KEYS.has(f.key)).map(f => ({ key: f.key, value: f.value, status: f.status, allowed: f.allowed, revision: f.revision ?? 1 })) });
   }
   const context: RecommendationContext = { taskRevision: row.revision, catalogRevision: data.revision, candidateVersion: createHash('sha256').update(JSON.stringify(versions)).digest('hex'), facts };
   const filtered = hardFilter(products, task);

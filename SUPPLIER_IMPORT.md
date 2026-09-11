@@ -19,8 +19,9 @@
 
 - `public/demo/prismlaunch-supplier-demo.xlsx`
 - `public/demo/prismlaunch-supplier-demo.csv`
+- `public/demo/prismlaunch-bag-demo.csv`
 
-二者内容一致，包含主角、缺包装重量、有吸管、750ml、三个不同颜色的完整商品和一行重复主角。
+前两份水杯样例内容一致，包含主角、缺包装重量、有吸管、750ml、三个不同颜色的完整商品和一行重复主角。包类 CSV 包含一个黑色帆布托特包，用于完整包类演示。
 
 重复主角故意填写了 USD 99 的成本；系统应保留前面有效主角的 USD 8.20，跳过重复行，不能用 USD 99 覆盖它。
 
@@ -42,11 +43,11 @@ sku,productName,category,color,capacityMl,material,hasStraw,countryOfOrigin,supp
 | --- | --- | --- |
 | `sku` | 必填文本；同一资料集内唯一 | `sku` |
 | `productName` | 必填文本 | `name` |
-| `category` | 必填文本；当前任务只推荐 `Home & Kitchen` | `category` |
+| `category` | 必填文本；当前完整流程支持 `Home & Kitchen` 与 `Bags & Accessories` | `category` |
 | `color` | 必填文本；当前任务偏好 `Black` | `color` |
-| `capacityMl` | 必填正整数，单位 ml | `capacity`；自动换算 `localizedCapacity` 为 fl oz |
+| `capacityMl` | 水杯必填正整数，单位 ml；包类可留空 | `capacity`；水杯自动换算 `localizedCapacity` 为 fl oz |
 | `material` | 必填文本 | `material` |
-| `hasStraw` | 必填，true / false / 1 / 0，支持 Excel 布尔值 | `straw` |
+| `hasStraw` | 水杯必填，true / false / 1 / 0；包类可留空 | `straw` |
 | `countryOfOrigin` | 必填文本 | `countryOfOrigin` |
 | `supplierCost` | 必填非负数，USD | `supplierCost` |
 | `declaredValue` | 必填非负数，USD | `declaredValue` |
@@ -64,7 +65,7 @@ sku,productName,category,color,capacityMl,material,hasStraw,countryOfOrigin,supp
 - **替换当前资料集（默认）**：以当前文件的有效商品替换整个目录。原有商品不参与本次去重；文件内同 SKU 仅保留第一条有效商品。
 - **仅添加新 SKU**：保留当前商品，仅追加新 SKU。与已有目录重复或在文件内重复的 SKU 会跳过，不覆盖现有商品。
 - **无效行**：缺必填项、非法数字或布尔值等会标为 Invalid row，并显示行号和字段原因。其他有效行仍可导入。
-- **缺包装信息**：商品仍能保存，但标记 Missing Data、Pricing Blocked，不进入推荐。
+- **缺包装信息**：商品仍能保存并参与选品，但标记 Missing Data、Pricing Blocked；选中后需补齐并确认定价资料，才能得到建议售价和发布。
 - **整文件错误、全是无效 / 重复行、取消预览**：不修改当前目录、任务或审核状态。
 - **成功导入（两种方式均如此）**：重置旧任务、证据、文案、审核和发布状态，避免沿用旧版本结果。
 
@@ -75,9 +76,9 @@ sku,productName,category,color,capacityMl,material,hasStraw,countryOfOrigin,supp
 - 文件内容确实经过解析；颜色、容量、材质、吸管、产地、成本、申报价值、包装信息来自文件。
 - 商品保存文件名、工作表名称和原始行号。导入商品的 FactCard V1 使用这些实际来源位置。
 - `Confirmed` 在此 Demo 中仅表示完成固定模板的数据确认，不代表已独立验证供应商真实性。
-- V2 的包装内含、工艺、杯盖等补充事实仍由原 Mock 流程提供，来源名称和页面说明明确标注 Mock。
+- V2 的包装内含、工艺、杯盖或包口/肩带等补充事实仍由 Mock 流程提供，来源名称和页面说明明确标注 Mock。
 - 推荐、文案生成、风险审核和发布继续使用原来的固定规则与模板，不连接外部业务 API。
-- 采购成本和申报价值使用导入值。运费、关税、平台费用及最低利润仍是演示假设；示例主角为 USD 19.99。若导入主角的采购成本更高，价格不会低于模拟总成本加目标利润。
+- 采购成本和申报价值使用导入值。运费、关税、平台费用及最低利润仍是演示假设，但不参与商品过滤或排序；选中 SKU 后，建议售价才读取这些定价资料和任务价格目标。示例主角在最低利润 USD 5 时为 USD 19.99；若采购成本或价格目标更高，价格不会低于模拟总成本加目标利润。
 - 中英文切换只改变界面。商品原始值不会自动翻译；美国站文案和导出仍使用原有英文模板。
 - 导入目录和结果摘要随业务状态保存在 localStorage；刷新恢复，旧版没有 `catalog` 字段的会话会自动补入内置目录。
 

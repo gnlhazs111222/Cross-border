@@ -50,6 +50,8 @@ test('authenticated product read and validated import survive a new Prisma conne
   assert.equal((await app.inject({ url: `/api/products/${first.recordId}`, headers: { cookie } })).json().data.sku, first.sku);
   const product = { ...products[0], sku: 'SERVER-IMPORTED-001', name: 'Persisted supplier bottle', packageLength: 8, packageWidth: 8, packageHeight: 25, importSource: { fileName: 'test.csv', sheetName: 'Products', row: 2 } };
   const report = { fileName: 'test.csv', mode: 'replace', processed: 1, ready: 1, missing: 0, duplicates: 0, invalid: 0, rows: [{ row: 2, sku: product.sku, status: 'ready', issues: [] }] };
+  const mismatched = await app.inject({ method: 'POST', url: '/api/products/import', headers: { cookie }, payload: { mode: 'replace', expectedRevision: catalog.revision, products: [{ ...product, visual: 'bag' }], report } });
+  assert.equal(mismatched.statusCode, 400); assert.equal(mismatched.json().error.code, 'validation_error');
   const imported = await app.inject({ method: 'POST', url: '/api/products/import', headers: { cookie }, payload: { mode: 'replace', expectedRevision: catalog.revision, products: [product], report } });
   assert.equal(imported.statusCode, 200, imported.body); assert.equal(imported.json().data.products.length, 1);
   const reopened = createDb(config.DATABASE_URL);

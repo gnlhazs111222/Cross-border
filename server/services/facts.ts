@@ -2,11 +2,11 @@ import type { Prisma, PrismaClient, Fact as StoredFact } from '@prisma/client';
 import type { Fact, FactCard, Evidence, Platform } from '../../src/types';
 import type { FactSnapshot } from '../../shared/contracts';
 import { baseFactCard, effectiveProduct, pricingFromFacts, productEvidence, reviewFact } from '../../shared/facts';
-import { PRICING_FACTS, REQUIRED_COPY_FACTS } from '../../src/services/factReview';
+import { COPY_FACTS, PRICING_FACTS, requiredCopyFactsFor } from '../../src/services/factReview';
 import { AppError } from '../errors';
 import { domainProviders } from '../providers/domain';
-import { assetsForProduct } from './assets';
 import { toProduct } from './catalog';
+import { assetsForProduct } from './assets';
 
 type DB = Prisma.TransactionClient;
 const json = (value: unknown): Prisma.InputJsonValue => JSON.parse(JSON.stringify(value));
@@ -28,6 +28,11 @@ export async function invalidateDownstream(db: DB, taskId: string, productId: st
   await db.publishResult.updateMany({ where: { listingDraft: where, invalidatedAt: null }, data: { invalidatedAt } });
   await db.listingDraft.updateMany({ where: { ...where, status: { not: 'superseded' } }, data: { status: 'stale' } });
 }
+async function invalidatePricingOutputs(db: DB, taskId: string, productId: string) {
+  const where = { taskId, productId };
+  await db.publishResult.updateMany({ where: { listingDraft: where, invalidatedAt: null }, data: { invalidatedAt: new Date() } });
+  await db.listingDraft.updateMany({ where: { ...where, status: 'published' }, data: { status: 'review_passed' } });
+}
 export async function factSnapshotTx(db: DB, userId: string, taskId: string, productId: string, invalidated = false): Promise<FactSnapshot> {
   const { task, product } = await owned(db, userId, taskId, productId);
   const cards = await db.factCard.findMany({ where: { userId, taskId: task.id, productId: product.id }, include: { facts: { orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] }, evidence: { orderBy: { createdAt: 'asc' } } }, orderBy: { version: 'asc' } });
@@ -35,14 +40,12 @@ export async function factSnapshotTx(db: DB, userId: string, taskId: string, pro
   if (!base) throw new AppError('facts_not_found', 'Select the product to create its facts.', 404);
   const card = (row: typeof base): FactCard => ({ recordId: row.id, revision: row.revision, productRevision: row.productRevision, version: row.version as 1 | 2, sku: product.sku, ...(row.version === 2 ? { taskId: task.code } : {}), facts: row.facts.map(readFact) });
   const v1 = card(base); const v2 = enhanced ? card(enhanced) : null; const facts = (v2 ?? v1).facts;
-  const p = toProduct(product); const view = effectiveProduct(p, facts); const pricing = pricingFromFacts(p, facts, facts.filter(f => PRICING_FACTS.includes(f.key)).reduce((sum, f) => sum + Math.max(0, (f.revision ?? 1) - 1), 0));
-  const assets = await assetsForProduct(db, userId, product.id);
-  const blockedFacts = REQUIRED_COPY_FACTS.filter(key => !facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed));
-  return { productId: product.id, taskId: task.id, product: view, v1, v2, facts, factsRevision: Math.max(base.revision, enhanced?.revision ?? 0), downstreamInvalidated: invalidated, pricing,
-    evidence: base.evidence.map(e => ({ ...(e.data as unknown as Evidence), recordId: e.id })), assets,
+  const p = toProduct(product); const view = effectiveProduct(p, facts); const pricing = pricingFromFacts(p, facts, facts.filter(f => PRICING_FACTS.includes(f.key)).reduce((sum, f) => sum + Math.max(0, (f.revision ?? 1) - 1), 0), task.minimumProfit);
+  const blockedFacts = requiredCopyFactsFor(p.visual).filter(key => !facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed));
+  const listingFactsRevision = facts.filter(f => COPY_FACTS.includes(f.key)).reduce((sum, f) => sum + (f.revision ?? 1), 0);
+  return { productId: product.id, taskId: task.id, product: view, v1, v2, facts, factsRevision: Math.max(base.revision, enhanced?.revision ?? 0), listingFactsRevision, downstreamInvalidated: invalidated, pricing,
+    evidence: base.evidence.map(e => ({ ...(e.data as unknown as Evidence), recordId: e.id })), assets: await assetsForProduct(db, userId, product.id),
     pricingReadiness: { ready: pricing.status === 'ready', missing: pricing.missing },
-    // The pricing status is deliberately absent here: incomplete commercial data must not block
-    // draft generation, it only leaves the suggested price pending.
     listingReadiness: { ready: !!v2 && !blockedFacts.length && p.duplicateStatus === 'unique' && p.category === task.category, blockedFacts } };
 }
 export function factSnapshot(db: PrismaClient, userId: string, taskId: string, productId: string) {
@@ -95,13 +98,15 @@ export async function mutateFact(db: PrismaClient, userId: string, factId: strin
     const rows = await tx.fact.findMany({ where: { key: row.key, factCard: { userId, taskId, productId } } });
     for (const f of rows) await tx.fact.update({ where: { id: f.id }, data: storedFact(updated) });
     await tx.factCard.updateMany({ where: { id: { in: rows.map(f => f.factCardId) } }, data: { revision: before.factsRevision + 1 } });
-    await invalidateDownstream(tx, taskId, productId);
-    return factSnapshotTx(tx, userId, taskId, productId, true);
+    const pricingOnly = PRICING_FACTS.includes(row.key) && !COPY_FACTS.includes(row.key);
+    if (!pricingOnly) await invalidateDownstream(tx, taskId, productId);
+    else await invalidatePricingOutputs(tx, taskId, productId);
+    return factSnapshotTx(tx, userId, taskId, productId, !pricingOnly);
   });
 }
 export async function templateFromFacts(db: PrismaClient, userId: string, taskId: string, productId: string, platform: Platform, revision: number, expectedRevision: number) {
   const snap = await factSnapshot(db, userId, taskId, productId);
   if (snap.factsRevision !== expectedRevision) throw new AppError('facts_changed', 'Facts changed. Reload the current facts before retrying.', 409);
-  if (!snap.listingReadiness.ready) throw new AppError('listing_blocked', 'Confirm required facts and resolve pricing before generating a listing.', 409);
-  return domainProviders.listing.generate({ factCard: snap.v2!, pricing: snap.pricing, platform, revision, factRevision: snap.factsRevision });
+  if (!snap.listingReadiness.ready) throw new AppError('listing_blocked', 'Confirm the required listing facts before generating a listing.', 409);
+  return domainProviders.listing.generate({ factCard: snap.v2!, pricing: snap.pricing, platform, revision, factRevision: snap.listingFactsRevision });
 }

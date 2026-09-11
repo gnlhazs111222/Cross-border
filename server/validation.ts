@@ -11,11 +11,16 @@ export const productInput = z.object({
   packageLength: positive.optional(), packageWidth: positive.optional(), packageHeight: positive.optional(),
   supplierCost: z.number().finite().min(0).max(1000000), declaredValue: z.number().finite().min(0).max(1000000),
   importSource: z.object({ fileName: text, sheetName: text, row: z.number().int().min(2).max(501) }),
+  sourceFile: z.object({ fileName: text, mimeType: text, contentBase64: z.string().min(1).max(8_000_000) }).strict().optional(),
   assetReferences: z.array(text).max(20).optional(),
   assetUrls: z.array(z.string().url().max(500)).max(20).optional(),
   status: z.enum(['search_ready', 'missing_data']), duplicateStatus: z.literal('unique'),
   missing: z.array(z.string().max(220)).max(14), visual: z.enum(['bottle', 'bag', 'lamp']),
-}).strict();
+}).strict().superRefine((p, ctx) => {
+  const expectedVisual = p.category === 'Bags & Accessories' ? 'bag' : p.category === 'Electronics' ? 'lamp' : 'bottle';
+  if (p.visual !== expectedVisual) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['visual'], message: 'Product type must match category.' });
+  if (p.visual === 'bottle' && p.capacity <= 0) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['capacity'], message: 'Bottle capacity is required.' });
+});
 const issue = z.object({ code: z.enum(['required', 'number', 'boolean', 'formula', 'extra', 'long', 'duplicate', 'missing', 'category']), field: z.string().max(220) });
 export const importSchema = z.object({
   mode: z.enum(['replace', 'append', 'merge']), expectedRevision: z.number().int().positive(), products: z.array(productInput).min(1).max(500),

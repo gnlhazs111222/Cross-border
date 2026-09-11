@@ -40,8 +40,9 @@ test.describe('Chinese and English interface', () => {
       await page.getByRole('button', { name: '创建演示任务', exact: true }).click();
       await expect(page.getByTestId('recommendation-1')).toContainText(HERO);
       await expect(page.getByTestId('recommendation-1')).toContainText('黑色符合指定颜色');
-      await expect(page.getByTestId('recommendation-2')).toContainText('不符合无吸管偏好');
-      await expect(page.getByTestId('recommendation-3')).toContainText('容量过大');
+      await expect(page.getByTestId('recommendation-2')).toContainText('LM-KT-BTL-005-BLK-500');
+      await expect(page.getByTestId('recommendation-2')).toContainText('无吸管');
+      await expect(page.getByTestId('recommendation-3')).toContainText('不符合无吸管偏好');
       await page.getByTestId('recommendation-1').getByRole('button', { name: '选择 SKU' }).click();
       await expect(page.getByRole('heading', { name: '事实卡 V1', exact: true })).toBeVisible();
       await page.getByRole('button', { name: /供应商表格.*查看提取结果/ }).click();

@@ -42,12 +42,12 @@ const act = (w: WorkflowSnapshot, action: string, platform: 'amazon' | 'shopify'
 test('Qwen output persists metadata, passes explicit rules review, publishes, and reuses cached generation', async () => {
   const { base, snap } = await setup();
   let w = await call(`${base}/listings`, { platform: 'amazon', expectedVersion: 0, expectedFactsRevision: snap.factsRevision });
-  assert.equal(w.listings.amazon.generationMode, 'qwen'); assert.equal(w.listings.amazon.riskDemoInjected, false); assert.equal(w.listings.amazon.generation.promptVersion, 'listing-qwen-v1'); assert.ok(w.listings.amazon.generation.aiCallId);
+  assert.equal(w.listings.amazon.generationMode, 'qwen'); assert.equal(w.listings.amazon.riskDemoInjected, false); assert.equal(w.listings.amazon.generation.promptVersion, 'listing-qwen-v2'); assert.ok(w.listings.amazon.generation.aiCallId);
   assert.equal(w.publishAllowed.amazon, false); assert.equal(w.listings.amazon.authorization, undefined);
   w = await act(w, 'review'); assert.equal(w.reviews.amazon.status, 'passed'); w = await act(w, 'publish'); assert.ok(w.publications.amazon);
   const before = calls; w = await act(w, 'regenerate'); assert.equal(calls, before); assert.equal(w.listings.amazon.generation.cacheHit, true); assert.equal(w.reviews.amazon, undefined);
   w = await call(`${base}/listings`, { platform: 'shopify', expectedVersion: 0, expectedFactsRevision: snap.factsRevision }); assert.equal(w.listings.shopify.generationMode, 'qwen'); assert.equal(calls, before + 1);
-  const audit = await db.aiCall.findUniqueOrThrow({ where: { id: w.listings.shopify.generation.aiCallId } }); assert.equal(audit.purpose, 'listing_generation'); assert.equal(audit.promptVersion, 'listing-qwen-v1'); assert.ok(audit.inputHash); assert.equal(audit.totalTokens, 50);
+  const audit = await db.aiCall.findUniqueOrThrow({ where: { id: w.listings.shopify.generation.aiCallId } }); assert.equal(audit.purpose, 'listing_generation'); assert.equal(audit.promptVersion, 'listing-qwen-v2'); assert.ok(audit.inputHash); assert.equal(audit.totalTokens, 50);
   const caps = await call('/api/capabilities'); assert.equal(caps.listing.activeProvider, 'qwen'); assert.equal(caps.listing.liveImplemented, true);
 });
 

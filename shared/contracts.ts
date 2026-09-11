@@ -51,7 +51,7 @@ export type Capabilities = {
 export type FactPreview = { v1: FactCard; product: Product; pricing: Pricing };
 export type FactSnapshot = FactPreview & {
   productId: string; taskId: string; v2: FactCard | null; facts: Fact[]; evidence: Evidence[]; assets: ProductAsset[];
-  factsRevision: number; downstreamInvalidated: boolean;
+  factsRevision: number; listingFactsRevision: number; downstreamInvalidated: boolean;
   pricingReadiness: { ready: boolean; missing: string[] };
   listingReadiness: { ready: boolean; blockedFacts: string[] };
 };

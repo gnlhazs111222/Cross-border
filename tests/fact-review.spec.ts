@@ -32,6 +32,32 @@ async function importSample(page: Page) {
   await expect(page.locator('.product-table tbody tr')).toHaveCount(7);
 }
 
+test('pricing-pending SKU can generate and pass Listing review before price is completed', async ({ page }) => {
+  await page.goto('/');
+  await openFacts(page, MISSING);
+  await page.getByRole('button', { name: 'Analyze Evidence', exact: true }).click();
+  await page.getByRole('button', { name: 'Continue to Listing Studio', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Pricing Blocked', exact: true })).toBeVisible();
+  await expect(page.getByText('Suggested price pending', { exact: true })).toBeVisible();
+  const generate = page.getByRole('button', { name: 'Generate Shopify Listing', exact: true });
+  await page.getByRole('tab', { name: 'Shopify US', exact: true }).click();
+  await expect(generate).toBeEnabled();
+  await generate.click();
+  await page.getByRole('button', { name: 'Continue to Review', exact: true }).click();
+  await page.getByRole('button', { name: 'Run Review', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Review Passed', exact: true })).toBeVisible();
+  await expect(page.getByTestId('review-stage-banner')).toContainText('Review passed · Suggested price pending');
+  await expect(page.getByRole('button', { name: 'Publish', exact: true })).toBeDisabled();
+  await expect(page.getByText('Complete pricing inputs before publishing or exporting.', { exact: true })).toBeVisible();
+  await navigate(page, 'Evidence & Facts');
+  await editFact(page, 'packagingWeight', '0.42');
+  await confirmFact(page, 'packagingWeight');
+  await expect(page.locator('.suggested-price>strong')).toHaveText('USD 19.20');
+  await navigate(page, 'Review & Publish');
+  await expect(page.getByRole('heading', { name: 'Review Passed', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Publish', exact: true })).toBeEnabled();
+});
+
 for (const imported of [false, true]) {
   test(`${imported ? 'imported English' : 'built-in Chinese mobile'} missing weight is saved pending, confirmed and really unlocks pricing`, async ({ page }, info) => {
     const zh = !imported;
@@ -102,7 +128,7 @@ test('all required dimensions must be confirmed, and invalid or blank values can
   await expect(page.locator('.suggested-price>strong')).toHaveText('USD 19.20');
 });
 
-test('changing an authorized fact clears both platforms and requires generation and review again', async ({ page }) => {
+test('copy fact changes invalidate Listing while pricing-only facts preserve approved copy', async ({ page }) => {
   await page.goto('/'); await openFacts(page, HERO);
   await page.getByRole('button', { name: 'Analyze Evidence', exact: true }).first().click();
   await page.getByRole('button', { name: 'Continue to Listing Studio' }).click();
@@ -142,12 +168,25 @@ test('changing an authorized fact clears both platforms and requires generation 
   await expect(page.getByRole('button', { name: 'Publish', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'Publish', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Shopify Draft Created' })).toBeVisible();
+  const beforePricingEdit = await snapshot(page);
   await navigate(page, 'Evidence & Facts'); await editFact(page, 'packagingWeight', '0.5');
   const changed = await snapshot(page);
   expect(changed.pricing.status).toBe('blocked'); expect(changed.pricing.version).not.toBe(priceVersion);
-  expect(changed.publications).toEqual({}); expect(changed.reviews).toEqual({}); expect(changed.listings).toEqual({});
+  expect(changed.publications).toEqual({});
+  expect(changed.reviews).toEqual(beforePricingEdit.reviews);
+  expect(changed.stage).toBe('review_passed');
+  expect(changed.listings.shopify).toMatchObject({
+    recordId: beforePricingEdit.listings.shopify.recordId,
+    revision: beforePricingEdit.listings.shopify.revision,
+    title: beforePricingEdit.listings.shopify.title,
+    status: 'review_passed',
+  });
   await confirmFact(page, 'packagingWeight');
   await expect(page.locator('.suggested-price>strong')).toHaveText('USD 19.99');
+  expect((await snapshot(page)).stage).toBe('review_passed');
+  await navigate(page, 'Review & Publish');
+  await expect(page.getByRole('heading', { name: 'Review Passed', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Publish', exact: true })).toBeEnabled();
   await page.reload();
   expect((await snapshot(page)).publications).toEqual({});
 });

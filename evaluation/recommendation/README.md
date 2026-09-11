@@ -1,8 +1,8 @@
 # Recommendation demo evaluation
 
-This directory contains 12 frozen synthetic cases in `cases.json`. The tasks, candidates, preferred Top1 sets, acceptable alternatives, graded relevance labels and notes were specified before real Qwen runs. Labels are independent of the ranking implementation; they are not external expert annotations or evidence about real sales outcomes.
+This directory contains 12 synthetic cases in `cases.json`. The selection/pricing boundary cases and their labels were revised on 2026-09-11 after the product contract was clarified: pricing inputs and price targets do not affect selection. The labels remain independent of model output; they are not external expert annotations or evidence about real sales outcomes.
 
-Cases cover the classic black 500ml no-straw brief, explicit straw preference, large capacity, compact capacity, light colors, confirmed package contents, glass material, conflicting priorities, no perfect match, close finish alternatives, no eligible products and a simulated profit threshold. Expected labels are checked against hard eligibility before evaluation.
+Cases cover the classic black 500ml no-straw brief, explicit straw preference, large capacity, compact capacity, light colors, confirmed package contents, glass material, conflicting priorities, no perfect match, close finish alternatives, no eligible products and price-target independence. Expected labels are checked against hard eligibility before evaluation.
 
 ## Commands
 
@@ -36,6 +36,6 @@ The no-candidate case is checked separately and excluded from ranking-metric den
 
 Reports are written under `artifacts/evaluation/recommendation/{rule,qwen-mock,qwen-live}/summary.{json,md}`. Per-case records retain expected labels, actual ranked candidates, scores, explanations, exclusions, mode, latency and usage when available. No API key or complete sensitive prompt is written.
 
-The default 12-case rule result is Top1 9/11 (81.8%), Hit@3 11/11 (100%), NDCG@3 0.9491, invalid candidates 0 and limited unsupported-reason checks 0. One empty case is correctly empty. The two rule errors are explicit priority handling with no perfect match and a preference for a confirmed matte finish. The rule baseline is deliberately documented as limited, not tuned to make all hand-authored labels pass.
+The 2026-09-11 12-case rule result is Top1 9/11 (81.8%), Hit@3 11/11 (100%), NDCG@3 0.9379, invalid candidates 0 and limited unsupported-reason checks 0. One empty case is correctly empty. The price-target-independence case keeps the same selection result while the chosen SKU's later pricing uses the higher target. The two rule errors remain explicit priority handling with no perfect match and a preference for a confirmed matte finish. The rule baseline is deliberately documented as limited, not tuned to make all hand-authored labels pass.
 
 This is a small synthetic demo evaluation. The limited live subset checks connectivity and behavior, not statistical significance or general recommendation superiority.

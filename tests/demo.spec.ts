@@ -94,25 +94,26 @@ test('P0 complete: Amazon risk block, human fix, review, mock publish, CSV, relo
   expect(errors).toEqual([]);
 });
 
-test('missing packaging weight blocks pricing; duplicates cannot enter recommendations', async ({ page }) => {
+test('missing packaging weight blocks pricing but not selection; duplicates remain excluded', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'View LM-KT-BTL-005-BLK-500', exact: true }).click();
   const dialog = page.getByRole('dialog');
   await expect(dialog.getByRole('heading', { name: 'Pricing Blocked', exact: true })).toBeVisible();
   await expect(dialog).toContainText('Packaging weight is required for logistics estimation.');
   await expect(dialog.locator('.suggested-price')).toHaveCount(0);
-  await expect(dialog.getByRole('button', { name: 'Select for Launch' })).toHaveCount(0);
+  await expect(dialog.getByRole('button', { name: 'Select for Launch' })).toBeVisible();
   await dialog.getByRole('button', { name: 'Close details' }).click();
   await page.getByLabel('Filter materials').selectOption('eligible');
-  await expect(page.locator('.product-table tbody tr')).toHaveCount(4);
-  await page.getByLabel('Filter materials').selectOption('held');
   await expect(page.locator('.product-table tbody tr')).toHaveCount(6);
+  await page.getByLabel('Filter materials').selectOption('held');
+  await expect(page.locator('.product-table tbody tr')).toHaveCount(4);
   await page.getByRole('button', { name: 'Create Demo Task', exact: true }).click();
   await expect(page.locator('.recommendation-card')).toHaveCount(3);
   await expect(page.locator('.recommendation-grid')).not.toContainText('LM-KT-BTL-007');
   await expect(page.locator('.recommendation-grid')).not.toContainText('LM-KT-BTL-008');
-  await expect(page.getByTestId('recommendation-2')).toContainText('Includes straw');
-  await expect(page.getByTestId('recommendation-3')).toContainText('Capacity too large');
+  await expect(page.getByTestId('recommendation-2')).toContainText('LM-KT-BTL-005-BLK-500');
+  await expect(page.getByTestId('recommendation-2')).toContainText('No straw');
+  await expect(page.getByTestId('recommendation-3')).toContainText('Includes straw');
 });
 
 test('Shopify creates a draft independently of the blocked Amazon draft', async ({ page }) => {

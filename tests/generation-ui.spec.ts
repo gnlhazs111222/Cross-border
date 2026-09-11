@@ -4,7 +4,7 @@ for (const mode of ['qwen', 'template_fallback'] as const) test(`generation indi
   // UI-only response fixture. Provider + DB behavior is verified with mock transports in server tests.
   await page.route('**/api/tasks/*/products/*/listings', async route => {
     const response = await route.fetch(); const body = await response.json();
-    if (body.data?.listings?.amazon) { const l = body.data.listings.amazon; l.generationMode = mode; l.generation = { provider: mode === 'qwen' ? 'bailian' : 'template', model: 'qwen3.6-flash', promptVersion: 'listing-qwen-v1', cacheHit: mode === 'qwen', fallbackReason: mode === 'qwen' ? undefined : 'bailian_timeout' }; }
+    if (body.data?.listings?.amazon) { const l = body.data.listings.amazon; l.generationMode = mode; l.generation = { provider: mode === 'qwen' ? 'bailian' : 'template', model: 'qwen3.6-flash', promptVersion: 'listing-qwen-v2', cacheHit: mode === 'qwen', fallbackReason: mode === 'qwen' ? undefined : 'bailian_timeout' }; }
     await route.fulfill({ response, json: body });
   });
   await page.goto('/'); await page.getByRole('button', { name: '中文', exact: true }).click();
@@ -17,7 +17,7 @@ for (const mode of ['qwen', 'template_fallback'] as const) test(`generation indi
   await expect(indicator).toContainText(mode === 'qwen' ? 'Qwen · qwen3.6-flash' : '模板回退');
   if (mode === 'template_fallback') await expect(indicator).toContainText('可以继续审核');
   await indicator.locator('summary').focus(); await page.keyboard.press('Enter');
-  await expect(indicator).toContainText('listing-qwen-v1');
+  await expect(indicator).toContainText('listing-qwen-v2');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 test('explicit demo risk creates a new server version and blocks review without claiming a model error', async ({ page }) => {

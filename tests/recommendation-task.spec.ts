@@ -27,20 +27,22 @@ for (const zh of [false, true]) test(`editable task save and explicit recommenda
   expect(stale.status).toBe('stale');
   await page.getByRole('button', { name: text('Run Recommendation', '运行推荐'), exact: true }).click();
   await expect(page.getByTestId('recommendation-1')).toContainText('LM-KT-BTL-003-BLK-750');
-  await page.getByRole('button', { name: text('Load Demo Task', '载入演示任务'), exact: true }).click();
+  await page.getByRole('button', { name: text('Load Bottle Demo', '载入水杯演示'), exact: true }).click();
   await expect(page.getByTestId('recommendation-1')).toContainText('LM-KT-BTL-001-BLK-500'); expect((await state(page)).task.id).toBe('PL-DEMO-001');
   await navigation(page, text('Materials', '商品资料')); await expect(page.locator('.product-table tbody tr')).toHaveCount(10);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
-test('minimum demo profit excludes candidates and shows deterministic exclusion reasons', async ({ page }) => {
+test('price target does not affect selection and is applied only after choosing a SKU', async ({ page }) => {
   await page.goto('/'); await page.getByRole('button', { name: 'Create Demo Task', exact: true }).click();
   await page.getByRole('button', { name: 'Edit Current Task', exact: true }).click();
   await page.getByRole('dialog').getByLabel('Minimum unit profit (USD)').fill('10');
   await page.getByRole('button', { name: 'Save Task', exact: true }).click(); await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('button', { name: 'Run Recommendation', exact: true }).click();
-  await expect(page.locator('.recommendation-card')).toHaveCount(0);
-  await page.getByText('Excluded products and reasons', { exact: true }).click();
-  await expect(page.locator('.hard-filter-reasons')).toContainText('Below demo profit requirement');
+  await expect(page.locator('.recommendation-card')).toHaveCount(3);
+  await expect(page.getByTestId('recommendation-1')).toContainText('LM-KT-BTL-001-BLK-500');
+  await page.getByTestId('recommendation-1').getByRole('button', { name: 'Select SKU', exact: true }).click();
+  await page.getByRole('button', { name: 'Analyze Evidence', exact: true }).first().click();
+  await expect(page.locator('.suggested-price>strong')).toHaveText('USD 24.20');
   await page.reload(); expect((await state(page)).task.minProfit).toBe(10);
 });
 

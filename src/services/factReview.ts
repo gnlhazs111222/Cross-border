@@ -1,9 +1,10 @@
 import type { Fact } from '../types';
 
-export const PRICING_FACTS = ['packagingWeight', 'packageLength', 'packageWidth', 'packageHeight', 'supplierCost'];
-export const COPY_FACTS = ['color', 'capacity', 'material', 'straw', 'countryOfOrigin', 'packageIncludes', 'finish', 'lidType'];
+export const PRICING_FACTS = ['packagingWeight', 'packageLength', 'packageWidth', 'packageHeight', 'supplierCost', 'declaredValue'];
+export const COPY_FACTS = ['color', 'capacity', 'material', 'straw', 'countryOfOrigin', 'packageIncludes', 'finish', 'lidType', 'bagType', 'closureType', 'strapType'];
 export const REQUIRED_COPY_FACTS = ['color', 'capacity', 'material'];
-const TEXT_FACTS = ['color', 'material', 'countryOfOrigin', 'packageIncludes', 'finish', 'lidType'];
+export function requiredCopyFactsFor(visual: 'bottle' | 'bag' | 'lamp') { return visual === 'bag' ? ['color', 'material', 'bagType'] : REQUIRED_COPY_FACTS; }
+const TEXT_FACTS = ['color', 'material', 'countryOfOrigin', 'packageIncludes', 'finish', 'lidType', 'bagType', 'closureType', 'strapType'];
 const UNITS: Record<string, string> = { capacity: 'ml', packagingWeight: 'kg', packageLength: 'cm', packageWidth: 'cm', packageHeight: 'cm', supplierCost: 'USD', declaredValue: 'USD' };
 
 export function editableFact(key: string) { return TEXT_FACTS.includes(key) || key === 'straw' || Object.hasOwn(UNITS, key); }

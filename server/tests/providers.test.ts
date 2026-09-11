@@ -4,9 +4,11 @@ import { z } from 'zod';
 import { readConfig } from '../config';
 import { BailianTextModelProvider, MockTextModelProvider } from '../providers/text';
 import { domainProviders, QwenEvidenceProvider } from '../providers/domain';
-import { demoTask, products } from '../../src/data/mockData';
+import { bagDemoTask, demoTask, products } from '../../src/data/mockData';
 import { AppError } from '../errors';
 import { QwenReviewProvider } from '../providers/qwenReview';
+import { baseFactCard, pricingFromFacts } from '../../shared/facts';
+import { demoRiskClaim } from '../../shared/domain';
 
 const config = { ...readConfig({ NODE_ENV: 'test' }), NODE_ENV: 'development' as const, AI_LIVE_ENABLED: true, BAILIAN_API_KEY: 'unit-test-key', BAILIAN_BASE_URL: 'https://provider.test/v1' };
 test('structured validation preserves safe failure paths without leaking model values or custom messages', async () => {
@@ -39,6 +41,25 @@ test('MockTextModelProvider and active domain providers are deterministic and lo
   const result = await mock.generateStructured({ prompt: 'test', purpose: 'unit', example: { ok: true }, schema: z.object({ ok: z.boolean() }) }); assert.deepEqual(result.data, { ok: true });
   const top = await domainProviders.recommendation.recommend(products, demoTask); assert.equal(top[0].score, 94); assert.equal(top[0].sku, products[0].sku);
   await assert.rejects(new QwenEvidenceProvider().enrich(), /not implemented/);
+});
+test('bag category has its own recommendation, facts, template and deterministic risk review', async () => {
+  const bag = products.find(p => p.visual === 'bag')!;
+  const lamp = products.find(p => p.visual === 'lamp')!;
+  const ranked = await domainProviders.recommendation.recommend(products, bagDemoTask);
+  assert.deepEqual(ranked.map(r => r.sku), [bag.sku]);
+  assert.ok(ranked[0].reasons.some(reason => /Tote bag/.test(reason)));
+  assert.deepEqual(await domainProviders.recommendation.recommend([lamp], { ...bagDemoTask, category: lamp.category }), []);
+  const v1 = baseFactCard(bag);
+  assert.ok(v1.facts.some(f => f.key === 'bagType' && f.value === 'Tote bag'));
+  assert.ok(!v1.facts.some(f => ['capacity', 'straw'].includes(f.key)));
+  const v2 = await domainProviders.evidence.enrich(bag, v1, bagDemoTask);
+  assert.ok(v2.facts.some(f => f.key === 'closureType' && f.status === 'Requires Confirmation'));
+  const listing = await domainProviders.listing.generate({ factCard: v2, pricing: pricingFromFacts(bag, v2.facts), platform: 'amazon', revision: 1, factRevision: 1 });
+  assert.equal(listing.title, 'Black Canvas Tote Bag');
+  assert.doesNotMatch(JSON.stringify(listing), /\b(?:500ml|straw|bottle|leakproof)\b/i);
+  const risky = structuredClone(listing); risky.bullets[2] = demoRiskClaim('bag');
+  const issues = await domainProviders.review.review(risky, listing);
+  assert.deepEqual(issues.map(issue => issue.id), ['R003']);
 });
 test('OpenAI SDK uses the supplied base URL, model and auth with mock transport; budget is enforced', async () => {
   let count = 0; const audit: unknown[] = [];

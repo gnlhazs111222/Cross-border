@@ -103,7 +103,7 @@ export async function parseSupplierFile(file: File, mode: ImportMode, _existing:
     const category = text(values.category);
     const product: Product = {
       sku, name: text(values.productName), category, color: text(values.color), capacity: capacity ?? 0,
-      localizedCapacity: `${((capacity ?? 0) / 29.5735295625).toFixed(1)} fl oz`, material: text(values.material),
+      localizedCapacity: capacity ? `${(capacity / 29.5735295625).toFixed(1)} fl oz` : '—', material: text(values.material),
       straw: strawValue === 'true' || strawValue === '1', countryOfOrigin: text(values.countryOfOrigin),
       supplierCost: supplierCost ?? 0, declaredValue: declaredValue ?? 0, packagingWeight,
       packageLength: length, packageWidth: width, packageHeight: height,

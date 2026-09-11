@@ -9,9 +9,10 @@ export function baseFactCard(p: Product): FactCard {
   const dimensions = p.packagingDimensions?.split(' × ').map(Number.parseFloat);
   const facts = [
     fact('color', 'Color', p.color, 'Supplier Spreadsheet', 'Products · column D'),
-    fact('capacity', 'Capacity', `${p.capacity}ml / ${p.localizedCapacity}`, 'Specification PDF', 'Page 1 · specifications'),
+    ...(p.visual === 'bottle' ? [fact('capacity', 'Capacity', `${p.capacity}ml / ${p.localizedCapacity}`, 'Specification PDF', 'Page 1 · specifications')] : []),
     fact('material', 'Material', p.material, 'Specification PDF', 'Page 1 · body material'),
-    fact('straw', 'Straw', p.straw ? 'Included' : 'No straw', 'Supplier Spreadsheet', 'Products · column F'),
+    ...(p.visual === 'bottle' ? [fact('straw', 'Straw', p.straw ? 'Included' : 'No straw', 'Supplier Spreadsheet', 'Products · column F')] : []),
+    ...(p.visual === 'bag' ? [fact('bagType', 'Bag type', 'Tote bag', 'Supplier Spreadsheet', 'Products · product name')] : []),
     fact('countryOfOrigin', 'Country of origin', p.countryOfOrigin, 'Supplier Spreadsheet', 'Products · column G'),
     fact('packagingWeight', 'Packaging weight', p.packagingWeight ? `${p.packagingWeight} kg` : 'Missing', 'Supplier Spreadsheet', 'Packaging · column C', false, !!p.packagingWeight),
     ...(['packageLength', 'packageWidth', 'packageHeight'] as const).map((key, i) => {
@@ -22,7 +23,7 @@ export function baseFactCard(p: Product): FactCard {
     fact('declaredValue', 'Declared value', `USD ${(p.declaredValue ?? 8.2).toFixed(2)}`, 'Supplier Spreadsheet', 'Commercial · column C', false),
   ];
   if (p.importSource) {
-    const columns: Record<string, string> = { color: 'color', capacity: 'capacityMl', material: 'material', straw: 'hasStraw', countryOfOrigin: 'countryOfOrigin', packagingWeight: 'packagingWeightKg', packageLength: 'packageLengthCm', packageWidth: 'packageWidthCm', packageHeight: 'packageHeightCm', supplierCost: 'supplierCost', declaredValue: 'declaredValue' };
+    const columns: Record<string, string> = { color: 'color', capacity: 'capacityMl', material: 'material', straw: 'hasStraw', bagType: 'productName', countryOfOrigin: 'countryOfOrigin', packagingWeight: 'packagingWeightKg', packageLength: 'packageLengthCm', packageWidth: 'packageWidthCm', packageHeight: 'packageHeightCm', supplierCost: 'supplierCost', declaredValue: 'declaredValue' };
     for (const f of facts) {
       f.sourceMetadata = { fileName: p.importSource.fileName, sheetName: p.importSource.sheetName, rowNumber: p.importSource.row, fieldName: columns[f.key] };
       f.source = 'Imported Supplier File'; f.sourceKind = 'supplier';
@@ -36,8 +37,10 @@ export function effectiveProduct(p: Product, facts: Fact[]): Product {
   const missing = p.missing.filter(label => !['Packaging Weight', 'Packaging Dimensions'].includes(label) && !(label === 'Accessory Information' && facts.find(f => f.key === 'packageIncludes')?.status === 'Confirmed'));
   if (!confirmed('packagingWeight')) missing.push('Packaging Weight');
   if (['packageLength', 'packageWidth', 'packageHeight'].some(key => !confirmed(key))) missing.push('Packaging Dimensions');
-  for (const key of ['color', 'capacity', 'material', 'straw', 'countryOfOrigin', 'supplierCost', 'declaredValue']) {
-    if (!confirmed(key)) missing.push(facts.find(f => f.key === key)!.label);
+  const productKeys = ['color', 'material', 'countryOfOrigin', 'supplierCost', 'declaredValue', ...(p.visual === 'bottle' ? ['capacity', 'straw'] : [])];
+  for (const key of productKeys) {
+    const supplied = facts.find(f => f.key === key);
+    if (supplied && !confirmed(key)) missing.push(supplied.label);
   }
   const value = (key: string) => confirmed(key)?.value;
   const dimensions = ['packageLength', 'packageWidth', 'packageHeight'].map(key => value(key) ? factNumber(value(key)!) : undefined);
@@ -53,7 +56,7 @@ export function effectiveProduct(p: Product, facts: Fact[]): Product {
     missing: [...new Set(missing)], status: missing.length ? 'missing_data' : 'search_ready',
   };
 }
-export function pricingFromFacts(p: Product, facts: Fact[], revision = 0): Pricing {
+export function pricingFromFacts(p: Product, facts: Fact[], revision = 0, targetProfit = 5): Pricing {
   const confirmed = (key: string) => facts.find(f => f.key === key && f.status === 'Confirmed');
   const missing = [
     ...(!confirmed('packagingWeight') ? ['Packaging Weight'] : []),
@@ -61,13 +64,18 @@ export function pricingFromFacts(p: Product, facts: Fact[], revision = 0): Prici
     ...(!confirmed('supplierCost') ? ['Supplier cost'] : []),
   ];
   const cost = confirmed('supplierCost') ? factNumber(confirmed('supplierCost')!.value) : p.supplierCost;
-  const floor = Math.ceil((cost + 3.1 + 0.7 + 2.2 + 5 - 1e-9) * 100) / 100;
+  const floor = Math.ceil((cost + 3.1 + 0.7 + 2.2 + targetProfit - 1e-9) * 100) / 100;
   return { version: `v${1 + revision}`, status: missing.length ? 'blocked' : 'ready', supplierCost: cost,
-    shipping: 3.1, duty: 0.7, platformCost: 2.2, targetProfit: 5,
+    shipping: 3.1, duty: 0.7, platformCost: 2.2, targetProfit,
     suggestedPrice: missing.length ? null : p.sku === HERO_SKU ? Math.max(19.99, floor) : floor, missing };
 }
 
 export function productEvidence(p: Product): Evidence[] {
+    if (p.visual === 'bag') return [
+      { id: 'EV-001', type: 'sheet', name: p.importSource ? 'Imported Supplier File' : 'Supplier Spreadsheet', file: p.importSource?.fileName ?? 'supplier_catalog.xlsx', anchor: p.importSource ? `${p.importSource.fileName} · ${p.importSource.sheetName} · row ${p.importSource.row}` : `${p.sku} · Products & Packaging`, extracted: [`Product type: Tote bag`, `Color: ${p.color}`, `Packaging weight: ${p.packagingWeight ? `${p.packagingWeight} kg` : 'Missing'}`] },
+      { id: 'EV-002', type: 'pdf', name: p.importSource ? 'Mock Specification PDF' : 'Specification PDF', file: 'canvas_tote_specification.pdf', anchor: 'Page 1 · materials', extracted: [`Body material: ${p.material}`, `Country of origin: ${p.countryOfOrigin}`, 'Load capacity: Not verified'] },
+      { id: 'EV-003', type: 'image', name: p.importSource ? 'Mock Product / Packaging Images' : 'Product / Packaging Images', file: 'tote_front.jpg + tote_opening.jpg', anchor: 'Image 1 · exterior; image 2 · opening', extracted: ['Finish: Natural woven texture', 'Closure: Open top', 'Straps: Dual shoulder straps', 'Load capacity: Not verified'] },
+    ];
     return [
       { id: 'EV-001', type: 'sheet', name: p.importSource ? 'Imported Supplier File' : 'Supplier Spreadsheet', file: p.importSource?.fileName ?? 'supplier_catalog.xlsx', anchor: p.importSource ? `${p.importSource.fileName} · ${p.importSource.sheetName} · row ${p.importSource.row}` : `${p.sku} · Products & Packaging`, extracted: [`Color: ${p.color}`, `Straw: ${p.straw ? 'Included' : 'No straw'}`, `Packaging weight: ${p.packagingWeight ? `${p.packagingWeight} kg` : 'Missing'}`] },
       { id: 'EV-002', type: 'pdf', name: p.importSource ? 'Mock Specification PDF' : 'Specification PDF', file: 'bottle_specification.pdf', anchor: 'Page 1 · specifications', extracted: [`Capacity: ${p.capacity}ml / ${p.localizedCapacity}`, `Body: ${p.material}`, 'Lid: Screw-top lid'] },

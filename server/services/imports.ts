@@ -267,7 +267,7 @@ export async function resolveImportOccurrence(db: PrismaClient, userId: string, 
     if (occurrence.resolution !== 'pending') throw new AppError('already_resolved', 'This row has already been resolved.', 409);
     const { catalogChanged } = await applyResolution(tx, userId, occurrence, action);
     if (catalogChanged) await tx.user.update({ where: { id: userId }, data: { catalogRevision: { increment: 1 } } });
-    const pending = await tx.importOccurrence.count({ where: { batchId: occurrence.batchId, resolution: 'pending' } });
+    const pending = await tx.importOccurrence.count({ where: { batchId: occurrence.batchId, resolution: 'pending', verdict: { in: ['conflict', 'probable'] } } });
     await tx.importBatch.update({ where: { id: occurrence.batchId }, data: { status: pending ? 'needs_review' : 'completed' } });
     return batchDetail(tx, userId, occurrence.batchId);
   }, { timeout: 20000 });
@@ -288,7 +288,7 @@ export async function resolveImportOccurrencesBulk(db: PrismaClient, userId: str
     if (user.catalogRevision !== expectedRevision) throw new AppError('catalog_changed', 'The dataset changed. Reload before resolving.', 409);
     const batch = await tx.importBatch.findFirst({ where: { id: batchId, userId } });
     if (!batch) throw new AppError('not_found', 'Import batch not found.', 404);
-    const candidates = await tx.importOccurrence.findMany({ where: { batchId: batch.id, userId, resolution: 'pending', ...(input.verdict ? { verdict: input.verdict } : {}) }, orderBy: { rowNumber: 'asc' } });
+    const candidates = await tx.importOccurrence.findMany({ where: { batchId: batch.id, userId, resolution: 'pending', ...(input.verdict ? { verdict: input.verdict } : { verdict: { in: ['conflict', 'probable'] } }) }, orderBy: { rowNumber: 'asc' } });
     let applied = 0; let skipped = 0; let catalogChanged = false;
     for (const occurrence of candidates) {
       if (input.field && input.field !== '*' && !(occurrence.conflicts as unknown as FieldDifference[] | null)?.some(difference => difference.field === input.field)) continue;
@@ -308,7 +308,7 @@ export async function resolveImportOccurrencesBulk(db: PrismaClient, userId: str
         create: { userId, verdict, field, action: input.action, appliedCount: applied },
       });
     }
-    const pending = await tx.importOccurrence.count({ where: { batchId: batch.id, resolution: 'pending' } });
+    const pending = await tx.importOccurrence.count({ where: { batchId: batch.id, resolution: 'pending', verdict: { in: ['conflict', 'probable'] } } });
     await tx.importBatch.update({ where: { id: batch.id }, data: { status: pending ? 'needs_review' : 'completed' } });
     return { batch: await batchDetail(tx, userId, batch.id), applied, skipped };
   }, { timeout: 20000 });

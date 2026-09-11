@@ -105,7 +105,7 @@ test('pending and rejected facts are excluded from backend template; confirmed p
   s = await mutate(s, 'lidType', 'reject'); assert.equal(s.facts.find(f => f.key === 'lidType')!.allowed, false);
   listing = await template(s); assert.doesNotMatch(listing.title, /Screw-top/);
   assert.ok(listing.sources.every((f: { allowed: boolean; status: string }) => f.allowed && f.status === 'Confirmed'));
-  assert.equal(listing.factRevision, s.factsRevision); assert.doesNotMatch(JSON.stringify(listing), /100% leakproof/);
+  assert.equal(listing.factRevision, s.listingFactsRevision); assert.doesNotMatch(JSON.stringify(listing), /100% leakproof/);
   const claim = s.facts.find(f => f.key === 'leakproof')!;
   assert.equal((await app.inject({ method: 'POST', url: `/api/facts/${claim.recordId}/confirm`, headers: { cookie }, payload: { expectedRevision: s.factsRevision } })).statusCode, 400);
 });

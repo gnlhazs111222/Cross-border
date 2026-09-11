@@ -19,7 +19,7 @@ export function normalizedListingInput(input: ListingInput) {
   return {
     platform: input.platform, market: input.context?.market ?? 'United States', category: input.context?.category ?? 'Home & Kitchen',
     requirements: (input.context?.requirements ?? []).filter(r => !/profit|cost|declared|freight|duty|margin|\bUSD\b|\$/i.test(r)).map(r => r.trim().replace(/\s+/g, ' ')),
-    product: input.context?.product ?? { sku: input.factCard.sku, name: 'Travel Bottle' }, factsRevision: input.factRevision,
+    product: input.context?.product ?? { sku: input.factCard.sku, name: 'Product' }, factsRevision: input.factRevision,
     ALLOWED_FACTS: facts.map(f => ({ field: f.key, label: f.label, value: f.value, source: f.sourceKind === 'supplier' ? 'Supplier File' : f.sourceKind === 'manual' ? 'Manual Confirmation' : 'Mock Evidence' })).sort((a, b) => a.field.localeCompare(b.field)),
   };
 }
@@ -37,7 +37,7 @@ export class QwenListingProvider implements ListingProvider {
     const example: GeneratedListing = { title: template.title, bullets: template.bullets.slice(0, 5), description: template.description, attributes: template.attributes, usedFacts: allowed.map(f => ({ field: f.key, value: f.value })) };
     const schema = listingOutputSchema(input.platform);
     const result = await this.text.generateStructured({ purpose: 'listing_generation', mode: 'text', promptVersion, inputHash,
-      systemPrompt: listingSystemPrompt(input.platform), maxTokens: this.options.maxTokens ?? 1800,
+      systemPrompt: listingSystemPrompt(input.platform, input.context?.category), maxTokens: this.options.maxTokens ?? 1800,
       prompt: JSON.stringify(normalizedListingInput(input)), schema, example });
     try {
       const output = validateGeneratedListingAgainstFacts(schema.parse(result.data), allowed);

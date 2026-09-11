@@ -11,7 +11,7 @@ export const toProduct = (row: DbProduct): ServerProduct => ({ ...(row.data as u
 export function normalizeImportedProduct(p: Product): Product {
   const missing = [...new Set([...p.missing, ...(!p.capacity ? ['Capacity'] : []), ...(!p.packagingWeight ? ['Packaging Weight'] : []), ...([p.packageLength, p.packageWidth, p.packageHeight].some(n => n === undefined) ? ['Packaging Dimensions'] : [])])];
   return { ...p, missing, status: missing.length ? 'missing_data' : 'search_ready',
-    localizedCapacity: `${(p.capacity / 29.5735295625).toFixed(1)} fl oz`,
+    localizedCapacity: p.visual === 'bottle' && p.capacity ? `${(p.capacity / 29.5735295625).toFixed(1)} fl oz` : '—',
     packagingDimensions: missing.includes('Packaging Dimensions') ? undefined : `${p.packageLength} × ${p.packageWidth} × ${p.packageHeight} cm` };
 }
 export async function seedProducts(db: Database, userId: string) {

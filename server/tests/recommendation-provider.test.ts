@@ -7,6 +7,7 @@ import { hardFilter, type RecommendationContext } from '../../shared/recommendat
 import { recommendationCases } from '../../evaluation/recommendation/cases';
 import { caseMetrics, summarizeMetrics, validateExpected } from '../../evaluation/recommendation/metrics';
 import { baseFactCard } from '../../shared/facts';
+import { bagDemoTask, products } from '../../src/data/mockData';
 import { AppError } from '../errors';
 import { reasonConflict, type RankedOutput } from '../providers/recommendationValidation';
 const example = recommendationCases[0];
@@ -17,19 +18,32 @@ class Text extends MockTextModelProvider {
 }
 const options = (): RecommendationOptions => ({ model: 'qwen3.6-flash', configured: true, liveEnabled: true });
 
-test('hard filter rejects duplicates, possible duplicates, wrong category, missing weight and insufficient demo profit', () => {
-  const filtered = hardFilter(example.candidates, example.task); assert.equal(filtered.eligible.length, 4); assert.equal(filtered.excluded.length, 6);
-  for (const reason of ['Duplicate', 'Possible Duplicate', 'Category mismatch', 'Missing critical facts']) assert.ok(filtered.excluded.some(r => r.reason === reason));
-  const profit = hardFilter(example.candidates, { ...example.task, minProfit: 5.5 }); assert.equal(profit.eligible.length, 1);
+test('hard filter uses candidate facts and ignores pricing readiness and the price target', () => {
+  const filtered = hardFilter(example.candidates, example.task); assert.equal(filtered.eligible.length, 6); assert.equal(filtered.excluded.length, 4);
+  for (const reason of ['Duplicate', 'Possible Duplicate', 'Category mismatch']) assert.ok(filtered.excluded.some(r => r.reason === reason));
+  assert.ok(filtered.eligible.some(p => p.status === 'missing_data' && !p.packagingWeight));
+  const missingSelectionFact = { ...example.candidates[0], status: 'missing_data' as const, missing: ['Material'] };
+  assert.equal(hardFilter([missingSelectionFact], example.task).excluded[0].reason, 'Missing candidate facts');
+  const higherTarget = hardFilter(example.candidates, { ...example.task, minProfit: 1000 });
+  assert.deepEqual(higherTarget.eligible.map(p => p.sku), filtered.eligible.map(p => p.sku));
   assert.equal(hardFilter(example.candidates, { ...example.task, category: 'home & kitchen' }).eligible.length, 0); // Same canonical category contract as the existing Fact / Listing workflow.
+});
+test('bag recommendation input uses category fields and keeps lamps excluded', () => {
+  const bag = products.find(p => p.visual === 'bag')!;
+  const lamp = products.find(p => p.visual === 'lamp')!;
+  const filtered = hardFilter([bag, lamp], bagDemoTask);
+  assert.deepEqual(filtered.eligible.map(p => p.sku), [bag.sku]);
+  const payload = normalizedRecommendationInput(filtered.eligible, bagDemoTask);
+  assert.deepEqual(payload.candidates[0].attributes, { productType: 'Tote bag', color: 'Black', material: 'Canvas' });
+  assert.doesNotMatch(JSON.stringify(payload), /capacityMl|capacityLocalized|hasStraw/);
 });
 test('Qwen receives only eligible public confirmed facts and returns authorized structured Top3 metadata', async () => {
   const text = new Text(); const c = context(); c.facts[example.candidates[0].sku].push({ key: 'finish', label: 'finish', value: 'PRIVATE_PENDING', source: 'PRIVATE_FILE', anchor: '/private', status: 'Requires Confirmation', allowed: false });
   const result = await new QwenRecommendationProvider(text, options()).recommend(example.candidates, example.task, c);
   assert.equal(text.calls, 1); assert.equal(result.length, 3); assert.equal(result[0].generation?.mode, 'qwen');
-  const data = JSON.parse(text.requests[0].prompt); assert.equal(data.candidates.length, 4);
+  const data = JSON.parse(text.requests[0].prompt); assert.equal(data.candidates.length, 6);
   assert.doesNotMatch(text.requests[0].prompt, /PRIVATE|supplierCost|declaredValue|packagingWeight|password|cookie|userId|007-BLK|008-BLK/);
-  assert.equal(data.task.minimumProfit, 5); assert.ok(data.candidates.every((p: { productId: string }) => /^C[1-9]\d*$/.test(p.productId)));
+  assert.equal(data.task.minimumProfit, undefined); assert.ok(data.candidates.every((p: { productId: string }) => /^C[1-9]\d*$/.test(p.productId)));
   assert.ok(result.every(r => example.candidates.some(p => p.recordId === r.productId && p.sku === r.sku)));
 });
 for (const mode of ['unknown', 'duplicate', 'score', 'empty-reason', 'color', 'straw', 'capacity', 'order'] as const) test(`${mode} model error causes deterministic fallback`, async () => {
@@ -39,8 +53,8 @@ for (const mode of ['unknown', 'duplicate', 'score', 'empty-reason', 'color', 's
     if (mode === 'score') data.rankedCandidates[0].score = 101;
     if (mode === 'empty-reason') data.rankedCandidates[0].matchedReasons = [];
     if (mode === 'color') data.rankedCandidates[0].matchedReasons = ['Ivory matches requested color'];
-    if (mode === 'straw') data.rankedCandidates[1].matchedReasons = ['No straw'];
-    if (mode === 'capacity') data.rankedCandidates[2].matchedReasons = ['500ml capacity'];
+    if (mode === 'straw') data.rankedCandidates.find(r => r.sku === 'LM-KT-BTL-002-BLK-500')!.matchedReasons = ['No straw'];
+    if (mode === 'capacity') data.rankedCandidates[0].matchedReasons = ['750ml capacity'];
     if (mode === 'order') data.rankedCandidates[0].score = 1;
   };
   const result = await new QwenRecommendationProvider(text, options()).recommend(example.candidates, example.task, context());
@@ -72,14 +86,14 @@ test('empty and oversized eligible pools do not consume model calls', async () =
 });
 test('evaluation labels are valid, metrics handle ties and empty cases without inflated ranking accuracy', () => {
   assert.ok(recommendationCases.length >= 10); recommendationCases.forEach(validateExpected);
-  const correct = caseMetrics(example, example.expected.acceptableTop3.map((sku, i) => ({ sku, score: 99-i, reasons: ['Packaging information is complete'], deductions: [] })));
+  const correct = caseMetrics(example, example.expected.acceptableTop3.map((sku, i) => ({ sku, score: 99-i, reasons: ['Core product facts are available for selection'], deductions: [] })));
   assert.equal(correct.top1Accuracy, 1); assert.equal(correct.hitAt3, 1); assert.equal(correct.ndcgAt3, 1);
   const emptyCase = recommendationCases.find(c => !c.expected.preferredTop1.length)!; const empty = caseMetrics(emptyCase, []); assert.equal(empty.top1Accuracy, null); assert.equal(empty.emptyCaseCorrect, true);
   assert.equal(summarizeMetrics([correct, empty]).labelledCaseCount, 1);
   const invalid = caseMetrics(example, [{ sku: 'unknown', score: 100, reasons: ['No straw'], deductions: [] }]); assert.equal(invalid.invalidCandidates, 1);
-  const repeated = caseMetrics(example, Array.from({ length: 3 }, () => ({ sku: example.expected.preferredTop1[0], score: 99, reasons: ['Packaging information is complete'], deductions: [] })));
+  const repeated = caseMetrics(example, Array.from({ length: 3 }, () => ({ sku: example.expected.preferredTop1[0], score: 99, reasons: ['Core product facts are available for selection'], deductions: [] })));
   assert.equal(repeated.invalidCandidates, 2); assert.ok(repeated.ndcgAt3! <= 1);
-  assert.equal(normalizedRecommendationInput(hardFilter(example.candidates, example.task).eligible, example.task).candidates.length, 4);
+  assert.equal(normalizedRecommendationInput(hardFilter(example.candidates, example.task).eligible, example.task).candidates.length, 6);
 });
 
 test('capacity comparison can mention a requested target but cannot assert it as the candidate capacity', () => {

@@ -37,13 +37,14 @@ export function hardReviewIssues(input: ReviewInput): Issue[] {
     const internal = disclosurePattern.exec(text) ?? (location.key ? disclosurePattern.exec(location.key) : null);
     if (internal) issues.push({ id: `B-LOCAL-${issues.length + 1}`, severity: 'HIGH', category: 'internal_disclosure', title: 'Internal commercial information', text: '[Internal information withheld]', location, reason: 'Remove internal commercial or credential information before public copy is reviewed.', factKeys: [], suggestedFix: 'Remove the internal information and run review again.', origin: 'rules' });
     if (/100%\s*leakproof/i.test(text)) issues.push({ id: `B-LOCAL-${issues.length + 1}`, severity: 'HIGH', category: 'unsupported_claim', title: 'Unsupported performance claim', text: text.match(/100%\s*leakproof/i)![0], location, reason: 'The demo does not authorize the absolute leakproof claim.', factKeys: [], suggestedFix: 'Remove the unsupported performance promise.', origin: 'rules' });
+    if (/guaranteed to carry up to 50 kg/i.test(text)) issues.push({ id: `B-LOCAL-${issues.length + 1}`, severity: 'HIGH', category: 'unsupported_claim', title: 'Unsupported load claim', text: text.match(/guaranteed to carry up to 50 kg/i)![0], location, reason: 'The demo has no confirmed load test or carrying-capacity specification.', factKeys: [], suggestedFix: 'Remove the unsupported carrying-capacity promise.', origin: 'rules' });
   }
   return issues;
 }
 export function reviewModelInput(input: ReviewInput) {
   // Review has its own consumer-field scope; generation's narrower whitelist must not erase valid review evidence.
   const publicKeys = new Set(['leakproof', 'color', 'capacity', 'material', 'straw', 'countryOfOrigin', 'packageIncludes', 'finish', 'lidType',
-    'bpaFree', 'foodSafe', 'dishwasherSafe', 'coldRetention', 'heatRetention', 'dropTest', 'power', 'supply']);
+    'bagType', 'closureType', 'strapType', 'bpaFree', 'foodSafe', 'dishwasherSafe', 'coldRetention', 'heatRetention', 'dropTest', 'power', 'supply']);
   const allowed = input.facts.filter(f => publicKeys.has(f.key) && f.status === 'Confirmed' && f.allowed);
   return { platform: input.listing.platform, market: input.context.market, category: input.context.category,
     ALLOWED_FACTS: allowed.map(f => ({ field: f.key, label: f.label, value: f.value, sourceKind: f.sourceKind ?? 'supplier' })),

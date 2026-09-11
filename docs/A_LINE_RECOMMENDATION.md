@@ -1,5 +1,7 @@
 # A 线：可编辑任务与 Qwen 推荐
 
+> 历史说明：本文件记录 `79cac0e` 当时的实现。2026-09-11 起，当前 `main` 已按项目书现版解除选品与定价耦合；下述“最低利润作为推荐门槛”等内容仅用于追溯旧版本，不代表当前行为。
+
 本轮基于 `a8a7c63`（包含稳定功能提交 `3fea260`），在独立 worktree `/mnt/data/pyc/Create_new_products_A`、分支 `feat/qwen-recommendation` 开发。没有合并到 full-demo。A worktree 独立安装依赖、独立复制 SQLite；主 worktree 与比赛标签保持原样。
 
 ## 1. 完成范围

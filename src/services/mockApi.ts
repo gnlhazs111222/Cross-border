@@ -5,8 +5,8 @@ import { baseFactCard, effectiveProduct, pricingFromFacts, productEvidence, revi
 import type { WorkflowSnapshot, FactSnapshot, FactPreview, ProductAsset, AssetRole, ImportBatchDto, ImportBatchDetail, ImportBulkResult, ImportResolution, ImportRuleDto } from '../../shared/contracts';
 import { apiClient, SERVER_MODE } from './apiClient';
 import { enrichProductEvidence, makeTemplateListing, rankProducts, reviewAgainstTemplate } from '../../shared/domain';
-import { demoTask, products as builtInProducts } from '../data/mockData';
-import { PRICING_FACTS, REQUIRED_COPY_FACTS, editableFact, factEditor } from './factReview';
+import { bagDemoTask, demoTask, products as builtInProducts } from '../data/mockData';
+import { requiredCopyFactsFor, PRICING_FACTS, editableFact, factEditor } from './factReview';
 import { SUPPLIER_COLUMNS } from '../data/supplierTemplate';
 import type { DemoState, Evidence, Fact, FactCard, ImportMode, ImportPreview, Listing, Platform, Pricing, Product, Recommendation, Stage, Task, Workspace } from '../types';
 
@@ -249,8 +249,7 @@ export const mockApi = {
   async getCatalog() { await delay(180); return current.catalog.map(productView); },
   factEditor, editableFact,
   // Pricing is not part of readiness: an incomplete price leaves the suggested price pending.
-  listingReady() { return !!current.v2 && !!current.selectedSku && selected().duplicateStatus === 'unique' && selected().category === (serverOwner ? current.task?.category : demoTask.category) && REQUIRED_COPY_FACTS.every(key => current.v2!.facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed)); },
-  getTaskTemplate: () => clone(demoTask),
+  listingReady() { return !!current.v2 && !!current.selectedSku && selected().duplicateStatus === 'unique' && selected().category === (serverOwner ? current.task?.category : demoTask.category) && requiredCopyFactsFor(selected().visual).every(key => current.v2!.facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed)); },  getTaskTemplate: () => clone(demoTask),
   async ready() { synchronizeFacts(); if (current.pricing && current.selectedSku) current.pricing = pricingFor(selected()); if (current.stage === 'initial') advance('materials_ready'); return save(); },
   navigate(workspace: Workspace) { current.workspace = workspace; return save(); },
   async reset() { await delay(180); const data = serverOwner ? await apiClient.reset() : null; pendingImport = null; current = initialState(); serverRecommendation = null; serverSnapshots = {}; serverWorkflow = null; serverAssets = {}; if (data) { serverPreviews = data.factPreviews; current.catalog = data.products; current.serverRevision = data.revision; } return save(); },
@@ -397,7 +396,12 @@ export const mockApi = {
     const restored = await apiClient.tasks.update(task.recordId, demoTask, task.revision!);
     await useServerTask(restored); serverRecommendation = await apiClient.recommendations.run(restored.recordId, restored.revision!, 'rule'); return save();
   },
-  async runRecommendation() {
+  async loadBagDemoTask() {
+    if (!serverOwner) throw new Error('Bag demo task requires Full Demo mode.');
+    const task = await apiClient.tasks.create(bagDemoTask);
+    const restored = await apiClient.tasks.update(task.recordId, bagDemoTask, task.revision!);
+    await useServerTask(restored); serverRecommendation = await apiClient.recommendations.run(restored.recordId, restored.revision!, 'rule'); return save();
+  },  async runRecommendation() {
     if (!serverOwner || !current.task) return save();
     try { serverRecommendation = await apiClient.recommendations.run(current.task.recordId!, current.task.revision!); return save(); }
     catch (error) { await this.connectServer(serverOwner); throw error; }
