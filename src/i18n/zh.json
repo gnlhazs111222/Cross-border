@@ -891,5 +891,13 @@
   "Expand": "展开",
   "Latest: {file} · {status}": "最近一次：{file} · {status}",
   "{count} row(s) need a decision": "有 {count} 条待裁决",
-  "expand to review them": "展开即可处理"
+  "expand to review them": "展开即可处理",
+  "Display units": "显示单位",
+  "US · fl oz / lb / in": "美国 · 液量盎司 / 磅 / 英寸",
+  "UK · fl oz (imperial) / lb / in": "英国 · 液量盎司（英制）/ 磅 / 英寸",
+  "Metric · ml / kg / cm": "公制 · 毫升 / 千克 / 厘米",
+  "Unit conversion": "单位转换",
+  "US units": "美国单位",
+  "UK units": "英国单位",
+  "Metric units": "公制单位"
 }

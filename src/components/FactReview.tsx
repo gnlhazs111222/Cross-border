@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { CheckCircle2, ClipboardCheck } from 'lucide-react';
 import type { Fact } from '../types';
 import { useDemo } from './DemoContext';
+import { projectFactValue } from '../../shared/units';
 import { useI18n } from '../i18n/I18nContext';
 import { mockApi } from '../services/mockApi';
 import { Badge, Button, Modal, Notice } from './ui';
@@ -36,7 +37,7 @@ export function FactReview() {
         const editable = mockApi.editableFact(f.key);
         const canConfirm = editable && !['Missing', 'Confirmed'].includes(f.status) && f.value !== 'Missing';
         return <tr key={f.key} className={f.key === focusedKey ? 'focused-fact' : undefined} data-testid={`fact-review-${f.key}`}>
-          <th scope="row">{t(f.label)}</th><td data-label={t("Value")} className="review-fact-value">{t(f.value)}</td>
+          <th scope="row">{t(f.label)}</th><td data-label={t("Value")} className="review-fact-value">{t(projectFactValue(f.key, f.value, mockApi.unitSystem()))}</td>
           <td data-label={t("Source:")} className="review-fact-source"><Badge tone={f.sourceKind === 'manual' ? 'blue' : 'neutral'}>{t(f.sourceKind === 'manual' ? 'Manual Confirmation' : f.sourceKind === 'supplier' ? 'Supplier File' : 'Mock Evidence')}</Badge><details><summary>{t(f.source)}</summary><small>{f.anchor}</small>{f.previousValue !== undefined && <small>{t('Previous value:')} {t(f.previousValue)}</small>}{f.previousSource && <small>{t('Previous source:')} {f.previousSource}</small>}{f.confirmedAt && <small>{t('Confirmed at:')} <time dateTime={f.confirmedAt}>{f.confirmedAt}</time></small>}</details></td>
           <td data-label={t("Status")}><Badge tone={f.status === 'Confirmed' ? 'green' : f.status === 'Rejected' ? 'red' : 'amber'}>{t(f.status === 'Requires Confirmation' ? 'Needs confirmation' : f.status)}</Badge></td>
           <td data-label={t("Listing Use")}><Badge tone={f.allowed && f.status === 'Confirmed' ? 'green' : 'neutral'}>{t(f.allowed && f.status === 'Confirmed' ? 'Allowed' : 'Not allowed')}</Badge></td>

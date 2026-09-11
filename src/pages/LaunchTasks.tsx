@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { SERVER_MODE } from '../services/apiClient';
 import { TaskEditor } from '../components/TaskEditor';
 import { useI18n } from '../i18n/I18nContext';
+import { formatCapacity } from '../../shared/units';
 import { ArrowRight, Check, Minus, SlidersHorizontal, Sparkles, Target } from 'lucide-react';
 import { useDemo } from '../components/DemoContext';
 import { Badge, Button, Notice, PageHeader, ProductVisual } from '../components/ui';
@@ -9,7 +10,7 @@ import { mockApi } from '../services/mockApi';
 import type { Product } from '../types';
 
 function ProductSummary({ product, t }: { product: Product; t: (key: string) => string }) {
-  return <span>{product.visual === 'bag' ? <>{t('Tote bag')}<br />{t(product.color)}<br />{t(product.material)}</> : <>{product.capacity}ml<br />{t(product.color)}<br />{t(product.straw ? 'With straw' : 'No straw')}</>}</span>;
+  return <span>{product.visual === 'bag' ? <>{t('Tote bag')}<br />{t(product.color)}<br />{t(product.material)}</> : <>{formatCapacity(product.capacity, mockApi.unitSystem())}<br />{t(product.color)}<br />{t(product.straw ? 'With straw' : 'No straw')}</>}</span>;
 }
 
 export function LaunchTasks() {

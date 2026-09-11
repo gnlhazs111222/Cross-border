@@ -1,5 +1,6 @@
 import { eligibilityReason, type RecommendationSnapshot } from '../../shared/recommendation';
 import { matchAssetFiles } from '../../shared/asset-match';
+import { systemForMarket, type UnitSystem } from '../../shared/units';
 import { amazonCsv } from '../../shared/csv';
 import { baseFactCard, effectiveProduct, pricingFromFacts, productEvidence, reviewFact } from '../../shared/facts';
 import type { WorkflowSnapshot, FactSnapshot, FactPreview, ProductAsset, AssetRole, ImportBatchDto, ImportBatchDetail, ImportBulkResult, ImportResolution, ImportRuleDto } from '../../shared/contracts';
@@ -255,6 +256,9 @@ export const mockApi = {
   async reset() { await delay(180); const data = serverOwner ? await apiClient.reset() : null; pendingImport = null; current = initialState(); serverRecommendation = null; serverSnapshots = {}; serverWorkflow = null; serverAssets = {}; if (data) { serverPreviews = data.factPreviews; current.catalog = data.products; current.serverRevision = data.revision; } return save(); },
   async loadBuiltInDataset() { await this.reset(); advance('materials_ready'); return save(); },
   getSupplierTemplate: () => [...SUPPLIER_COLUMNS],
+  /** Display units: the task market decides the default, a manual choice wins until the task changes. */
+  unitSystem(): UnitSystem { return current.units ?? systemForMarket(serverOwner ? current.task?.market : undefined); },
+  setUnits(units: UnitSystem) { current.units = units; return save(); },
   /** Classifies the pending file against the pool before anything is written. Server mode only. */
   async previewImportAlignment(): Promise<import('../../server/services/imports').ImportPreviewResult | null> {
     if (!serverOwner || !pendingImport) return null;

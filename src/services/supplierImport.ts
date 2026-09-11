@@ -1,8 +1,45 @@
 import { read, utils, type WorkBook } from 'xlsx';
 import { MAX_IMPORT_BYTES, MAX_IMPORT_COLUMNS, MAX_IMPORT_ROWS, OPTIONAL_COLUMNS, SUPPLIER_COLUMNS } from '../data/supplierTemplate';
+import { parseCapacityMl, toHalfWidth } from '../../shared/alignment';
 import type { ImportIssue, ImportMode, ImportPreview, Product } from '../types';
 
 type Column = typeof SUPPLIER_COLUMNS[number];
+
+/**
+ * Unit differences are a format question, not a data question: 16.9 fl oz, 0.5L and 500ml are the
+ * same bottle. Values are converted to the column's canonical unit (ml, kg, cm, plain number) and
+ * then validated by the usual rules, so nothing about the data contract changes.
+ */
+const weightToKg = (value: string): number | undefined => {
+  const text = toHalfWidth(value).toLowerCase().replace(/,/g, '');
+  const match = text.match(/(\d+(?:\.\d+)?)\s*(kg|kgs|kilograms?|g|grams?|千克|公斤|克|lb|lbs|pounds?|oz|ounces?)/);
+  if (!match) return undefined;
+  const amount = Number(match[1]); const unit = match[2];
+  if (/^(kg|kgs|kilogram|kilograms|千克|公斤)/.test(unit)) return amount;
+  if (/^(g|gram|grams|克)/.test(unit)) return amount / 1000;
+  if (/^(lb|lbs|pound|pounds)/.test(unit)) return amount * 0.45359237;
+  return amount * 0.028349523125;
+};
+const lengthToCm = (value: string): number | undefined => {
+  const text = toHalfWidth(value).toLowerCase().replace(/,/g, '');
+  const match = text.match(/(\d+(?:\.\d+)?)\s*(cm|厘米|mm|毫米|inch|inches|in|英寸)?/);
+  if (!match) return undefined;
+  const amount = Number(match[1]); const unit = match[2] ?? 'cm';
+  if (/^(mm|毫米)/.test(unit)) return amount / 10;
+  if (/^(inch|inches|in|英寸)/.test(unit)) return amount * 2.54;
+  return amount;
+};
+const moneyNumber = (value: string): number | undefined => {
+  const text = toHalfWidth(value).replace(/[,$\s]/g, '').replace(/^(usd|cny|rmb|eur|jpy)/i, '').replace(/[$¥€£]/g, '');
+  return /^\d+(?:\.\d+)?$/.test(text) ? Number(text) : undefined;
+};
+const unitConverted = (column: Column, value: string): number | undefined => {
+  if (column === 'capacityMl') return parseCapacityMl(value);
+  if (column === 'packagingWeightKg') return weightToKg(value);
+  if (column === 'packageLengthCm' || column === 'packageWidthCm' || column === 'packageHeightCm') return lengthToCm(value);
+  if (column === 'supplierCost' || column === 'declaredValue') return moneyNumber(value);
+  return undefined;
+};
 /** Short names our own exports use, mapped onto the template names. */
 const COLUMN_ALIASES: Record<string, string> = { straw: 'hasStraw' };
 const blank = (value: unknown) => value === null || value === undefined || (typeof value === 'string' && value.trim() === '');
@@ -66,7 +103,9 @@ export async function parseSupplierFile(file: File, mode: ImportMode, _existing:
     const numeric = (column: Column, optional = false, allowZero = false, integer = false) => {
       if (blank(values[column])) { if (!optional) issue('required', column); return undefined; }
       const raw = values[column];
-      const number = typeof raw === 'number' ? raw : typeof raw === 'string' && /^\d+(?:\.\d+)?$/.test(raw.trim()) ? Number(raw) : NaN;
+      const text = typeof raw === 'string' ? raw.trim() : '';
+      const converted = text ? unitConverted(column, text) : undefined;
+      const number = typeof raw === 'number' ? raw : converted !== undefined ? (integer ? Math.round(converted) : converted) : text && /^\d+(?:\.\d+)?$/.test(text) ? Number(text) : NaN;
       if (!Number.isFinite(number) || (allowZero ? number < 0 : number <= 0) || (integer && !Number.isInteger(number))) { issue('number', column); return undefined; }
       return number;
     };
