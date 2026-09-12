@@ -1,7 +1,7 @@
 import type { RecommendationSnapshot } from '../../shared/recommendation';
 import type { WorkflowSnapshot, FactSnapshot, Capabilities, CatalogResponse, PublicUser, ServerProduct, ServerTask, ProductAsset, AssetRole, ImportBatchDto, ImportBatchDetail, ImportBulkResult, ImportResolution, ImportRuleDto } from '../../shared/contracts';
 import type { ImportPreviewResult } from '../../server/services/imports';
-import type { ImportPreview, Listing, Platform, Task } from '../types';
+import type { ImportPreview, Listing, Platform, PricingContextSnapshot, Task } from '../types';
 
 export const SERVER_MODE = typeof window !== 'undefined' && import.meta.env?.MODE !== 'competition' && new URLSearchParams(window.location.search).get('mode') !== 'local';
 export class ApiError extends Error { constructor(public code: string, message: string, public status = 0) { super(message); } }
@@ -64,6 +64,8 @@ export const apiClient = {
     create: (task: Task) => request<ServerTask>('/tasks', 'POST', { code: task.id, platform: task.platform, market: task.market, category: task.category, requirements: task.requirements, minimumProfit: task.minProfit }),
     update: (id: string, task: Task, expectedRevision: number) => request<ServerTask>(`/tasks/${encodeURIComponent(id)}`, 'PATCH', { platform: task.platform, market: task.market, category: task.category, requirements: task.requirements, minimumProfit: task.minProfit, expectedRevision }),
     select: (taskId: string, sku: string, purpose: 'selected' | 'fact_review') => request<ServerTask>(`/tasks/${encodeURIComponent(taskId)}/selection`, 'POST', { productId: sku, purpose }),
+    pricingSnapshots: (taskId: string) => request<PricingContextSnapshot[]>(`/tasks/${encodeURIComponent(taskId)}/pricing-snapshots`),
+    refreshPricingSnapshot: (taskId: string, expectedVersion: number) => request<PricingContextSnapshot>(`/tasks/${encodeURIComponent(taskId)}/pricing-snapshots`, 'POST', { expectedVersion }),
   },
   recommendations: {
     get: (taskId: string) => request<RecommendationSnapshot>(`/tasks/${encodeURIComponent(taskId)}/recommendations`),

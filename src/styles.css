@@ -109,3 +109,14 @@ html[lang=zh-CN] .page-heading p,html[lang=zh-CN] .notice{line-height:1.9}
 
 .import-alignment{margin-bottom:16px}
 .import-alignment .notice{margin:12px 0 0}
+
+.pricing-snapshot-details{border-top:1px solid var(--border);padding:13px 22px 16px;background:#fbfcfa}
+.pricing-snapshot-details summary{cursor:pointer;color:var(--green);font-size:12px;font-weight:650}
+.pricing-snapshot-details dl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px 20px;margin-top:15px}
+.pricing-snapshot-details dt{font-size:11px;color:var(--muted);margin-bottom:5px}
+.pricing-snapshot-details dd{margin:0;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.pricing-snapshot-details dd small{display:block;color:var(--muted);margin-top:3px}
+.pricing-snapshot-details p{font-size:11px;color:var(--muted);line-height:1.6;margin-top:13px}
+.pricing-panel .panel-title>.button,.pricing-blocked .panel-title>.button{margin-left:auto}
+@media(max-width:1000px){.pricing-snapshot-details dl{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.pricing-snapshot-details{padding-inline:18px}.pricing-snapshot-details dl{grid-template-columns:1fr}.pricing-panel .panel-title>.button,.pricing-blocked .panel-title>.button{width:100%;margin-left:0}}

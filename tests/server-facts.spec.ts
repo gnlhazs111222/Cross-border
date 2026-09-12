@@ -37,7 +37,7 @@ for (const zh of [false, true]) test(`server facts survive all localStorage dele
   await page.evaluate(() => localStorage.clear()); await page.reload();
   await expect(page.locator('.product-table tbody tr')).toHaveCount(10);
   await page.getByRole('navigation').getByRole('button', { name: 'Evidence & Facts', exact: true }).click();
-  await expect(page.getByTestId('fact-review-packagingWeight')).toContainText('0.42 kg');
+  await expect(page.getByTestId('fact-review-packagingWeight')).toContainText('0.93 lb');
   expect((await serverSnapshot(page)).factsRevision).toBe(snap.factsRevision);
   expect((await state(page)).v2).not.toBeNull();
   await page.evaluate(key => {

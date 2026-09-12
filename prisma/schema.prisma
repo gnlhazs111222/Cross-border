@@ -20,6 +20,7 @@ model User {
   occurrences     ImportOccurrence[]
   importRules     ImportResolutionRule[]
   tasks           LaunchTask[]
+  pricingSnapshots PricingSnapshot[]
   factCards       FactCard[]
   listings        ListingDraft[]
 }
@@ -144,8 +145,40 @@ model LaunchTask {
   selections    TaskSelection[]
   factCards     FactCard[]
   listings      ListingDraft[]
+  pricingSnapshots PricingSnapshot[]
   @@unique([userId, code])
   @@unique([userId, id])
+}
+model PricingSnapshot {
+  id                    String   @id @default(cuid())
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taskId                String
+  task                  LaunchTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  code                  String
+  version               Int
+  platform              String
+  market                String
+  settlementCurrency    String   @default("USD")
+  exchangePair          String
+  exchangeRate          Float
+  exchangeSource        String
+  exchangeReferenceDate String
+  fetchedAt             DateTime
+  shippingAmount        Float
+  shippingConfigVersion String
+  shippingSource        String
+  dutyAmount            Float
+  dutyRuleVersion       String
+  dutySource             String
+  platformFeeAmount     Float
+  platformFeeVersion    String
+  platformFeeSource     String
+  policyVersion         String
+  createdAt             DateTime @default(now())
+  @@unique([taskId, version])
+  @@unique([userId, code])
+  @@index([userId, taskId, createdAt])
 }
 model TaskSelection {
   id        String     @id @default(cuid())

@@ -116,7 +116,10 @@ test('append aligns rows with the pool instead of skipping them', async ({ page 
   // comparison happens; only the duplicate row inside the file itself is.
   await expect(page.getByRole('dialog').locator('.import-counts strong').nth(3)).toHaveText('1');
   await page.getByRole('button', { name: /^Import \d+ products?$/ }).click();
-  expect(await page.locator('.product-table tbody tr').count()).toBeGreaterThan(10);
+  await expect(page.getByTestId('import-completed')).toBeVisible();
+  // Only the genuinely new row is inserted. Matching, conflicting and uncertain rows stay attached
+  // to the batch for review instead of overwriting or duplicating the existing products.
+  await expect(page.locator('.product-table tbody tr')).toHaveCount(11);
   const saved = await snapshot(page);
   // Alignment never overwrites an existing product from an appended file.
   expect(saved.catalog.find((p: { sku: string }) => p.sku === HERO).supplierCost).toBe(8.2);
@@ -162,10 +165,10 @@ test('validation retains quoted CSV values and rejects invalid rows and XLSX for
   const missingPackaging = [...hero]; missingPackaging[0] = 'MISSING-BOTH'; missingPackaging[10] = ''; missingPackaging[11] = '';
   const data = csvBytes([valid, missingSku, missingName, badNumber, badBool, missingPackaging]);
   const preview = await parseSupplierFile(new File([new Uint8Array(data)], 'test.csv'), 'replace', []);
-  expect([preview.processed, preview.ready, preview.missing, preview.invalid]).toEqual([6, 1, 1, 4]);
+  expect([preview.processed, preview.ready, preview.missing, preview.invalid]).toEqual([6, 1, 3, 2]);
   expect(preview.products[0].name).toBe(valid[1]); expect(preview.products[0].declaredValue).toBe(6.75);
   expect(preview.products[0].straw).toBe(false);
-  expect(preview.products[1].missing).toEqual(['Packaging Weight', 'Packaging Dimensions']);
+  expect(preview.products.find(product => product.sku === 'MISSING-BOTH')!.missing).toEqual(['Packaging Weight', 'Packaging Dimensions']);
   const workbook = utils.book_new(); const sheet = utils.aoa_to_sheet([header.split(','), hero]);
   sheet.G2 = { t: 'b', v: false };
   sheet.I2 = { t: 'n', v: 8.2, f: '4.1*2' };
@@ -190,15 +193,16 @@ test('mixed-validity CSV shows invalid rows and uses imported costs and declared
   await page.goto('/');
   await page.getByRole('button', { name: 'Import Supplier File', exact: true }).click();
   await page.getByLabel('Supplier file', { exact: true }).setInputFiles({ name: 'custom.csv', mimeType: 'text/csv', buffer: csvBytes([valid, noSku, noName, valid]) });
-  await expect(page.getByRole('dialog').locator('.import-counts strong')).toHaveText(['4', '1', '0', '1', '2']);
-  await expect(page.getByRole('dialog')).toContainText('Missing required field: sku');
-  await expect(page.getByRole('dialog')).toContainText('Missing required field: productName');
-  await page.getByRole('button', { name: 'Import 1 products' }).click();
-  await expect(page.locator('.product-table tbody tr')).toHaveCount(1);
+  await expect(page.getByRole('dialog').locator('.import-counts strong')).toHaveText(['4', '1', '2', '1', '0']);
+  await expect(page.getByRole('dialog')).toContainText('Missing SKU');
+  await expect(page.getByRole('dialog')).toContainText('Missing Product name');
+  await page.getByRole('button', { name: 'Import 3 products' }).click();
+  await expect(page.locator('.product-table tbody tr')).toHaveCount(3);
   await expect(page.locator('.product-table')).toContainText('Real Uploaded 350ml Bottle');
   await page.getByRole('button', { name: 'Create Demo Task', exact: true }).click();
-  await expect(page.getByTestId('recommendation-1')).toContainText('CSV-CUSTOM-350');
-  await page.getByTestId('recommendation-1').getByRole('button', { name: 'Select SKU' }).click();
+  const uploadedCandidate = page.locator('.recommendation-card').filter({ hasText: 'CSV-CUSTOM-350' });
+  await expect(uploadedCandidate).toBeVisible();
+  await uploadedCandidate.getByRole('button', { name: 'Select SKU' }).click();
   await expect(page.getByRole('heading', { name: 'FactCard V1', exact: true })).toBeVisible();
   const facts = (await snapshot(page)).v1.facts;
   expect(facts.find((f: { key: string }) => f.key === 'declaredValue').value).toBe('USD 6.75');

@@ -90,7 +90,7 @@ for (const imported of [false, true]) {
     await expect(page.getByRole('button', { name: zh ? '继续前往文案工作室' : 'Continue to Listing Studio' })).toBeVisible();
     expect((await snapshot(page)).v1).toEqual(v1);
     await page.reload();
-    await expect(page.getByTestId('fact-review-packagingWeight')).toContainText('0.42 kg');
+    await expect(page.getByTestId('fact-review-packagingWeight')).toContainText('0.93 lb');
     await expect(page.locator('.suggested-price>strong')).toHaveText(imported ? 'USD 18.90' : 'USD 19.20');
     await page.screenshot({ path: info.outputPath('manual-weight-ready.png'), fullPage: true });
     await navigate(page, zh ? '商品资料' : 'Materials');

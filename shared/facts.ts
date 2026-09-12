@@ -1,4 +1,4 @@
-import type { Fact, FactCard, Product, Pricing, Evidence } from '../src/types';
+import type { Fact, FactCard, Product, Pricing, PricingContextSnapshot, Evidence } from '../src/types';
 import { HERO_SKU } from '../src/data/mockData';
 import { COPY_FACTS, editableFact, factEditor, factNumber, normalizeFactValue } from '../src/services/factReview';
 
@@ -56,7 +56,7 @@ export function effectiveProduct(p: Product, facts: Fact[]): Product {
     missing: [...new Set(missing)], status: missing.length ? 'missing_data' : 'search_ready',
   };
 }
-export function pricingFromFacts(p: Product, facts: Fact[], revision = 0, targetProfit = 5): Pricing {
+export function pricingFromFacts(p: Product, facts: Fact[], revision = 0, targetProfit = 5, snapshot?: PricingContextSnapshot): Pricing {
   const confirmed = (key: string) => facts.find(f => f.key === key && f.status === 'Confirmed');
   const missing = [
     ...(!confirmed('packagingWeight') ? ['Packaging Weight'] : []),
@@ -64,10 +64,13 @@ export function pricingFromFacts(p: Product, facts: Fact[], revision = 0, target
     ...(!confirmed('supplierCost') ? ['Supplier cost'] : []),
   ];
   const cost = confirmed('supplierCost') ? factNumber(confirmed('supplierCost')!.value) : p.supplierCost;
-  const floor = Math.ceil((cost + 3.1 + 0.7 + 2.2 + targetProfit - 1e-9) * 100) / 100;
+  const shipping = snapshot?.shipping.amount ?? 3.1;
+  const duty = snapshot?.duty.amount ?? 0.7;
+  const platformCost = snapshot?.platformFee.amount ?? 2.2;
+  const floor = Math.ceil((cost + shipping + duty + platformCost + targetProfit - 1e-9) * 100) / 100;
   return { version: `v${1 + revision}`, status: missing.length ? 'blocked' : 'ready', supplierCost: cost,
-    shipping: 3.1, duty: 0.7, platformCost: 2.2, targetProfit,
-    suggestedPrice: missing.length ? null : p.sku === HERO_SKU ? Math.max(19.99, floor) : floor, missing };
+    shipping, duty, platformCost, targetProfit,
+    suggestedPrice: missing.length ? null : p.sku === HERO_SKU ? Math.max(19.99, floor) : floor, missing, ...(snapshot ? { snapshot } : {}) };
 }
 
 export function productEvidence(p: Product): Evidence[] {

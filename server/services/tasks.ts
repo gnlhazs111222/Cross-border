@@ -5,13 +5,23 @@ import type { z } from 'zod';
 import type { ServerTask } from '../../shared/contracts';
 import { taskSchema } from '../validation';
 import { AppError } from '../errors';
+import { createPricingSnapshotTx, ensurePricingSnapshotTx, pricingSnapshotDto } from './pricing-snapshots';
 
 export async function tasks(db: PrismaClient, userId: string): Promise<ServerTask[]> {
-  const rows = await db.launchTask.findMany({ where: { userId }, include: { selections: { include: { product: true } } }, orderBy: { updatedAt: 'desc' } });
-  return rows.map(row => ({ id: row.code, recordId: row.id, revision: row.revision, platform: row.platform, market: row.market, category: row.category, requirements: row.requirements as string[], minProfit: row.minimumProfit, selectedSku: row.selections[0]?.product.sku ?? null, selectionPurpose: row.selections[0]?.purpose ?? null }));
+  return db.$transaction(async tx => {
+    const rows = await tx.launchTask.findMany({ where: { userId }, include: { selections: { include: { product: true } } }, orderBy: { updatedAt: 'desc' } });
+    return Promise.all(rows.map(async row => {
+      const snapshot = await ensurePricingSnapshotTx(tx, row);
+      return { id: row.code, recordId: row.id, revision: row.revision, platform: row.platform, market: row.market, category: row.category, requirements: row.requirements as string[], minProfit: row.minimumProfit,
+        selectedSku: row.selections[0]?.product.sku ?? null, selectionPurpose: row.selections[0]?.purpose ?? null, pricingSnapshot: pricingSnapshotDto(snapshot) };
+    }));
+  }, { timeout: 15000 });
 }
 export async function createTask(db: PrismaClient, userId: string, data: z.infer<typeof taskSchema>) {
-  await db.launchTask.upsert({ where: { userId_code: { userId, code: data.code } }, update: {}, create: { ...data, userId } });
+  await db.$transaction(async tx => {
+    const task = await tx.launchTask.upsert({ where: { userId_code: { userId, code: data.code } }, update: {}, create: { ...data, userId } });
+    await ensurePricingSnapshotTx(tx, task);
+  }, { timeout: 15000 });
   return (await tasks(db, userId)).find(t => t.id === data.code)!;
 }
 export async function selectProduct(db: PrismaClient, userId: string, taskId: string, productId: string, purpose: 'selected' | 'fact_review') {
@@ -32,11 +42,14 @@ export async function updateTask(db: PrismaClient, userId: string, taskId: strin
     const task = await tx.launchTask.findFirst({ where: { userId, id: taskId } });
     if (!task) throw new AppError('not_found', 'Task not found.', 404);
     if (task.revision !== data.expectedRevision) throw new AppError('task_changed', 'Task changed. Reload the current task before retrying.', 409);
+    const snapshot = await ensurePricingSnapshotTx(tx, task);
     const { expectedRevision: _expected, ...fields } = data; void _expected;
     await tx.taskSelection.deleteMany({ where: { taskId: task.id } });
     const products = await tx.factCard.findMany({ where: { taskId: task.id, userId, version: 1 }, select: { productId: true } });
     for (const p of products) await invalidateDownstream(tx, task.id, p.productId);
-    return tx.launchTask.update({ where: { id: task.id }, data: { ...fields, revision: { increment: 1 } } });
+    const updated = await tx.launchTask.update({ where: { id: task.id }, data: { ...fields, revision: { increment: 1 } } });
+    if (task.platform !== updated.platform || task.market !== updated.market || task.category !== updated.category) await createPricingSnapshotTx(tx, updated, snapshot.version + 1);
+    return updated;
   }, { timeout: 15000 });
   return (await tasks(db, userId)).find(t => t.recordId === row.id)!;
 }

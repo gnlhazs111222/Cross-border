@@ -91,7 +91,7 @@ function applyWorkflow(workflow: WorkflowSnapshot) {
   current.listings = clone(workflow.listings); current.reviews = clone(workflow.reviews); current.publications = clone(workflow.publications);
   const platform = current.platform;
   if (current.publications[platform]) advance('published');
-  else if (current.reviews[platform]) advance(workflow.publishAllowed[platform] ? 'review_passed' : current.reviews[platform]!.status === 'blocked' ? 'review_blocked' : 'listing_generated');
+  else if (current.reviews[platform]) advance(workflow.publishAllowed[platform] || (current.reviews[platform]!.status === 'passed' && current.pricing?.status !== 'ready') ? 'review_passed' : current.reviews[platform]!.status === 'blocked' ? 'review_blocked' : 'listing_generated');
   else if (current.listings[platform]) advance('listing_generated');
   else if (current.v2) advance(current.pricing?.status === 'ready' ? 'pricing_ready' : 'evidence_analyzed');
   else advance(current.selectedSku ? 'sku_selected' : current.task ? 'task_created' : 'materials_ready');
@@ -131,7 +131,6 @@ async function mutateServerFact(key: string, action: 'edit' | 'confirm' | 'rejec
     const snap = action === 'edit' ? await apiClient.facts.update(before.recordId!, value ?? '', current.factsRevision!) : await apiClient.facts[action](before.recordId!, current.factsRevision!);
     applySnapshot(snap);
     await refreshWorkflow(); await refreshRecommendation();
-    advance(snap.pricingReadiness.ready ? 'pricing_ready' : snap.v2 ? 'evidence_analyzed' : 'sku_selected');
     return save();
   } catch (error) { await refreshServerFacts(); throw error; }
 }
@@ -175,7 +174,7 @@ function productView(p: Product): Product {
   return Object.keys(editsFor(p.sku)).length ? effectiveProduct(p, [...cardV1(p).facts, ...Object.values(editsFor(p.sku)).filter(f => !cardV1(p).facts.some(b => b.key === f.key))]) : clone(p);
 }
 function pricingFor(p: Product): Pricing {
-  return serverOwner ? clone(serverSnapshots[p.sku]?.pricing ?? serverPreviews[p.sku].pricing) : pricingFromFacts(p, cardV1(p).facts, factRevision(p.sku, PRICING_FACTS));
+  return serverOwner ? clone(serverSnapshots[p.sku]?.pricing ?? serverPreviews[p.sku].pricing) : pricingFromFacts(p, cardV1(p).facts, factRevision(p.sku, PRICING_FACTS), current.task?.minProfit ?? demoTask.minProfit);
 }
 function synchronizeFacts() {
   if (serverOwner) return;
@@ -405,10 +404,20 @@ export const mockApi = {
     const task = await apiClient.tasks.create(bagDemoTask);
     const restored = await apiClient.tasks.update(task.recordId, bagDemoTask, task.revision!);
     await useServerTask(restored); serverRecommendation = await apiClient.recommendations.run(restored.recordId, restored.revision!, 'rule'); return save();
-  },  async runRecommendation() {
+  },
+  async runRecommendation() {
     if (!serverOwner || !current.task) return save();
     try { serverRecommendation = await apiClient.recommendations.run(current.task.recordId!, current.task.revision!); return save(); }
     catch (error) { await this.connectServer(serverOwner); throw error; }
+  },
+  async refreshPricingSnapshot() {
+    if (!serverOwner || !current.task?.recordId) throw new Error('Pricing snapshot refresh requires the server-backed workspace.');
+    const version = current.pricing?.snapshot?.version ?? current.task.pricingSnapshot?.version;
+    if (!version) throw new Error('Pricing snapshot is unavailable. Reload the task.');
+    const snapshot = await apiClient.tasks.refreshPricingSnapshot(current.task.recordId, version);
+    current.task = { ...current.task, pricingSnapshot: snapshot };
+    if (current.selectedSku) { await refreshServerFacts(); await refreshWorkflow(); }
+    return save();
   },
   recommendationState: () => serverRecommendation ? clone(serverRecommendation) : null,
   recommendations(): Recommendation[] {

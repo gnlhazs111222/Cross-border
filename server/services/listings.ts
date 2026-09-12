@@ -215,7 +215,9 @@ export async function publishListing(db: PrismaClient, userId: string, id: strin
     if (!existing) {
       const platform = row.platform as Platform;
       const externalDemoId = platform === 'amazon' ? 'AMZ-DEMO-1042' : 'SHOP-DEMO-1042';
-      await tx.publishResult.create({ data: { listingDraftId: id, revision: row.revision, platform, status: platform === 'amazon' ? 'Export ready' : 'Draft', externalDemoId, data: { mock: true } } });
+      const pricingSnapshot = snap.pricing.snapshot;
+      await tx.publishResult.create({ data: { listingDraftId: id, revision: row.revision, platform, status: platform === 'amazon' ? 'Export ready' : 'Draft', externalDemoId,
+        data: { mock: true, pricingSnapshotId: pricingSnapshot?.recordId ?? null, pricingSnapshotCode: pricingSnapshot?.code ?? null, pricingSnapshotVersion: pricingSnapshot?.version ?? null } } });
     }
     await tx.listingDraft.update({ where: { id }, data: { status: 'published' } });
     return workflow(tx, userId, row.taskId, row.productId, reviewRuntime);
