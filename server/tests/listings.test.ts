@@ -133,6 +133,21 @@ test('published CSV is generated from current SQLite data and old versions canno
   assert.equal((await app.inject({ method: 'POST', url: `/api/listings/${oldId}/publish`, headers: { cookie }, payload: { expectedVersion: 2, expectedFactsRevision: w.factsRevision } })).statusCode, 409);
 });
 
+test('refreshing the pricing snapshot retires publication and binds the next publish to the new snapshot', async () => {
+  let w = await published(); const oldPublication = w.publications.amazon!;
+  const task = await call(`/api/tasks/${w.taskId}`);
+  const stored = await db.publishResult.findUniqueOrThrow({ where: { id: oldPublication.recordId } });
+  assert.equal((stored.data as { pricingSnapshotCode: string }).pricingSnapshotCode, task.pricingSnapshot.code);
+  const refreshed = await call(`/api/tasks/${w.taskId}/pricing-snapshots`, 'POST', { expectedVersion: task.pricingSnapshot.version });
+  assert.equal(refreshed.version, 2);
+  w = await call(`${path(w)}/listings`);
+  assert.equal(w.publications.amazon, undefined); assert.equal(w.reviews.amazon?.status, 'passed'); assert.equal(w.publishAllowed.amazon, true);
+  assert.equal((await app.inject({ url: `/api/publish/${oldPublication.recordId}/amazon-csv`, headers: { cookie } })).statusCode, 409);
+  w = await act(w, 'publish');
+  const next = await db.publishResult.findUniqueOrThrow({ where: { id: w.publications.amazon!.recordId } });
+  assert.equal((next.data as { pricingSnapshotCode: string }).pricingSnapshotCode, refreshed.code);
+});
+
 test('fact change marks both platforms and their results stale without deleting history; regenerate repairs the chain', async () => {
   let w = await published(); w = await create(w, 'shopify'); w = await act(w, 'review', 'shopify'); w = await act(w, 'publish', 'shopify');
   const original = w; const rowsBefore = await db.listingDraft.count();

@@ -19,6 +19,7 @@ import { hashPassword, newSessionToken, tokenHash, verifyPassword } from './auth
 import { catalog, resetCatalog, seedProducts, toProduct } from './services/catalog';
 import { deleteImportRule, importBatchDetail, importBatchSourceFile, importWithAlignment, listImportBatches, listImportRules, previewImportAlignment, resolveImportOccurrence, resolveImportOccurrencesBulk } from './services/imports';
 import { createTask, selectProduct, tasks, updateTask } from './services/tasks';
+import { pricingSnapshotHistory, refreshPricingSnapshot } from './services/pricing-snapshots';
 import { ASSET_MIME_TYPES, deleteProductAsset, listProductAssets, pruneOrphanAssetFiles, readProductAsset, storeProductAsset } from './services/assets';
 import { recordHazmatRelease } from './services/hazmat';
 import { assetUploadSchema } from './validation';
@@ -152,6 +153,15 @@ export async function buildApp(config: ServerConfig, db: PrismaClient, options: 
     const input = taskSchema.omit({ code: true }).extend({ expectedRevision: z.number().int().positive() }).parse(request.body);
     return { data: await updateTask(db, request.user!.id, id, input) };
   });
+  app.get('/api/tasks/:id/pricing-snapshots', protectedRoute, async request => {
+    const { id } = z.object({ id: z.string().min(1).max(220) }).parse(request.params);
+    return { data: await pricingSnapshotHistory(db, request.user!.id, id) };
+  });
+  app.post('/api/tasks/:id/pricing-snapshots', protectedRoute, async request => {
+    const { id } = z.object({ id: z.string().min(1).max(220) }).parse(request.params);
+    const input = z.object({ expectedVersion: z.number().int().positive() }).strict().parse(request.body);
+    return { data: await refreshPricingSnapshot(db, request.user!.id, id, input.expectedVersion) };
+  });
   app.get('/api/tasks/:id/recommendations', protectedRoute, async request => {
     const { id } = z.object({ id: z.string().min(1).max(220) }).parse(request.params);
     return { data: await getRecommendations(db, request.user!.id, id) };
@@ -236,7 +246,7 @@ export async function buildApp(config: ServerConfig, db: PrismaClient, options: 
     await db.$queryRaw`SELECT 1`;
     const available = config.AI_LIVE_ENABLED && !!config.BAILIAN_API_KEY;
     const result: Capabilities = { backend: true, database: true, authentication: true,
-      storage: { server: ['User', 'Product', 'ProductAsset', 'LaunchTask', 'TaskSelection', 'FactCard', 'Fact', 'Evidence', 'ListingDraft', 'ReviewResult', 'PublishResult'], browser: ['Language', 'UI preferences', 'Non-authoritative cache'] },
+      storage: { server: ['User', 'Product', 'ProductAsset', 'LaunchTask', 'PricingSnapshot', 'TaskSelection', 'FactCard', 'Fact', 'Evidence', 'ListingDraft', 'ReviewResult', 'PublishResult'], browser: ['Language', 'UI preferences', 'Non-authoritative cache'] },
       assets: { storage: 'server', acceptedTypes: [...ASSET_MIME_TYPES], maxBytesPerFile: config.ASSET_MAX_BYTES, maxPerProduct: config.ASSET_MAX_PER_PRODUCT },
       textModel: { activeProvider: 'mock', liveAvailable: available, configured: !!config.BAILIAN_API_KEY, liveEnabled: config.AI_LIVE_ENABLED, model: config.BAILIAN_TEXT_MODEL, remainingCalls: providers.bailian.remainingCalls },
       recommendation: { activeProvider: config.RECOMMENDATION_PROVIDER === 'qwen' && available ? 'qwen' : 'rule', liveAvailable: available, liveImplemented: true, liveModel: config.BAILIAN_TEXT_MODEL }, evidence: { activeProvider: multimodalRuntime.mode, liveAvailable: available, liveImplemented: true, liveModel: multimodalRuntime.model },

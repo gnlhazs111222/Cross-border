@@ -97,7 +97,6 @@ for (const imported of [false, true]) {
     await expect(page.getByRole('button', { name: zh ? '继续前往文案工作室' : 'Continue to Listing Studio' })).toBeVisible();
     expect((await snapshot(page)).v1).toEqual(v1);
     await page.reload();
-    // Stored canonically in kg, shown in the market system the top bar selects (US by default).
     await expect(page.getByTestId('fact-review-packagingWeight')).toContainText('0.93 lb');
     await expect(page.locator('.suggested-price>strong')).toHaveText(imported ? 'USD 18.90' : 'USD 19.20');
     await page.screenshot({ path: info.outputPath('manual-weight-ready.png'), fullPage: true });

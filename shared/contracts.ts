@@ -1,4 +1,4 @@
-import type { Fact, FactCard, Evidence, Pricing, Listing, Review, Publication, Platform, ImportReport, Product, Task } from '../src/types';
+import type { Fact, FactCard, Evidence, Pricing, PricingContextSnapshot, Listing, Review, Publication, Platform, ImportReport, Product, Task } from '../src/types';
 import type { FieldDifference } from './alignment';
 
 export type PublicUser = { id: string; email: string; displayName: string };
@@ -28,7 +28,7 @@ export type ImportBatchDetail = { batch: ImportBatchDto; occurrences: ImportOccu
 /** A remembered bulk decision, so the same kind of conflict does not have to be reviewed twice. */
 export type ImportRuleDto = { recordId: string; verdict: string; field: string; action: ImportResolution; appliedCount: number; createdAt: string };
 export type ImportBulkResult = { batch: ImportBatchDetail; applied: number; skipped: number };
-export type ServerTask = Task & { recordId: string; selectedSku: string | null; selectionPurpose: string | null };
+export type ServerTask = Task & { recordId: string; selectedSku: string | null; selectionPurpose: string | null; pricingSnapshot: PricingContextSnapshot };
 export type AssetKind = 'image' | 'pdf';
 export type AssetRole = 'main' | 'detail' | 'packaging' | 'spec' | 'other';
 export type AssetParseStatus = 'pending' | 'parsed' | 'failed';

@@ -116,8 +116,10 @@ test('append aligns rows with the pool instead of skipping them', async ({ page 
   // comparison happens; only the duplicate row inside the file itself is.
   await expect(page.getByRole('dialog').locator('.import-counts strong').nth(3)).toHaveText('1');
   await page.getByRole('button', { name: /^Import \d+ products?$/ }).click();
-  // Only the sample rows the pool does not hold yet are added; the rest align with a stored product.
-  await expect(page.locator('.product-table tbody tr')).toHaveCount(12);
+  await expect(page.getByTestId('import-completed')).toBeVisible();
+  // Only the genuinely new row is inserted. Matching, conflicting and uncertain rows stay attached
+  // to the batch for review instead of overwriting or duplicating the existing products.
+  await expect(page.locator('.product-table tbody tr')).toHaveCount(11);
   const saved = await snapshot(page);
   // Alignment never overwrites an existing product from an appended file.
   expect(saved.catalog.find((p: { sku: string }) => p.sku === HERO).supplierCost).toBe(8.2);
@@ -235,8 +237,9 @@ test('mixed-validity CSV keeps incomplete rows out of ranking and uses imported 
   await expect(page.locator('.product-table tbody tr')).toHaveCount(3);
   await expect(page.locator('.product-table')).toContainText('Real Uploaded 350ml Bottle');
   await page.getByRole('button', { name: 'Create Demo Task', exact: true }).click();
-  await expect(page.getByTestId('recommendation-1')).toContainText('CSV-CUSTOM-350');
-  await page.getByTestId('recommendation-1').getByRole('button', { name: 'Select SKU' }).click();
+  const uploadedCandidate = page.locator('.recommendation-card').filter({ hasText: 'CSV-CUSTOM-350' });
+  await expect(uploadedCandidate).toBeVisible();
+  await uploadedCandidate.getByRole('button', { name: 'Select SKU' }).click();
   await expect(page.getByRole('heading', { name: 'FactCard V1', exact: true })).toBeVisible();
   const facts = (await snapshot(page)).v1.facts;
   expect(facts.find((f: { key: string }) => f.key === 'declaredValue').value).toBe('USD 6.75');

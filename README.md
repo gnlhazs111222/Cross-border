@@ -41,7 +41,8 @@ npm run preview:local
 
 ## 数据与模型边界
 
-- SQLite 权威保存：User、Session、Product、LaunchTask、TaskSelection、FactCard、Fact、Evidence、ListingDraft、ReviewResult、PublishResult、AI 调用元数据。
+- SQLite 权威保存：User、Session、Product、LaunchTask、PricingSnapshot、TaskSelection、FactCard、Fact、Evidence、ListingDraft、ReviewResult、PublishResult、AI 调用元数据。
+- 创建任务时会持久化 `PricingSnapshot`：冻结参考汇率及来源、运费配置、关税规则、平台费配置和时间；售价计算读取当前任务快照，手动刷新会生成新版本并使旧发布结果失效。
 - 浏览器只保存界面偏好和非权威业务快照；文案绑定服务端 factsRevision，刷新 / 清空 localStorage 后仍可恢复数据库中的审核和发布。
 - 目录 / 任务 / 事实在浏览器中仅有兼容性快照；会话初始化从 API 覆盖，清空 localStorage 后仍可恢复。旧 factEdits 不会自动升级成可信的服务端事实。
 - XLSX / CSV 继续在浏览器按固定模板解析，服务端再校验并保存；替换 / 追加、重复处理和原始顺序保留。
@@ -96,6 +97,7 @@ AI_LIVE_ENABLED=true NODE_TLS_REJECT_UNAUTHORIZED=1 npm run ai:smoke -- --live
 - [供应商导入说明](SUPPLIER_IMPORT.md)
 - [托特包完整演示说明](docs/BAG_DEMO.md)
 - [人工事实核对](FACT_REVIEW.md)
+- [任务级税价快照](docs/PRICING_SNAPSHOT.md)
 - [比赛版 3 / 5 分钟讲稿](docs/DEMO_SCRIPT.md)
 - [比赛版问答](docs/DEMO_QA.md)
 - [比赛版截图](artifacts/presentation/README.md)
