@@ -2,7 +2,7 @@
 .generation-summary { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; line-height: 1.6; }
 .generation-summary svg { flex: none; }
 .generation-summary strong { font-weight: 600; }
-.generation-cache { font-size: 12px; border: 1px solid currentColor; border-radius: 4px; padding: 1px 6px; }
+.generation-cache { font-size:14px; border: 1px solid currentColor; border-radius: 4px; padding: 1px 6px; }
 .generation-indicator p { margin: 8px 0 0; line-height: 1.6; }
 .generation-indicator summary { cursor: pointer; min-height: 44px; display: list-item; padding-top: 12px; }
 .generation-details { display: grid; gap: 6px; overflow-wrap: anywhere; line-height: 1.6; }

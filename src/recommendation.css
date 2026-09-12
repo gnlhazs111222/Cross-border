@@ -1,10 +1,10 @@
 .task-actions { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
 .task-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:0 18px; }
 .task-form-grid select { min-height:44px; border:1px solid var(--border); padding:10px 12px; border-radius:6px; background:white; }
-.recommendation-source { font-size:13px; line-height:1.7; margin-bottom:18px; color:var(--muted); }
+.recommendation-source { font-size:14px; line-height:1.7; margin-bottom:18px; color:var(--muted); }
 .recommendation-source details { margin-top:6px; }
 .recommendation-source summary { cursor:pointer; min-height:36px; }
-.rank-source { display:block; font-size:12px; margin-bottom:12px; color:var(--green); }
+.rank-source { display:block; font-size:14px; margin-bottom:12px; color:var(--green); }
 @media(max-width:600px) { .task-form-grid { grid-template-columns:1fr; } .task-actions .button { min-height:44px; flex:1 1 45%; } }
 .task-brief .panel-title { flex-wrap:wrap; }
 .task-brief .panel-title .task-actions { margin:0 0 0 auto; }

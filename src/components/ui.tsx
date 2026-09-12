@@ -12,9 +12,9 @@ export function Button({ children, variant = 'primary', busy, className = '', ..
 export function Badge({ children, tone = 'neutral' }: { children: ReactNode; tone?: 'green' | 'amber' | 'red' | 'neutral' | 'blue' }) {
   return <span className={`badge ${tone}`}>{children}</span>;
 }
-export function PageHeader({ eyebrow, title, description, action }: { eyebrow: string; title: string; description?: string; action?: ReactNode }) {
+export function PageHeader({ eyebrow, title, action }: { eyebrow: string; title: string; description?: string; action?: ReactNode }) {
   const { t } = useI18n();
-  return <div className="page-heading"><div><div className="eyebrow">{t(eyebrow)}</div><h1>{t(title)}</h1>{description && <p>{t(description)}</p>}</div>{action && <div className="heading-action">{action}</div>}</div>;
+  return <div className="page-heading"><div><div className="eyebrow">{t(eyebrow)}</div><h1>{t(title)}</h1></div>{action && <div className="heading-action">{action}</div>}</div>;
 }
 export function EmptyState({ title, description, action }: { title: string; description: string; action?: ReactNode }) {
   const { t } = useI18n();

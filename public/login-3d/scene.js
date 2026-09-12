@@ -227,29 +227,30 @@
   const left = createBottle(false);
   const right = createBottle(true);
 
-  // Water-to-air bubbles. Clear centers show a live refracted view of the product behind them.
+  // Bubbles stay outside bottle silhouettes; vertical motion keeps them clear.
   const configs = [
-    [-2.40,.53,1.3,.43,-.80,.55],[-.35,1.92,1.6,.36,.65,.68],
-    [2.17,1.40,1.0,.34,.67,.55],[.46,-.99,1.9,.41,-.73,-.52],
-    [-2.35,-1.73,1.1,.17,-.81,-.30],[-1.94,-2.68,1.5,.22,-.60,.64],
-    [-.22,-2.99,1.1,.27,.82,-.36],[-1.81,-.70,.8,.13,-.8,.40],
-    [2.50,-1.50,1.3,.32,.70,-.55],[.10,3.00,.2,.29,-.65,.60],
-    [-2.65,2.55,-.5,.24,-.70,.50],[1.30,-2.75,1.5,.38,.55,.65],
-    [2.90,.08,-.3,.20,.75,.35],[-3.45,-.45,-1.1,.30,-.65,.45],
-    [-.10,.40,2.0,.19,.65,.65],[1.80,2.90,-.8,.15,.50,.75]
+    [-3.3,1.8,.3,.24,0,1],[-3.3,-1.5,.3,.18,0,-1],
+    [3.3,1.8,.3,.22,0,1],[3.3,-1.5,.3,.26,0,-1],
+    [-3.3,.15,.3,.15,0,1],[3.3,.1,.3,.18,0,-1]
   ];
   // Screen-relative accents frame the copy instead of clustering beside the products.
   const copyAnchors=[
-    {desktop:[.09,.18],pixels:24},
-    {desktop:[.39,.15],pixels:17},
-    {desktop:[.032,.44],pixels:14},
-    {desktop:[.473,.49],pixels:20},
-    {desktop:[.12,.77],pixels:18},
-    {desktop:[.39,.79],pixels:28}
+    // Five large accents sit around the headline rather than over the products.
+    {desktop:[.085,.25],pixels:78,large:true},
+    {desktop:[.36,.15],pixels:68,large:true},
+    {desktop:[.06,.66],pixels:64,large:true},
+    {desktop:[.23,.85],pixels:84,large:true},
+    {desktop:[.45,.80],pixels:72,large:true},
+    ...Array.from({length:26},(_,i)=>({
+      desktop:[.025+((i*7)%23)/23*.46,.12+((i*11)%29)/29*.79],
+      pixels:7+(i%5)*2.5
+    }))
   ];
+  const bubbleSizeScale=1;
   const productBubbleCount=configs.length;
   copyAnchors.forEach((a,i)=>configs.push([0,0,1.1,.25,i%2?.65:-.65,i%3?.50:-.50]));
   const bubbles = configs.map(([x,y,z,r,dx,dy],index) => {
+    if(index<productBubbleCount)r*=bubbleSizeScale;
     const group = new T.Group();group.name='bubble-'+index;
     group.userData.copyAccent=index>=productBubbleCount;
     group.add(new T.Mesh(new T.SphereGeometry(r,40,28),water.bubbleMaterial(r)));
@@ -270,7 +271,10 @@
     // Keep the two-pass refraction affordable on high-DPI / large displays.
     renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5,Math.sqrt(3200000/(screenWidth*screenHeight))));
     renderer.setSize(screenWidth,screenHeight,false);water.resize(screenWidth,screenHeight);
-    const region={x:screenWidth*.48,y:screenHeight*.055,w:screenWidth*.52,h:screenHeight*.89};
+    const compact=screenWidth<=700;
+    const region=compact
+      ? {x:0,y:screenHeight*.43,w:screenWidth,h:screenHeight*.55}
+      : {x:screenWidth*.43,y:screenHeight*.055,w:screenWidth*.57,h:screenHeight*.89};
     const pixelsPerUnit=Math.max(1,Math.min(region.w/6.9,region.h/6.5));
     const viewHeight=screenHeight/pixelsPerUnit;
     const centerX=(screenWidth*.5-(region.x+region.w*.5))/pixelsPerUnit;
@@ -281,10 +285,11 @@
     camera.updateProjectionMatrix();camera.updateMatrixWorld();
     copyAnchors.forEach((anchor,i)=>{
       const b=bubbles[productBubbleCount+i],uv=anchor.desktop;
+      b.group.visible=!compact;
       const unitsPerPixel=viewHeight*(14-b.base.z)/14/screenHeight;
       b.base.x=centerX+(uv[0]-.5)*screenWidth*unitsPerPixel;
       b.base.y=centerY+(.5-uv[1])*screenHeight*unitsPerPixel;
-      b.radius=anchor.pixels*(screenWidth/1440)*unitsPerPixel;
+      b.radius=anchor.pixels*bubbleSizeScale*(screenWidth/1440)*unitsPerPixel;
       b.group.children[0].scale.setScalar(b.radius/.25);
       b.group.children[0].material.uniforms.uRadius.value=b.radius;
       b.group.position.copy(b.base);b.elapsed=-1;b.armed=true;
@@ -385,6 +390,32 @@
     });
   }
 
+  // Project the full moving products (including the opening cap). Keep a clear
+  // gutter around their combined bounds, even while bubbles react to the pointer.
+  const productBounds=new T.Box3(),bubblePoint=new T.Vector3();
+  function keepBubblesClear(){
+    productBounds.makeEmpty().expandByObject(left.group).expandByObject(right.group);
+    let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+    for(const x of [productBounds.min.x,productBounds.max.x])
+      for(const y of [productBounds.min.y,productBounds.max.y])
+        for(const z of [productBounds.min.z,productBounds.max.z]){
+          const p=screenPoint(bubblePoint.set(x,y,z));
+          minX=Math.min(minX,p.x);maxX=Math.max(maxX,p.x);
+          minY=Math.min(minY,p.y);maxY=Math.max(maxY,p.y);
+        }
+    bubbles.forEach(b=>{
+      if(!b.group.visible)return;
+      const p=screenPoint(b.group.position);
+      const edge=screenPoint(bubblePoint.copy(b.group.position).add(new T.Vector3(b.radius*1.08,0,0)));
+      const margin=Math.abs(edge.x-p.x)+12;
+      if(p.y<minY-margin||p.y>maxY+margin||p.x<minX-margin||p.x>maxX+margin)return;
+      const x=p.x<(minX+maxX)/2?minX-margin:maxX+margin;
+      bubblePoint.copy(b.group.position).project(camera);
+      bubblePoint.x=(x-bounds.left)/screenWidth*2-1;
+      b.group.position.copy(bubblePoint.unproject(camera));
+    });
+  }
+
   let previous=performance.now(),time=0,waterTime=0,frameId=0,visible=true,lost=false;
   host.addEventListener('pointerdown',event=>{
     if(!reduced&&!modalActive)water.pulse((event.clientX-bounds.left)/screenWidth,1-(event.clientY-bounds.top)/screenHeight);
@@ -410,6 +441,7 @@
       mesh.position.set(d.x+Math.sin(waterTime*.23+i)*.045,-3.8+((waterTime*.014+d.phase)%1)*7.6,d.z);
       mesh.scale.set(1,1.035+Math.sin(waterTime*.6+i)*.025,1);
     });
+    keepBubblesClear();
     bubbles.forEach((b,i)=>{const wobble=reduced?0:Math.sin(waterTime*.7+i)*.008;b.group.scale.set(1+wobble,1-wobble*.5,1);});
     try {
       water.render(camera);

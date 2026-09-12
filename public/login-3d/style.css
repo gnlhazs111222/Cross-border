@@ -39,3 +39,30 @@ body{background:linear-gradient(110deg,#b6cbaa 0%,#a5c095 48%,#71936b 100%)}
 
 .brand-signature{position:absolute;z-index:2;left:5.5%;top:clamp(20px,3.5vh,36px);bottom:auto;width:auto;display:flex;justify-content:flex-start;align-items:center;gap:11px;pointer-events:none;color:#28523b;font-size:22px;letter-spacing:.12em;font-weight:500}
 .brand-signature svg{width:32px;height:30px;flex-shrink:0}
+
+/* Readable controls without scaling the entire copy block. */
+.copy{left:28%;top:49%;width:44%;max-width:620px;transform:translate(-50%,-50%)}
+.copy h1{font-size:clamp(40px,4.8vw,76px);line-height:1.22;margin-bottom:24px}
+.actions{gap:20px}
+.start{font-size:20px;min-height:52px;padding:14px 24px;gap:28px}
+.secondary{font-size:16px}
+.dialog{padding:30px}
+.dialog-brand{margin-bottom:16px}
+.dialog h2{margin-bottom:16px}
+.dialog label{font-size:16px;margin-top:16px}
+.submit{margin-top:20px}
+.demo-note{margin-top:16px;overflow-wrap:anywhere}
+@media(max-width:700px){
+  .brand-signature{left:6%;top:20px;font-size:20px}
+  .copy{left:50%;top:13%;width:92%;transform:translateX(-50%)}
+  .copy h1{font-size:clamp(32px,8vw,44px);margin-bottom:18px}
+  .actions{gap:16px}
+  .start{font-size:18px;padding:12px 20px;min-height:48px}
+  .dialog{padding:24px}
+  .loading{left:50%;top:70%}
+  .fallback{inset:46% 6% 5%;padding:20px}
+  .lid-access{left:50%;bottom:8%}
+}
+@media(max-height:500px) and (min-width:701px){
+  .copy h1{font-size:40px;margin-bottom:16px}
+}

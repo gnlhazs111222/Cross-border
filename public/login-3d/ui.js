@@ -3,13 +3,6 @@
   let toastTimer, previousFocus, loginBusy = false;
   const $ = id => document.getElementById(id);
 
-  // Only scale the copy. The water canvas always fills the actual viewport.
-  function fitPage() {
-    const scale = Math.min(1, window.innerWidth / 1440, window.innerHeight / 810);
-    $('appShell').style.setProperty('--content-scale', String(scale));
-  }
-  fitPage();
-  window.addEventListener('resize', fitPage, { capture: true });
   // Keep scene pointer bounds synchronized with the full-viewport layout.
   window.dispatchEvent(new Event('resize'));
 
