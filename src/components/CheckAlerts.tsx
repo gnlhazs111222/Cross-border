@@ -6,9 +6,9 @@ import { assessHazmat } from '../../shared/hazmat';
 import { mockApi } from '../services/mockApi';
 import { useDemo } from './DemoContext';
 import { useI18n } from '../i18n/I18nContext';
-import { Badge, Button, Modal } from './ui';
+import { Badge, Button, Modal, Notice } from './ui';
 import { HazmatNotice } from './HazmatNotice';
-import { openFactComparison, useFactCheckActions } from './factCheckActions';
+import { openFactComparison, requestFactEdit, useFactCheckActions } from './factCheckActions';
 import { assetMimeType, fileToBase64 } from './SourceAssets';
 
 /**
@@ -41,7 +41,7 @@ export function CheckDecision({ label, options, busy }: { label: string; options
  */
 export function CheckAlerts({ product, facts, evidence }: { product?: Product; facts: Fact[]; evidence?: Evidence[] }) {
   const { t } = useI18n();
-  const { busy, act, navigate } = useDemo();
+  const { state, busy, act, navigate } = useDemo();
   const { adoptPrintedText, discardPicture, editDisputedFact } = useFactCheckActions();
   const [reportOpen, setReportOpen] = useState(false);
   const [reportNo, setReportNo] = useState('');
@@ -128,22 +128,48 @@ export function CheckAlerts({ product, facts, evidence }: { product?: Product; f
     ? <p className="check-line" data-testid="check-clear-transport">{t('Declared and clear.')}</p>
     : <HazmatNotice product={product} />;
 
+  // The pricing facts are the fourth check. A missing weight blocks the price, so it is raised here and
+  // closed here — the same place every other alarm is decided, instead of a button buried in a card.
+  const pricingChecks = state.pricing?.status === 'blocked' ? [
+    { label: 'Packaging Weight', keys: ['packagingWeight'] },
+    { label: 'Packaging Dimensions', keys: ['packageLength', 'packageWidth', 'packageHeight'] },
+    { label: 'Supplier cost', keys: ['supplierCost'] },
+  ].filter(entry => state.pricing!.missing.includes(entry.label)).map(entry => ({
+    label: entry.label,
+    rows: entry.keys.map(key => facts.find(candidate => candidate.key === key)).filter((fact): fact is Fact => !!fact),
+  })).filter(entry => entry.rows.length > 0) : [];
+  const pricingCell = pricingChecks.length ? <Notice tone="amber">
+    <p className="check-line" data-testid="check-alert-pricing">{t('Pricing stays closed until {list} is confirmed.', { list: pricingChecks.map(entry => t(entry.label)).join(' · ') })}</p>
+    <div className="fact-actions">{pricingChecks.map(entry => {
+      const gap = entry.rows.find(row => row.value === 'Missing');
+      return gap
+        ? <Button key={entry.rows[0].key} variant="secondary" disabled={!!busy} onClick={() => requestFactEdit(gap.key)}>{t('Add Value')} · {t(entry.label)}</Button>
+        : <Button key={entry.rows[0].key} variant="secondary" disabled={!!busy} busy={busy === `confirm-${entry.rows[0].key}`} onClick={() => void act(`confirm-${entry.rows[0].key}`, async () => {
+            for (const row of entry.rows) if (row.status !== 'Confirmed') await mockApi.confirmFact(row.key);
+            return mockApi.getState();
+          }, 'Fact confirmed. Downstream eligibility has been recalculated.')}>{t('Confirm')} · {t(entry.label)}</Button>;
+    })}</div>
+  </Notice>
+    : <p className="check-line" data-testid="check-clear-pricing">{state.pricing ? t('Priced from the confirmed facts.') : t('No pricing data for this product yet.')}</p>;
+  const pricingTone = pricingChecks.length ? 'amber' : 'clear';
+
   const imageTone = disputes.length ? 'red' : disputes.length === 0 && (imageText.verdict === 'read' || imageText.verdict === 'not_run') ? 'clear' : 'amber';
   const reportTone = !report.declared || report.verdict === 'expired' ? 'amber' : report.verdict === 'failed' || report.verdict === 'mismatch' ? 'red' : 'clear';
   const hazmatTone = hazmat.verdict === 'forbidden' ? 'red' : hazmat.verdict === 'needs_documents' ? 'amber' : 'clear';
   // Each disagreement is its own alarm; a picture state that needs a decision counts once.
-  const alarms = disputes.length + (imageTone !== 'clear' && !disputes.length ? 1 : 0) + (reportTone !== 'clear' ? 1 : 0) + (hazmatTone !== 'clear' ? 1 : 0);
+  const alarms = disputes.length + (imageTone !== 'clear' && !disputes.length ? 1 : 0) + (reportTone !== 'clear' ? 1 : 0) + (hazmatTone !== 'clear' ? 1 : 0) + (pricingTone !== 'clear' ? 1 : 0);
   const name = (title: string, tone: string) => <span className="check-name">{tone !== 'clear' && (tone === 'red' ? <TriangleAlert size={14} /> : <CircleAlert size={14} />)}{title}</span>;
 
   return <section className="panel check-alerts" aria-label={t('Check alerts')} data-testid="check-alerts">
     <div className="panel-title"><ShieldCheck size={20} /><h2>{t('Check alerts')}</h2><Badge tone={alarms ? 'red' : 'green'}>{t(alarms ? '{count} alarm(s) to decide' : 'No alarm', { count: alarms })}</Badge></div>
     <div className="check-table-wrap"><table className="check-table">
-      <colgroup><col className="col-evidence" /><col className="col-action" /><col className="col-report" /><col className="col-transport" /></colgroup>
+      <colgroup><col className="col-evidence" /><col className="col-action" /><col className="col-report" /><col className="col-transport" /><col className="col-pricing" /></colgroup>
       <thead>
         <tr>
           <th colSpan={2} rowSpan={2} className={imageTone}>{name(t('Picture information check'), imageTone)}</th>
           <th rowSpan={2} className={reportTone}>{name(t('Quality report'), reportTone)}</th>
           <th rowSpan={2} className={hazmatTone}>{name(t('Transport attributes'), hazmatTone)}</th>
+          <th rowSpan={2} className={pricingTone}>{name(t('Pricing facts'), pricingTone)}</th>
         </tr>
         <tr><th className={`check-sub ${imageTone}`}>{t('Evidence description')}</th><th className={`check-sub ${imageTone}`}>{t('Action')}</th></tr>
       </thead>
@@ -154,6 +180,7 @@ export function CheckAlerts({ product, facts, evidence }: { product?: Product; f
         </td>
         {index === 0 && <td rowSpan={imageRows.length} className={reportTone} data-label={t('Quality report')} data-testid="check-row-quality-report">{reportEvidence}{reportActions}</td>}
         {index === 0 && <td rowSpan={imageRows.length} className={hazmatTone} data-label={t('Transport attributes')} data-testid="check-row-transport">{hazmatCell}</td>}
+        {index === 0 && <td rowSpan={imageRows.length} className={pricingTone} data-label={t('Pricing facts')} data-testid="check-row-pricing">{pricingCell}</td>}
       </tr>)}</tbody>
     </table></div>
     <Modal open={reportOpen} onOpenChange={value => !value && !busy && setReportOpen(false)} title={t('Submit a quality report')} description={t('The report is the laboratory statement, not our own reading: nothing in it changes the product facts.')}>

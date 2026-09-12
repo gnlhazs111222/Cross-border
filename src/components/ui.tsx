@@ -12,9 +12,9 @@ export function Button({ children, variant = 'primary', busy, className = '', ..
 export function Badge({ children, tone = 'neutral' }: { children: ReactNode; tone?: 'green' | 'amber' | 'red' | 'neutral' | 'blue' }) {
   return <span className={`badge ${tone}`}>{children}</span>;
 }
-export function PageHeader({ eyebrow, title, description, action }: { eyebrow: string; title: string; description: string; action?: ReactNode }) {
+export function PageHeader({ eyebrow, title, description, action }: { eyebrow: string; title: string; description?: string; action?: ReactNode }) {
   const { t } = useI18n();
-  return <div className="page-heading"><div><div className="eyebrow">{t(eyebrow)}</div><h1>{t(title)}</h1><p>{t(description)}</p></div>{action && <div className="heading-action">{action}</div>}</div>;
+  return <div className="page-heading"><div><div className="eyebrow">{t(eyebrow)}</div><h1>{t(title)}</h1>{description && <p>{t(description)}</p>}</div>{action && <div className="heading-action">{action}</div>}</div>;
 }
 export function EmptyState({ title, description, action }: { title: string; description: string; action?: ReactNode }) {
   const { t } = useI18n();
@@ -26,13 +26,13 @@ export function NextButton({ children, ...props }: ButtonHTMLAttributes<HTMLButt
 export function Notice({ children, tone = 'neutral' }: { children: ReactNode; tone?: 'neutral' | 'green' | 'amber' | 'red' }) {
   return <div className={`notice ${tone}`}>{children}</div>;
 }
-export function Modal({ open, onOpenChange, title, description, children, wide = false }: { open: boolean; onOpenChange: (open: boolean) => void; title: string; description: string; children: ReactNode; wide?: boolean }) {
+export function Modal({ open, onOpenChange, title, description, children, wide = false }: { open: boolean; onOpenChange: (open: boolean) => void; title: string; description?: string; children: ReactNode; wide?: boolean }) {
   const { t } = useI18n();
   const wasOpen = useRef(false);
   const returnFocus = useRef<HTMLElement | null>(null);
   if (open && !wasOpen.current) returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   wasOpen.current = open;
-  return <Dialog.Root open={open} onOpenChange={onOpenChange}><Dialog.Portal><Dialog.Overlay className="modal-overlay" /><Dialog.Content onCloseAutoFocus={event => { event.preventDefault(); const target = returnFocus.current; if (target?.isConnected) target.focus({ preventScroll: true }); else document.getElementById('main')?.focus({ preventScroll: true }); }} className={`modal ${wide ? 'wide' : ''}`}><div className="modal-heading"><div><Dialog.Title>{t(title)}</Dialog.Title><Dialog.Description>{t(description)}</Dialog.Description></div><Dialog.Close asChild><Button variant="ghost" aria-label={t("Close dialog")}><X size={20} /></Button></Dialog.Close></div>{children}</Dialog.Content></Dialog.Portal></Dialog.Root>;
+  return <Dialog.Root open={open} onOpenChange={onOpenChange}><Dialog.Portal><Dialog.Overlay className="modal-overlay" /><Dialog.Content onCloseAutoFocus={event => { event.preventDefault(); const target = returnFocus.current; if (target?.isConnected) target.focus({ preventScroll: true }); else document.getElementById('main')?.focus({ preventScroll: true }); }} className={`modal ${wide ? 'wide' : ''}`}><div className="modal-heading"><div><Dialog.Title>{t(title)}</Dialog.Title>{description && <Dialog.Description>{t(description)}</Dialog.Description>}</div><Dialog.Close asChild><Button variant="ghost" aria-label={t("Close dialog")}><X size={20} /></Button></Dialog.Close></div>{children}</Dialog.Content></Dialog.Portal></Dialog.Root>;
 }
 export function PlatformTabs({ value, onChange, disabled }: { value: Platform; onChange: (p: Platform) => void; disabled?: boolean }) {
   const { t } = useI18n();

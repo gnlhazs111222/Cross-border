@@ -5,99 +5,75 @@ import { useDemo } from './DemoContext';
 import { projectFactValue } from '../../shared/units';
 import { useI18n } from '../i18n/I18nContext';
 import { mockApi } from '../services/mockApi';
-import { EDIT_DISPUTED_FACT_EVENT, useFactCheckActions } from './factCheckActions';
+import { EDIT_FACT_EVENT, scrollToFactRow } from './factCheckActions';
 import { Badge, Button, Modal, Notice } from './ui';
 
 /**
- * The two fact cards, side by side.
+ * The two fact cards, left and right.
  *
- * V1 keeps what the supplier delivered and is never rewritten; V2 is the task card the launch is built
- * on. Every field is shown twice, so a value a check or a person changed is visible as a change — a
- * card that only listed its own new fields could look untouched right after someone adopted what a
- * picture printed. The block is collapsed by default: it is the reference behind the checks, not the
- * first thing to read.
+ * V1 is the supplier card and is never rewritten. V2 shows the task card's own work — the fields the
+ * server marked as more than the supplier's confirmed value — written the same way V1 is written, and
+ * read-only on purpose: this column reports what a person concluded, it does not carry buttons. Every
+ * human decision (a picture value adopted, a value corrected, a weight confirmed) lands here as soon
+ * as it is taken.
+ *
+ * The editor itself lives here, because both this page and the check panel ask for it by fact key.
  */
 export function FactReview() {
   const { t } = useI18n();
-  const { state, busy, act, notify } = useDemo();
-  const [focusedKey, setFocusedKey] = useState<string | null>(null);
+  const { state, busy, act } = useDemo();
   const [editing, setEditing] = useState<Fact | null>(null);
   const [value, setValue] = useState('');
   const [error, setError] = useState('');
   // The editor opened from a picture disagreement closes that disagreement when it saves.
   const [imageEdit, setImageEdit] = useState(false);
   const facts = (state.v2 ?? state.v1)?.facts ?? [];
-  const before = new Map((state.v1?.facts ?? []).map(fact => [fact.key, fact]));
-  const priority = (fact: Fact) => fact.key === focusedKey ? -1 : fact.status === 'Missing' ? 0 : fact.status === 'Requires Confirmation' ? 1 : 2;
-  const orderedFacts = [...facts].sort((left, right) => priority(left) - priority(right));
-  const changed = (fact: Fact) => { const original = before.get(fact.key); return !!original && original.value !== fact.value; };
-  const source = (fact: Fact) => t(fact.sourceKind === 'manual' ? 'Manual Confirmation' : fact.sourceKind === 'image' ? 'Product Picture' : fact.sourceKind === 'supplier' ? 'Supplier File' : 'Mock Evidence');
+  const changed = (fact: Fact) => (state.changedFactKeys ?? []).includes(fact.key);
+  const taskFacts = facts.filter(changed);
   const editor = editing ? mockApi.factEditor(editing) : null;
   const hadResults = Object.keys(state.listings).length > 0 || Object.keys(state.reviews).length > 0 || Object.keys(state.publications).length > 0;
   const unit = mockApi.unitSystem();
-  const confirm = async (fact: Fact) => {
-    setFocusedKey(fact.key);
-    const wasBlocked = state.pricing?.status === 'blocked';
-    const ok = await act(`confirm-${fact.key}`, () => mockApi.confirmFact(fact.key), 'Fact confirmed. Downstream eligibility has been recalculated.');
-    if (ok && wasBlocked && mockApi.getState().pricing?.status === 'ready') notify('Fact confirmed. Pricing is now available.');
-  };
-  /**
-   * Correcting a disputed value by hand opens the editor here: the check area asks for it through the
-   * same event, so one form serves both places and a person can write a third value if neither fits.
-   */
-  const { scrollToFact } = useFactCheckActions(setFocusedKey);
   useEffect(() => {
     const openEditor = (event: Event) => {
-      const fact = facts.find(candidate => candidate.key === (event as CustomEvent<string>).detail);
+      const detail = (event as CustomEvent<{ key: string; disputed?: boolean }>).detail;
+      const fact = facts.find(candidate => candidate.key === detail.key);
       if (!fact) return;
-      scrollToFact(fact.key);
-      setFocusedKey(fact.key); setEditing(fact); setImageEdit(true); setValue(mockApi.factEditor(fact).value); setError('');
+      scrollToFactRow(detail.key);
+      setEditing(fact); setImageEdit(!!detail.disputed); setValue(mockApi.factEditor(fact).value); setError('');
     };
-    window.addEventListener(EDIT_DISPUTED_FACT_EVENT, openEditor);
-    return () => window.removeEventListener(EDIT_DISPUTED_FACT_EVENT, openEditor);
-  }, [facts, scrollToFact]);
+    window.addEventListener(EDIT_FACT_EVENT, openEditor);
+    return () => window.removeEventListener(EDIT_FACT_EVENT, openEditor);
+  }, [facts]);
   const closeEditor = () => { setEditing(null); setImageEdit(false); };
   return <details className="panel facts-panel fact-compare" id="fact-review" aria-label={t('Fact card comparison')} data-testid="fact-compare">
     <summary className="fact-version-header">
       <div>
-        <span className="eyebrow">{t('VERSIONED PRODUCT KNOWLEDGE')}</span>
-        <h2>{t('Fact card comparison')}</h2>
-        <p>{t('V1 keeps what the supplier delivered. V2 is the task card: every value a check or a person changed is marked here, since V2 never rewrites V1.')}</p>
+        <span className="eyebrow">{t("VERSIONED PRODUCT KNOWLEDGE")}</span>
+        <h2>{t("Fact card comparison")}</h2>
+        <p>{t('V1 holds supplied base facts. V2 adds task facts without replacing V1; manual changes remain traceable.')}</p>
       </div>
-      <Badge tone={state.v2 ? 'green' : 'neutral'}>{t(state.v2 ? 'Click to open' : 'Awaiting analysis')}</Badge>
+      <Badge tone={state.v2 ? 'green' : 'neutral'}>{t('Click to open')}</Badge>
     </summary>
-    {state.v2 ? <>
-      <p className="footnote fact-compare-count">{t('{count} field(s) · {changed} changed for this task', { count: facts.length, changed: facts.filter(fact => changed(fact)).length })}</p>
-      <div className="table-scroll"><table className="fact-table fact-compare-table">
-        <thead><tr><th>{t("Field")}</th><th>{t("FactCard V1")}</th><th>{t("FactCard V2")}</th><th>{t("Status")}</th><th>{t("Action")}</th></tr></thead>
-        <tbody>{orderedFacts.map(fact => {
-          const original = before.get(fact.key);
-          const editable = mockApi.editableFact(fact.key);
-          const canConfirm = editable && !['Missing', 'Confirmed'].includes(fact.status) && fact.value !== 'Missing';
-          return <tr key={fact.key} className={fact.key === focusedKey ? 'focused-fact' : undefined} data-testid={`fact-review-${fact.key}`}>
-            <th scope="row">{t(fact.label)}</th>
-            <td data-label={t("FactCard V1")} className="compare-before">{original ? t(projectFactValue(fact.key, original.value, unit)) : t('Not on V1')}</td>
-            <td data-label={t("FactCard V2")} className="compare-after">
-              <span>{t(projectFactValue(fact.key, fact.value, unit))}</span>
-              {changed(fact) && <Badge tone="amber">{t('Changed')}</Badge>}
-              <Badge tone={fact.sourceKind === 'manual' ? 'blue' : fact.sourceKind === 'image' ? 'amber' : 'neutral'}>{source(fact)}</Badge>
-              {fact.previousValue !== undefined && <small>{t('Previous value:')} {t(fact.previousValue)}</small>}
-            </td>
-            <td data-label={t("Status")} className="compare-status">
-              <Badge tone={fact.status === 'Confirmed' ? 'green' : fact.status === 'Rejected' ? 'red' : 'amber'}>{t(fact.status === 'Requires Confirmation' ? 'Needs confirmation' : fact.status)}</Badge>
-              <Badge tone={fact.allowed && fact.status === 'Confirmed' ? 'green' : 'neutral'}>{t(fact.allowed && fact.status === 'Confirmed' ? 'Allowed' : 'Not allowed')}</Badge>
-            </td>
-            <td className="review-fact-actions"><div className="fact-actions">
-              {editable && <Button variant="secondary" disabled={!!busy} onClick={() => { setFocusedKey(fact.key); setEditing(fact); setImageEdit(false); setValue(mockApi.factEditor(fact).value); setError(''); }}>{t(fact.status === 'Missing' ? 'Add Value' : 'Edit')}</Button>}
-              {canConfirm && <Button variant="secondary" disabled={!!busy} busy={busy === `confirm-${fact.key}`} onClick={() => void confirm(fact)}>{t('Confirm')}</Button>}
-              {fact.status !== 'Rejected' && fact.status !== 'Missing' && <Button variant="ghost" disabled={!!busy} busy={busy === `reject-${fact.key}`} onClick={() => void act(`reject-${fact.key}`, () => mockApi.rejectFact(fact.key), hadResults ? 'Fact rejected. Previous listings, reviews and publish results were cleared.' : 'Fact rejected. It cannot be used in normal listing copy.')}>{t('Reject')}</Button>}
-            </div>{fact.key === 'leakproof' && <small className="restricted-claim">{t('Unsupported performance claim; confirmation is unavailable. Demo risk injection remains separate.')}</small>}</td>
-          </tr>;
-        })}</tbody>
-      </table></div>
-      <p className="footnote fact-change-policy">{t('Fact changes clear existing listings, reviews and publish results for both platforms. Pricing checks confirmed weight, dimensions and supplier cost; its fixed demo fees stay unchanged.')}</p>
-    </> : <div className="analysis-empty"><ClipboardCheck size={32} /><h3>{t("Turn evidence into usable facts")}</h3><p>{t('Analyze the evidence to build the task card; it then stands next to V1 field by field.')}</p><Button busy={busy === 'analyze'} disabled={!!busy} onClick={() => void act('analyze', () => mockApi.analyzeEvidence(), 'FactCard V2 created. Review the facts before continuing.')}>{t("Analyze Evidence")}</Button></div>}
-    <Modal open={!!editing} onOpenChange={open => !open && !busy && closeEditor()} title={t(editing?.status === 'Missing' ? 'Add Missing Value' : imageEdit ? 'Correct the disputed value' : 'Edit Fact')} description={t(imageEdit ? 'Saving closes the picture disagreement this correction came from. The value is recorded as Manual confirmation and stays pending until it is confirmed.' : 'Saving records Manual confirmation as the source and leaves the fact pending. Click Confirm in the comparison to authorize the value.')}>
+    <div className="facts-columns">
+      <div className="fact-version">
+        <div className="section-heading"><h3>{t("FactCard V1")}</h3><Badge>{t(state.v1!.facts.some(f => f.sourceKind === 'manual') ? 'Base facts · manually reviewed' : 'Original · preserved')}</Badge></div>
+        <p className="footnote">{t('Supplier facts · {count} fields', { count: state.v1!.facts.length })}</p>
+        <dl className="fact-list">{state.v1!.facts.map(f => <div key={f.key}><dt>{t(f.label)}</dt><dd>{t(f.value)}</dd></div>)}</dl>
+      </div>
+      <div className="fact-version v2">
+        <div className="section-heading"><h3>{t("FactCard V2")}</h3><Badge tone={state.v2 ? 'green' : 'neutral'}>{state.v2 ? state.v2.taskId : t('Awaiting analysis')}</Badge></div>
+        {state.v2 ? <>
+          <p className="footnote">{t('Inherits {count} V1 fields + 4 sample fields', { count: state.v1!.facts.length })}</p>
+          {taskFacts.length === 0
+            ? <p className="footnote" data-testid="fact-compare-none">{t('No field differs from the supplier card yet.')}</p>
+            : <dl className="fact-list">{taskFacts.map(fact => <div key={fact.key} data-testid={`fact-review-${fact.key}`}>
+              <dt>{t(fact.label)}</dt>
+              <dd>{t(projectFactValue(fact.key, fact.value, unit))}</dd>
+            </div>)}</dl>}
+        </> : <div className="analysis-empty"><ClipboardCheck size={32} /><h3>{t("Turn evidence into usable facts")}</h3><p>{t('Analyze the evidence to build the task card; it then stands next to V1 field by field.')}</p><Button variant="secondary" busy={busy === 'analyze'} disabled={!!busy} onClick={() => void act('analyze', () => mockApi.analyzeEvidence(), 'FactCard V2 created. Review the facts before continuing.')}>{t("Analyze Evidence")}</Button></div>}
+      </div>
+    </div>
+    <Modal open={!!editing} onOpenChange={open => !open && !busy && closeEditor()} title={t(editing?.status === 'Missing' ? 'Add Missing Value' : imageEdit ? 'Correct the disputed value' : 'Edit Fact')} description={t(imageEdit ? 'Saving closes the picture disagreement this correction came from. The value is recorded as Manual confirmation and stays pending until it is confirmed.' : 'Saving records Manual confirmation as the source and leaves the fact pending. Confirm it where the check that raised it lives.')}>
       {editing && editor && <form noValidate onSubmit={async event => {
         event.preventDefault(); setError('');
         const ok = await act(`edit-fact-${editing.key}`, async () => {

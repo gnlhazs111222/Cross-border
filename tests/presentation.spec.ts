@@ -82,7 +82,7 @@ for (const locale of ['en-US', 'zh-CN']) for (const viewport of profiles) {
       await expect(page.locator('.contextbar')).toContainText('PL-DEMO-001');
       await expect(page.locator('.contextbar')).toContainText('LM-KT-BTL-001-BLK-500');
       await button('Analyze Evidence', '分析证据').first().click();
-      await expect(page.locator('.suggested-price>strong')).toHaveText('USD 19.99');
+      await expect(page.locator('.suggested-price>strong')).toHaveText('USD 22.39');
       await expect(page.locator('.facts-panel')).not.toHaveAttribute('open', '');
       await expect(page.locator('.fact-permission-note')).toContainText(choose('Confirmed costs and weights still stay internal.', '已确认的成本、重量仍仅供内部使用。'));
       metrics.factReviewTop = await page.locator('.fact-review').evaluate(element => Math.round(element.getBoundingClientRect().top + scrollY));
@@ -131,11 +131,11 @@ for (const locale of ['en-US', 'zh-CN']) for (const viewport of profiles) {
       await row.getByRole('button', { name: choose('Add Value', '补充值'), exact: true }).click();
       await page.getByRole('dialog').locator('input').fill('0.42');
       await button('Save Value', '保存数值').click();
-      await expect(row.locator('td').nth(2)).toHaveText(choose('Needs confirmation', '待确认'));
+      await expect(row).toContainText(choose('Needs confirmation', '待确认'));
       await expect(page.getByRole('heading', { name: choose('Pricing Blocked', '定价已阻断'), exact: true })).toBeVisible();
       await row.getByRole('button', { name: choose('Confirm', '确认'), exact: true }).click();
       await expect(page.getByTestId('fact-outcome')).toContainText('18.90');
-      await expect(page.locator('.suggested-price>strong')).toHaveText('USD 18.90');
+      await expect(page.locator('.suggested-price>strong')).toHaveText('USD 21.96');
       await expect(row).toContainText(choose('Manual confirmation', '人工确认'));
       await row.locator('summary').click();
       await noOverflow(); await shot('05-manual-confirmation-pricing-ready.png', '.pricing-panel');

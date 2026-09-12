@@ -21,7 +21,7 @@ async function generateAmazon(page: Page) {
   const before = (await snapshot(page)).v1;
   await page.getByRole('button', { name: 'Analyze Evidence', exact: true }).first().click();
   await expect(page.getByRole('button', { name: 'Analyzing product evidence...' })).toBeVisible();
-  await expect(page.locator('.suggested-price>strong')).toHaveText('USD 19.99');
+  await expect(page.locator('.suggested-price>strong')).toHaveText('USD 22.39');
   const after = await snapshot(page);
   expect(after.v1).toEqual(before);
   expect(after.v2.facts.length).toBeGreaterThan(after.v1.facts.length);
@@ -80,7 +80,7 @@ test('P0 complete: Amazon risk block, human fix, review, mock publish, CSV, relo
   const stream = await download.createReadStream();
   const chunks = []; for await (const chunk of stream!) chunks.push(chunk);
   const csv = Buffer.concat(chunks).toString('utf8');
-  expect(csv).toContain('19.99'); expect(csv).toContain(HERO); expect(csv).not.toContain('100% leakproof');
+  expect(csv).toContain('22.39'); expect(csv).toContain(HERO); expect(csv).not.toContain('100% leakproof');
   expect(csv).not.toMatch(/supplier.?cost|declared.?value|shipping|duty/i);
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Amazon Listing Export Ready' })).toBeVisible();

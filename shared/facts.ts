@@ -1,6 +1,10 @@
 import type { Fact, FactCard, Product, Pricing, PricingContextSnapshot, Evidence } from '../src/types';
 import { HERO_SKU } from '../src/data/mockData';
 import { COPY_FACTS, editableFact, factEditor, factNumber, normalizeFactValue } from '../src/services/factReview';
+import { DEMO_PRICING_RATES, priceFromRates, type PricingRates } from './pricing';
+
+/** The frozen snapshot says which market the task sells into; the rate tables are keyed by country. */
+export const marketCountry = (market?: string): string => ({ 'United States': 'US', 'United Kingdom': 'GB', Germany: 'DE', Japan: 'JP' })[market ?? ''] ?? 'US';
 
 function fact(key: string, label: string, value: string, source: string, anchor: string, allowed = true, confirmed = true): Fact {
   return { key, label, value, source, anchor, allowed: confirmed && allowed, status: value === 'Missing' ? 'Missing' : confirmed ? 'Confirmed' : 'Requires Confirmation', sourceKind: 'mock' };
@@ -56,21 +60,56 @@ export function effectiveProduct(p: Product, facts: Fact[]): Product {
     missing: [...new Set(missing)], status: missing.length ? 'missing_data' : 'search_ready',
   };
 }
-export function pricingFromFacts(p: Product, facts: Fact[], revision = 0, targetProfit = 5, snapshot?: PricingContextSnapshot): Pricing {
+/**
+ * Whether a task-card field is more than the confirmed supplier value: added for this task, changed by
+ * a person or a check, still waiting for confirmation, or not allowed into copy. The server marks the
+ * fields this returns true for, and the UI renders that list instead of deciding field by field.
+ */
+export function variesFromSupplier(fact: Fact, supplierFact?: Pick<Fact, 'value' | 'status'>): boolean {
+  // A field the supplier card never had, a value it states differently, a status a person changed, or a
+  // value still waiting for a person: that is the task card's own work. An internal field being kept out
+  // of copy is not a change, so `listingAllowed` never enters this decision.
+  if (!supplierFact) return true;
+  if (supplierFact.value !== fact.value || supplierFact.status !== fact.status) return true;
+  return fact.status !== 'Confirmed';
+}
+
+/**
+ * The plan's price calculation: the goods, the freight, the two tax layers and the platform's share,
+ * with the profit floor on top. Every amount is computed from a rate table rather than read from a
+ * constant, which is what makes weight, size and destination matter.
+ */
+export function pricingFromFacts(p: Product, facts: Fact[], revision = 0, targetProfit = 5, snapshot?: PricingContextSnapshot, rates: PricingRates = DEMO_PRICING_RATES): Pricing {
   const confirmed = (key: string) => facts.find(f => f.key === key && f.status === 'Confirmed');
   const missing = [
     ...(!confirmed('packagingWeight') ? ['Packaging Weight'] : []),
     ...(['packageLength', 'packageWidth', 'packageHeight'].some(key => !confirmed(key)) ? ['Packaging Dimensions'] : []),
     ...(!confirmed('supplierCost') ? ['Supplier cost'] : []),
   ];
-  const cost = confirmed('supplierCost') ? factNumber(confirmed('supplierCost')!.value) : p.supplierCost;
-  const shipping = snapshot?.shipping.amount ?? 3.1;
-  const duty = snapshot?.duty.amount ?? 0.7;
-  const platformCost = snapshot?.platformFee.amount ?? 2.2;
-  const floor = Math.ceil((cost + shipping + duty + platformCost + targetProfit - 1e-9) * 100) / 100;
+  const number = (key: string, fallback: number) => confirmed(key) ? factNumber(confirmed(key)!.value) : fallback;
+  /**
+   * A supplier price quoted in the frozen pair's base currency is converted at the frozen rate; a price
+   * already in the settlement currency stays as it is, and the rate is only provenance. The demo's rows
+   * are all USD, so this branch is what a CNY-priced supplier row would take.
+   */
+  const quoted = confirmed('supplierCost')?.value ?? '';
+  const currency = (quoted.match(/^([A-Z]{3})\s/) ?? [])[1] ?? 'USD';
+  const quotedCost = Number.parseFloat(quoted.replace(/^[A-Z]{3}\s*/, '')) || p.supplierCost;
+  const cost = snapshot && snapshot.exchange && currency !== snapshot.settlementCurrency && snapshot.exchange.pair.startsWith(currency)
+    ? Math.round(quotedCost * snapshot.exchange.rate * 100) / 100 : quotedCost;
+  const declaredValue = number('declaredValue', p.declaredValue ?? 0);
+  const weightKg = confirmed('packagingWeight') ? factNumber(confirmed('packagingWeight')!.value) : p.packagingWeight;
+  const sides = ['packageLength', 'packageWidth', 'packageHeight'].map(key => confirmed(key) ? factNumber(confirmed(key)!.value) : undefined);
+  const origin = (confirmed('countryOfOrigin')?.value ?? p.countryOfOrigin ?? '').includes('中国') ? 'CN' : 'US';
+  const breakdown = priceFromRates({ supplierCost: cost, declaredValue, weightKg,
+    dimensionsCm: sides.every(side => side !== undefined) ? sides as number[] : undefined,
+    origin, destination: marketCountry(snapshot?.market), category: p.category, targetProfit, rates,
+    floorPrice: p.sku === HERO_SKU ? Math.max(19.99, rates.logistics.base) : undefined });
   return { version: `v${1 + revision}`, status: missing.length ? 'blocked' : 'ready', supplierCost: cost,
-    shipping, duty, platformCost, targetProfit,
-    suggestedPrice: missing.length ? null : p.sku === HERO_SKU ? Math.max(19.99, floor) : floor, missing, ...(snapshot ? { snapshot } : {}) };
+    shipping: breakdown.logistics, duty: Math.round((breakdown.exportDuty + breakdown.importDuty) * 100) / 100,
+    platformCost: breakdown.platformFee, targetProfit,
+    suggestedPrice: missing.length ? null : breakdown.suggestedPrice, missing,
+    ...(missing.length ? {} : { breakdown }), ...(snapshot ? { snapshot } : {}) };
 }
 
 export function productEvidence(p: Product): Evidence[] {

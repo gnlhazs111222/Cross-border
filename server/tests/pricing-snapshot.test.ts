@@ -55,7 +55,12 @@ test('selected SKU pricing reads the frozen snapshot and refresh is version guar
   let facts = await call(`/api/tasks/${task.recordId}/products/${HERO_SKU}/fact-cards/v1`, {});
   facts = await call(`/api/tasks/${task.recordId}/products/${HERO_SKU}/analyze`, { expectedRevision: facts.factsRevision });
   assert.equal(facts.pricing.snapshot.code, task.pricingSnapshot.code);
-  assert.deepEqual([facts.pricing.shipping, facts.pricing.duty, facts.pricing.platformCost], [3.1, 0.7, 2.2]);
+  // The amounts are computed from the frozen rate table: freight band, duty by destination+category,
+  // import tax by destination, and the marketplace's share of the price.
+  assert.deepEqual([facts.pricing.shipping, facts.pricing.duty, facts.pricing.platformCost], [3.1, 1.66, 3.36]);
+  assert.equal(facts.pricing.breakdown!.rates.logistics, 'logistics-demo-v1');
+  assert.equal(facts.pricing.breakdown!.rates.divisor, 5000);
+  assert.equal(facts.pricing.breakdown!.chargeableWeightKg, 0.38, 'billable weight comes from the facts');
   const refreshed = await call(`/api/tasks/${task.recordId}/pricing-snapshots`, { expectedVersion: 1 }); assert.equal(refreshed.version, 2);
   facts = await call(`/api/tasks/${task.recordId}/products/${HERO_SKU}/fact-snapshot`); assert.equal(facts.pricing.snapshot.code, refreshed.code);
   const stale = await app.inject({ method: 'POST', url: `/api/tasks/${task.recordId}/pricing-snapshots`, headers: { cookie }, payload: { expectedVersion: 1 } });

@@ -53,7 +53,7 @@ test.describe('Chinese and English interface', () => {
       // Switching while the request is pending does not cancel or duplicate it.
       await page.getByRole('button', { name: '分析证据', exact: true }).first().click();
       await page.getByRole('button', { name: 'EN', exact: true }).click();
-      await expect(page.locator('.suggested-price>strong')).toHaveText('USD 19.99');
+      await expect(page.locator('.suggested-price>strong')).toHaveText('USD 22.39');
       await page.getByRole('button', { name: '中文', exact: true }).click();
       await expect(page.locator('.v2')).toContainText('杯体、杯盖、说明卡');
       await expect(page.locator('.v2')).toContainText('禁止写入文案');

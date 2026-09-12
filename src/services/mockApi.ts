@@ -9,7 +9,7 @@ import { enrichProductEvidence, makeTemplateListing, rankProducts, reviewAgainst
 import { bagDemoTask, demoTask, products as builtInProducts } from '../data/mockData';
 import { COPY_FACTS, requiredCopyFactsFor, PRICING_FACTS, editableFact, factEditor } from './factReview';
 import { SUPPLIER_COLUMNS } from '../data/supplierTemplate';
-import { MULTIMODAL_PROMPT_VERSION, describeImageAssets, factImageCheck, imageCheckCounts, imageCheckFindingText, localImageCheckFindings, type ImageCheckEvidence, type ImageCheckResult } from '../../shared/multimodal';
+import { IMAGE_CHECK_SOURCE, MULTIMODAL_PROMPT_VERSION, describeImageAssets, factImageCheck, imageCheckCounts, imageCheckFindingText, localImageCheckFindings, type ImageCheckEvidence, type ImageCheckResult } from '../../shared/multimodal';
 import { appliedFactDecision, type CheckDecisionTarget } from '../../shared/checks';
 import type { CheckDecisionRequest } from '../../server/services/checks';
 import type { DemoState, Evidence, Fact, FactCard, ImportMode, ImportPreview, Listing, Platform, Pricing, Product, Recommendation, Stage, Task, Workspace } from '../types';
@@ -119,6 +119,7 @@ function applySnapshot(snapshot: FactSnapshot) {
   // Only copy facts invalidate the listing: a price-only edit keeps the approved wording in place.
   const listingChanged = current.listingFactsRevision !== undefined && current.listingFactsRevision !== snapshot.listingFactsRevision;
   current.v1 = clone(snapshot.v1); current.v2 = clone(snapshot.v2); current.pricing = clone(snapshot.pricing);
+  current.changedFactKeys = [...snapshot.changedFactKeys];
   current.factsRevision = snapshot.factsRevision; current.listingFactsRevision = snapshot.listingFactsRevision; current.factEdits = {};
   if (listingChanged || snapshot.downstreamInvalidated) {
     serverWorkflow = null; current.listings = {}; current.reviews = {}; current.publications = {};
@@ -275,7 +276,11 @@ async function checkDecision(input: CheckDecisionRequest) {
     const product = selected();
     const kept = (product.checkDecisions ?? []).filter(decision => !(decision.target === target && decision.ref === ref));
     product.checkDecisions = input.action === 'restore_image' ? kept : [...kept, { target, ref, by: 'Demo operator', at: new Date().toISOString() }];
-    if (target === 'image_text' && input.action === 'discard_image') current.v2.facts = current.v2.facts.map(fact => fact.imageCheck?.asset === ref ? { ...fact, imageCheck: undefined } : fact);
+    // Dropping a picture drops the candidate fields it produced, and clears the verdicts it left on
+    // fields the card already had. The server does the same, so both modes agree.
+    if (target === 'image_text' && input.action === 'discard_image') current.v2.facts = current.v2.facts
+      .filter(fact => !(fact.imageCheck?.asset === ref && fact.sourceKind === 'image' && fact.source === IMAGE_CHECK_SOURCE))
+      .map(fact => fact.imageCheck?.asset === ref ? { ...fact, imageCheck: undefined } : fact);
     return save();
   }
   const fact = current.v2.facts.find(candidate => candidate.key === input.factKey);

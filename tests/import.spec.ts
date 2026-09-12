@@ -64,7 +64,7 @@ for (const extension of ['xlsx', 'csv']) {
     await expect(page.getByRole('dialog')).toContainText('These values were parsed from your supplier file.');
     await page.getByRole('button', { name: 'Close dialog' }).click();
     await page.getByRole('button', { name: 'Analyze Evidence', exact: true }).first().click();
-    await expect(page.locator('.suggested-price>strong')).toHaveText('USD 19.99');
+    await expect(page.locator('.suggested-price>strong')).toHaveText('USD 22.39');
     expect((await snapshot(page)).v1).toEqual(v1);
     await page.getByRole('button', { name: 'Continue to Listing Studio' }).click();
     await page.getByRole('button', { name: 'Generate Amazon Listing' }).click();
@@ -84,7 +84,7 @@ for (const extension of ['xlsx', 'csv']) {
     const download = await downloaded;
     await download.saveAs(testInfo.outputPath('imported-amazon.csv'));
     const output = readFileSync(testInfo.outputPath('imported-amazon.csv'), 'utf8');
-    expect(output).toContain(HERO); expect(output).toContain('19.99'); expect(output).not.toContain('100% leakproof');
+    expect(output).toContain(HERO); expect(output).toContain('22.39'); expect(output).not.toContain('100% leakproof');
     await page.reload();
     await expect(page.getByRole('heading', { name: 'Amazon Listing Export Ready' })).toBeVisible();
     await page.getByRole('navigation', { name: 'Workspaces' }).getByRole('button', { name: 'Materials', exact: true }).click();
@@ -246,7 +246,7 @@ test('mixed-validity CSV keeps incomplete rows out of ranking and uses imported 
   expect(facts.find((f: { key: string }) => f.key === 'supplierCost').value).toBe('USD 12.00');
   expect(facts.find((f: { key: string }) => f.key === 'capacity').value).toBe('350ml / 11.8 fl oz');
   await page.getByRole('button', { name: 'Analyze Evidence', exact: true }).first().click();
-  await expect(page.locator('.suggested-price>strong')).toHaveText('USD 23.00');
+  await expect(page.locator('.suggested-price>strong')).toHaveText('USD 26.45');
 });
 
 test('Chinese mobile import and language switch preserve the preview and imported state', async ({ page }) => {

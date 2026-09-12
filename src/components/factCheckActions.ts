@@ -5,14 +5,14 @@ import { useI18n } from '../i18n/I18nContext';
 import { mockApi } from '../services/mockApi';
 
 /**
- * The three answers to a picture disagreement: save what the picture prints, correct the value by
- * hand, or drop the picture. The check alarm panel and the Fact Review table both offer them, so
- * they live here once and both stay in step. The correction editor belongs to Fact Review, so the
- * alarm panel asks for it by fact key instead of carrying a second copy of the form.
+ * The correction editor belongs to the fact-card comparison, so anything that needs it asks by fact
+ * key instead of carrying a second copy of the form: the check panel's picture answers, and the alarm
+ * that a pricing fact is still missing.
  */
-export const EDIT_DISPUTED_FACT_EVENT = 'prismlaunch:edit-disputed-fact';
-export const requestDisputedFactEdit = (factKey: string) => {
-  window.dispatchEvent(new CustomEvent<string>(EDIT_DISPUTED_FACT_EVENT, { detail: factKey }));
+export type FactEditRequest = { key: string; /** True when the edit answers an open picture disagreement. */ disputed?: boolean };
+export const EDIT_FACT_EVENT = 'prismlaunch:edit-fact';
+export const requestFactEdit = (factKey: string, disputed = false) => {
+  window.dispatchEvent(new CustomEvent<FactEditRequest>(EDIT_FACT_EVENT, { detail: { key: factKey, disputed } }));
 };
 export const factRowSelector = (factKey: string) => `[data-testid="fact-review-${factKey}"]`;
 
@@ -23,13 +23,16 @@ export const openFactComparison = () => {
   return panel;
 };
 
+/** Brings one row of the comparison into view, opening the block first because it starts collapsed. */
+export const scrollToFactRow = (factKey: string) => {
+  openFactComparison();
+  document.querySelector(factRowSelector(factKey))?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+};
+
 export function useFactCheckActions(onFocus?: (factKey: string) => void) {
   const { act } = useDemo();
   const { t } = useI18n();
-  const scrollToFact = useCallback((factKey: string) => {
-    openFactComparison();
-    document.querySelector(factRowSelector(factKey))?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  }, []);
+  const scrollToFact = useCallback((factKey: string) => scrollToFactRow(factKey), []);
   const adoptPrintedText = async (f: Fact) => {
     onFocus?.(f.key);
     await act(`image-adopt-${f.key}`, () => mockApi.adoptPrintedText(f.key), 'The stored value now follows the text printed in the picture. Confirm it before it can enter copy.');
@@ -39,6 +42,6 @@ export function useFactCheckActions(onFocus?: (factKey: string) => void) {
     onFocus?.(f.key);
     await act(`image-discard-${f.key}`, () => mockApi.discardImageCheck(asset), t('Picture {asset} is dropped from the checks and will not be read again. The other pictures still are.', { asset }));
   };
-  const editDisputedFact = (f: Fact) => { onFocus?.(f.key); requestDisputedFactEdit(f.key); };
+  const editDisputedFact = (f: Fact) => { onFocus?.(f.key); requestFactEdit(f.key, true); };
   return { adoptPrintedText, discardPicture, editDisputedFact, scrollToFact };
 }

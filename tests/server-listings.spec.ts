@@ -51,7 +51,7 @@ for (const zh of [false, true]) test(`server review and publication survive cach
   const downloaded = page.waitForEvent('download');
   await page.getByRole('button', { name: label(zh, 'Export Amazon CSV', '导出 Amazon CSV') }).click();
   const response = await csvResponse; expect(response.status()).toBe(200);
-  const csv = await response.text(); expect(csv).toContain('19.99'); expect(csv).not.toMatch(/FORGED|100% leakproof|fake-publish/);
+  const csv = await response.text(); expect(csv).toContain('22.39'); expect(csv).not.toMatch(/FORGED|100% leakproof|fake-publish/);
   await (await downloaded).saveAs(info.outputPath('server-amazon.csv'));
   const bytes = await readFile(info.outputPath('server-amazon.csv'));
   expect(bytes.subarray(0, 3).toString('hex')).toBe('efbbbf');

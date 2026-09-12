@@ -32,7 +32,7 @@ for (const zh of [false, true]) test(`server facts survive all localStorage dele
   expect(snap.pricingReadiness.ready).toBe(false);
   expect(snap.facts.find((f: { key: string }) => f.key === 'packagingWeight').status).toBe('Requires Confirmation');
   await page.getByTestId('fact-review-packagingWeight').getByRole('button', { name: zh ? '确认' : 'Confirm', exact: true }).click();
-  await expect(page.locator('.suggested-price>strong')).toHaveText('USD 19.20');
+  await expect(page.locator('.suggested-price>strong')).toHaveText('USD 22.39');
   await page.getByRole('button', { name: zh ? '分析证据' : 'Analyze Evidence', exact: true }).first().click();
   await expect(page.getByRole('button', { name: zh ? '继续前往文案工作室' : 'Continue to Listing Studio' })).toBeVisible();
   snap = await serverSnapshot(page);

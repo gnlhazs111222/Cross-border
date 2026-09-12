@@ -6,6 +6,7 @@ import { AppError } from '../errors';
 import { factSnapshotTx, readFact, storedFact } from './facts';
 import { invalidateDownstream } from './invalidation';
 import { settleImageOccurrences } from './multimodal';
+import { IMAGE_CHECK_SOURCE } from '../../shared/multimodal';
 
 type Writer = Prisma.TransactionClient;
 const json = (value: unknown): Prisma.InputJsonValue => JSON.parse(JSON.stringify(value));
@@ -74,6 +75,13 @@ export async function decideCheck(db: PrismaClient, userId: string, taskId: stri
         for (const row of rows) {
           const metadata = { ...(row.metadata as object ?? {}) } as Record<string, unknown>;
           if ((metadata.imageCheck as { asset?: string } | undefined)?.asset !== ref) continue;
+          // A field that exists only because this picture printed something is the picture's own
+          // candidate, not a fact the supplier or a person owns: dropping the picture drops it too.
+          if (metadata.sourceKind === 'image' && row.source === IMAGE_CHECK_SOURCE) {
+            await tx.fact.delete({ where: { id: row.id } });
+            cleared += 1;
+            continue;
+          }
           delete metadata.imageCheck;
           await tx.fact.update({ where: { id: row.id }, data: { metadata: json(metadata) } });
           cleared += 1;

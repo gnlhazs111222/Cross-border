@@ -152,7 +152,7 @@ html[lang=zh-CN] .page-heading p,html[lang=zh-CN] .notice{line-height:1.9}
 .check-alerts .check-table td.red{background:#fff7f5}
 .check-alerts .check-table th.amber{background:#fff7e8;color:#8a611c}
 .check-alerts .check-table td.amber{background:#fffcf3}
-.check-alerts .col-evidence{width:26%}.check-alerts .col-action{width:20%}.check-alerts .col-report{width:29%}.check-alerts .col-transport{width:25%}
+.check-alerts .col-evidence{width:22%}.check-alerts .col-action{width:16%}.check-alerts .col-report{width:22%}.check-alerts .col-transport{width:20%}.check-alerts .col-pricing{width:20%}
 .check-alerts .check-name{display:flex;align-items:center;justify-content:center;gap:7px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .check-alerts .check-table th.red .check-name{color:var(--red)}
 .check-alerts .check-table th.amber .check-name{color:#8a611c}
@@ -188,7 +188,13 @@ svg{display:inline-block;vertical-align:middle}
 .pricing-snapshot-details dt{font-size:11px;color:var(--muted);margin-bottom:5px}
 .pricing-snapshot-details dd{margin:0;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
 .pricing-snapshot-details dd small{display:block;color:var(--muted);margin-top:3px}
+/* The total is the sum it is: goods of the formula on one line, result at the end. */
+.pricing-tax-details .tax-formula{font-weight:650;color:var(--ink);overflow-wrap:anywhere}
 .pricing-snapshot-details p{font-size:11px;color:var(--muted);line-height:1.6;margin-top:13px}
+/* Which snapshot froze the numbers right above it: the one thing that changes on a refresh. */
+.cost-snapshot-source{padding:11px 22px 0;font-size:11px;color:var(--muted)}
+/* The task card's conclusion, in plain text: a badge there would read as a control. */
+.fact-status{color:var(--muted);font-size:11px;margin-left:7px}
 .pricing-panel .panel-title>.button,.pricing-blocked .panel-title>.button{margin-left:auto}
 @media(max-width:1000px){.pricing-snapshot-details dl{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.pricing-snapshot-details{padding-inline:18px}.pricing-snapshot-details dl{grid-template-columns:1fr}.pricing-panel .panel-title>.button,.pricing-blocked .panel-title>.button{width:100%;margin-left:0}}

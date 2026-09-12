@@ -79,7 +79,7 @@ publicTest('offline competition fallback works without any API requests', async 
   await page.getByRole('button', { name: 'Create Demo Task', exact: true }).click();
   await page.getByTestId('recommendation-1').getByRole('button', { name: 'Select SKU' }).click();
   await page.getByRole('button', { name: 'Analyze Evidence', exact: true }).first().click();
-  await expect(page.locator('.suggested-price>strong')).toHaveText('USD 19.99');
+  await expect(page.locator('.suggested-price>strong')).toHaveText('USD 22.39');
   await page.getByRole('button', { name: 'Continue to Listing Studio' }).click();
   await page.getByRole('button', { name: 'Generate Amazon Listing' }).click();
   await page.getByRole('button', { name: 'Continue to Review' }).click();

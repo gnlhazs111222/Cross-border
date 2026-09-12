@@ -43,7 +43,9 @@ export type PricingContextSnapshot = {
   duty: { amount: number; currency: 'USD'; ruleVersion: string; source: string };
   platformFee: { amount: number; currency: 'USD'; configVersion: string; source: string };
 };
-export type Pricing = { version: string; status: 'ready' | 'blocked'; supplierCost: number; shipping: number; duty: number; platformCost: number; targetProfit: number; suggestedPrice: number | null; missing: string[]; snapshot?: PricingContextSnapshot };
+export type Pricing = { version: string; status: 'ready' | 'blocked'; supplierCost: number; shipping: number; duty: number; platformCost: number; targetProfit: number; suggestedPrice: number | null; missing: string[]; snapshot?: PricingContextSnapshot;
+  /** The computed freight, duty, import tax and platform share, with the rate versions behind them. */
+  breakdown?: import('../../shared/pricing').PriceBreakdown };
 export type GenerationMetadata = { provider: string; model?: string; promptVersion?: string; fallbackReason?: string; aiCallId?: string; inputHash?: string; cacheHit?: boolean };
 export type Listing = { generation?: GenerationMetadata; recordId?: string; status?: string; generationMode?: string; platform: Platform; title: string; bullets: string[]; description: string; attributes: Record<string, string>; sources: Fact[]; revision: number; factRevision?: number; riskDemoInjected: boolean };
 export type Issue = { id: string; severity: 'HIGH'; title: string; text: string; reason: string; category?: import('../../shared/review').ReviewCategory; location?: import('../../shared/review').ReviewLocation; factKeys?: string[]; suggestedFix?: string; origin?: 'rules' | 'qwen' };
@@ -56,6 +58,8 @@ export type ImportReport = { fileName: string; mode: ImportMode; processed: numb
 export type ImportPreview = ImportReport & { products: Product[] };
 export type DemoState = {
   schemaVersion: 1; factsRevision?: number; listingFactsRevision?: number; serverRevision?: number; ownerId?: string; units?: 'metric' | 'us' | 'uk'; workspace: Workspace; stage: Stage; history: Stage[];
+  /** Task-card keys the server marked as more than the confirmed supplier value. */
+  changedFactKeys?: string[];
   catalog: Product[]; datasetSource: 'builtin' | 'imported' | 'mixed'; importReport: ImportReport | null;
   factEdits: Record<string, Record<string, Fact>>;
   task: Task | null; selectedSku: string | null; v1: FactCard | null; v2: FactCard | null;

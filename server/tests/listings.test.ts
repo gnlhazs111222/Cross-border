@@ -126,7 +126,8 @@ test('published CSV is generated from current SQLite data and old versions canno
   let w = await published(); const pub = w.publications.amazon!;
   const result = await app.inject({ url: `/api/publish/${pub.recordId}/amazon-csv`, headers: { cookie } });
   assert.equal(result.statusCode, 200); assert.match(String(result.headers['content-type']), /text\/csv/); assert.match(String(result.headers['content-disposition']), /Amazon\.csv/);
-  assert.match(result.body, /19\.99/); assert.match(result.body, new RegExp(HERO_SKU)); assert.doesNotMatch(result.body, /100% leakproof|supplier.?cost|declared.?value|8\.20/);
+  // The exported price is the computed one (goods, freight, duty, platform share, profit floor).
+  assert.match(result.body, /22\.39/); assert.match(result.body, new RegExp(HERO_SKU)); assert.doesNotMatch(result.body, /100% leakproof|supplier.?cost|declared.?value|8\.20/);
   const oldId = w.listings.amazon!.recordId!;
   w = await act(w, 'regenerate'); assert.equal(w.listings.amazon!.revision, 3); assert.equal(w.reviews.amazon, undefined);
   assert.equal((await app.inject({ url: `/api/publish/${pub.recordId}/amazon-csv`, headers: { cookie } })).statusCode, 409);

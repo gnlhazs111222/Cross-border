@@ -90,9 +90,11 @@ test('edit stays pending; confirm persists manual history and unlocks current co
   const f = s.facts.find(f => f.key === 'packagingWeight')!;
   assert.equal(f.value, '0.42 kg'); assert.equal(f.status, 'Confirmed'); assert.equal(f.sourceKind, 'manual'); assert.equal(f.previousValue, 'Missing');
   assert.match(f.previousSource!, /Supplier Spreadsheet/); assert.ok(f.confirmedAt); assert.equal(f.revision, 3); assert.equal(s.factsRevision, 3);
-  assert.equal(s.pricingReadiness.ready, true); assert.equal(s.pricing.suggestedPrice, 19.2);
+  // 8.20 goods + 3.10 freight + 0.70 duty (8.20 x 8.5%) + 15% platform share + 5.00 profit -> 20.00.
+  assert.equal(s.pricingReadiness.ready, true); assert.equal(s.pricing.suggestedPrice, 22.39);
   s = await mutate(s, 'supplierCost', 'edit', '12'); assert.equal(s.pricing.status, 'blocked');
-  s = await mutate(s, 'supplierCost', 'confirm'); assert.equal(s.pricing.suggestedPrice, 23); assert.equal(s.facts.find(f => f.key === 'supplierCost')!.allowed, false);
+  // Confirming the edited cost (12.00, declared value still 8.20): (12.00 + 3.10 + 0.70 + 5.00) / 0.85.
+  s = await mutate(s, 'supplierCost', 'confirm'); assert.equal(s.pricing.suggestedPrice, 26.86); assert.equal(s.facts.find(f => f.key === 'supplierCost')!.allowed, false);
   const stored = await db.fact.findUniqueOrThrow({ where: { id: f.recordId! } });
   assert.equal((stored.metadata as { previousValue: string }).previousValue, 'Missing');
 });

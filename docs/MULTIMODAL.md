@@ -65,7 +65,7 @@ Fact Review 表格「Picture text check」列里，`differ` 那一行直接写�
 | --- | --- |
 | **直接保存图中印字** | 把图上文字写进 v2：状态 `Requires Confirmation`、不允许进入文案、原值存为 `previousValue`、来源记为 `Product Picture`，并使下游 Listing／审核／发布失效 |
 | **修改后保存** | 打开事实编辑弹窗（标题变成「修改有争议的取值」），由人改成第三个值再保存；服务端校验取值合法，非法值返回 409 `invalid_fact` |
-| **放弃该图** | 这张图从本 SKU 的核对里剔除：记一条 `CheckDecision{target:image_text, ref:文件名}`（含处置人与时间）在**商品**上，并清掉它贡献的 `imageCheck` 标注；之后**重跑不再读取也不再发送**这张图，证据 notes 里写明 `Dropped from the check by a recorded human decision` |
+| **放弃该图** | 这张图从本 SKU 的核对里剔除：记一条 `CheckDecision{target:image_text, ref:文件名}`（含处置人与时间）在**商品**上；清掉它贡献的 `imageCheck` 标注，并且**它凭空带来的候选字段**（`imageVisibleText`／`imagePackagingMark` 这类，`sourceKind=image` 的机器观测）**随图一起删除**——卡上原有的字段只清标注、不删行。之后**重跑不再读取也不再发送**这张图，证据 notes 里写明 `Dropped from the check by a recorded human decision` |
 
 三个动作共用一条路由 `POST /api/tasks/:taskId/products/:productId/check-decisions`（`server/services/checks.ts`；前端 `src/services/apiClient.ts` 的 `facts.checkDecision`），请求带 `expectedRevision` 做乐观锁，陈旧版本返回 409 `facts_changed`。决定记在**商品**上（`checkDecisions`）与事实卡上，换图、重跑都带不走它。
 

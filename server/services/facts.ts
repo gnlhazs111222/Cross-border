@@ -1,7 +1,7 @@
 import type { Prisma, PrismaClient, Fact as StoredFact } from '@prisma/client';
 import type { Fact, FactCard, Evidence, Platform } from '../../src/types';
 import type { FactSnapshot } from '../../shared/contracts';
-import { baseFactCard, effectiveProduct, pricingFromFacts, productEvidence, reviewFact } from '../../shared/facts';
+import { baseFactCard, effectiveProduct, pricingFromFacts, productEvidence, reviewFact, variesFromSupplier } from '../../shared/facts';
 import { COPY_FACTS, PRICING_FACTS, requiredCopyFactsFor } from '../../src/services/factReview';
 import { AppError } from '../errors';
 import { domainProviders } from '../providers/domain';
@@ -38,7 +38,11 @@ export async function factSnapshotTx(db: DB, userId: string, taskId: string, pro
   const pricing = pricingFromFacts(p, facts, facts.filter(f => PRICING_FACTS.includes(f.key)).reduce((sum, f) => sum + Math.max(0, (f.revision ?? 1) - 1), 0), task.minimumProfit, pricingContext);
   const blockedFacts = requiredCopyFactsFor(p.visual).filter(key => !facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed));
   const listingFactsRevision = facts.filter(f => COPY_FACTS.includes(f.key)).reduce((sum, f) => sum + (f.revision ?? 1), 0);
-  return { productId: product.id, taskId: task.id, product: view, v1, v2, facts, factsRevision: Math.max(base.revision, enhanced?.revision ?? 0), listingFactsRevision, downstreamInvalidated: invalidated, pricing,
+  // Which task fields differ from the supplier card is decided here, once, so every surface shows the
+  // same list instead of each one comparing the two cards itself.
+  const supplierByKey = new Map(v1.facts.map(fact => [fact.key, fact]));
+  const changedFactKeys = facts.filter(fact => variesFromSupplier(fact, supplierByKey.get(fact.key))).map(fact => fact.key);
+  return { productId: product.id, taskId: task.id, product: view, v1, v2, facts, changedFactKeys, factsRevision: Math.max(base.revision, enhanced?.revision ?? 0), listingFactsRevision, downstreamInvalidated: invalidated, pricing,
     evidence: [...base.evidence, ...(enhanced?.evidence ?? [])].map(e => ({ ...(e.data as unknown as Evidence), recordId: e.id })), assets: await assetsForProduct(db, userId, product.id),
     pricingReadiness: { ready: pricing.status === 'ready', missing: pricing.missing },
     listingReadiness: { ready: !!v2 && !blockedFacts.length && p.duplicateStatus === 'unique' && p.category === task.category, blockedFacts } };

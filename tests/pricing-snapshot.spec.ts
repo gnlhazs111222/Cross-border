@@ -13,7 +13,7 @@ test('task pricing snapshot is persisted, traceable and refreshable', async ({ p
   const panel = page.locator('.pricing-panel');
   await expect(panel.getByRole('heading', { name: 'Task Pricing Snapshot', exact: true })).toBeVisible();
   await expect(panel).toContainText('PCS-PL-DEMO-001-v1');
-  await panel.getByText('Snapshot provenance', { exact: true }).click();
+  await panel.getByText('Exchange rate snapshot', { exact: true }).click();
   await expect(panel).toContainText('1 CNY = 0.139 USD');
   await expect(panel).toContainText('Demo approved exchange-rate table');
   await expect(panel).toContainText('2026-09-01');
@@ -36,7 +36,7 @@ test('Chinese mobile snapshot disclosure stays readable without horizontal overf
   const panel = page.locator('.pricing-panel');
   await expect(panel.getByRole('heading', { name: '定价计算', exact: true })).toBeVisible();
   await expect(panel.getByRole('button', { name: '刷新快照', exact: true })).toBeVisible();
-  await panel.getByText('查看快照来源与版本', { exact: true }).click();
+  await panel.getByText('汇率快照', { exact: true }).click();
   await expect(panel).toContainText('演示用受控汇率表');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('pricing-snapshot-mobile-zh.png'), fullPage: true });

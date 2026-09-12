@@ -175,6 +175,32 @@ test('a live disagreement is raised on the card and adopting the printed text cl
   assert.equal((await pendingDisputes()).length, 0, 'the queue row is closed by the same action');
 });
 
+test('dropping a picture also drops the candidate fields that picture produced', async () => {
+  await call('/api/demo/reset', {});
+  const task = await call<{ recordId: string }>('/api/tasks', { code: demoTask.id, platform: demoTask.platform, market: demoTask.market, category: demoTask.category, requirements: demoTask.requirements, minimumProfit: demoTask.minProfit });
+  await call(`/api/tasks/${task.recordId}/selection`, { productId: HERO_SKU, purpose: 'selected' });
+  const base = `/api/tasks/${task.recordId}/products/${HERO_SKU}`;
+  await call<{ asset: ProductAsset }>(`/api/products/${encodeURIComponent(HERO_SKU)}/assets`, { fileName: 'front.png', mimeType: 'image/png', role: 'main', contentBase64: PNG.toString('base64') });
+  await call<FactSnapshot>(`${base}/fact-cards/v1`, {});
+  const v1 = await call<FactSnapshot>(`${base}/fact-snapshot`);
+  // One finding is a disagreement about a field the card already had, the other is wording no field
+  // covers — that second one joins the card as a candidate.
+  reply = JSON.stringify({ findings: [
+    { factKey: 'capacity', attribute: 'capacityMark', imageValue: '750 ML', verdict: 'differ', confidence: 0.9, asset: 'front.png', region: 'label' },
+    { factKey: null, attribute: 'barcodeText', imageValue: '6901234567890', verdict: 'agree', confidence: 0.6, asset: 'front.png', region: 'base' },
+  ] });
+  const snap = await call<FactSnapshot>(`${base}/analyze`, { expectedRevision: v1.factsRevision });
+  const candidate = snap.v2!.facts.find(f => f.key === 'imageVisibleText')!;
+  assert.equal(candidate.value, '6901234567890');
+  assert.equal(candidate.sourceKind, 'image');
+
+  const dropped = await call<FactSnapshot>(`${base}/check-decisions`, { action: 'discard_image', asset: 'front.png', expectedRevision: snap.factsRevision });
+  assert.equal(dropped.v2!.facts.some(f => f.key === 'imageVisibleText'), false, 'the candidate goes with the picture that produced it');
+  const kept = dropped.v2!.facts.find(f => f.key === 'capacity')!;
+  assert.equal(kept.imageCheck, undefined, 'the verdict the picture left on an existing field is cleared');
+  assert.equal(kept.value, snap.v2!.facts.find(f => f.key === 'capacity')!.value, 'and the field itself stays');
+});
+
 test('correcting the value by hand re-reads the verdict and only agrees when it matches', async () => {
   const { base, snap } = await disputed();
   const decided = await call<FactSnapshot>(`${base}/check-decisions`, { action: 'edited', factKey: 'capacity', value: '600', expectedRevision: snap.factsRevision });
