@@ -34,7 +34,7 @@ test('Chinese mobile snapshot disclosure stays readable without horizontal overf
   await openPricing(page);
   await page.getByRole('button', { name: '中文', exact: true }).click();
   const panel = page.locator('.pricing-panel');
-  await expect(panel.getByRole('heading', { name: '任务级税价快照', exact: true })).toBeVisible();
+  await expect(panel.getByRole('heading', { name: '定价计算', exact: true })).toBeVisible();
   await expect(panel.getByRole('button', { name: '刷新快照', exact: true })).toBeVisible();
   await panel.getByText('查看快照来源与版本', { exact: true }).click();
   await expect(panel).toContainText('演示用受控汇率表');
