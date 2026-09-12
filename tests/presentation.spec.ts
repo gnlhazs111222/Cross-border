@@ -123,7 +123,7 @@ for (const locale of ['en-US', 'zh-CN']) for (const viewport of profiles) {
       await page.getByRole('navigation').getByRole('button', { name: choose('Materials', '商品资料'), exact: true }).click();
       await button('View LM-KT-IMP-005-BLK-500', '查看 LM-KT-IMP-005-BLK-500').click();
       await button('Review Facts', '核对事实').click();
-      await expect(page.getByRole('heading', { name: choose('Fact Review', '事实人工核对'), exact: true })).toBeVisible();
+      await expect(page.getByRole('heading', { name: choose('Fact card comparison', '事实卡对照'), exact: true })).toBeVisible();
       await expect(page.getByRole('heading', { name: choose('Pricing Blocked', '定价已阻断'), exact: true })).toBeVisible();
       await expect(page.locator('.fact-review-table tbody tr').first()).toHaveAttribute('data-testid', 'fact-review-packagingWeight');
       await shot('04-missing-fact-pricing-blocked.png', '.pricing-blocked');

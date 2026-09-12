@@ -70,7 +70,7 @@ export function SourceAssets({ sku }: { sku: string }) {
 
   return <section className="source-assets" data-testid={`source-assets-${sku}`}>
     <div className="source-assets-head"><h4>{t('Source assets')}</h4>{assets.length > 0 && <Badge>{assets.length}</Badge>}</div>
-    <p className="source-assets-hint">{t('Images and PDFs attached to this SKU. The server stores the file and keeps the hash; the multimodal parser reads them in a later step.')}</p>
+    <p className="source-assets-hint">{t('Images and PDFs attached to this SKU. The server stores the file and keeps the hash. The picture text check compares the words printed in the images with the facts; PDFs are stored but not read yet.')}</p>
     {!SERVER_MODE
       ? <Notice tone="amber">{t('Source assets require the server-backed workspace.')}</Notice>
       : <>

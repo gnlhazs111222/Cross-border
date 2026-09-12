@@ -4,7 +4,7 @@ import type { z } from 'zod';
 import type { ServerConfig } from '../config';
 import { AppError } from '../errors';
 
-export type TextRequest = { prompt: string; purpose: string; systemPrompt?: string; maxTokens?: number; promptVersion?: string; inputHash?: string; mode?: 'text' | 'reasoning' | 'premium' };
+export type TextRequest = { prompt: string; purpose: string; systemPrompt?: string; maxTokens?: number; promptVersion?: string; inputHash?: string; mode?: 'text' | 'reasoning' | 'premium' | 'vision'; /** Selected SKU pictures only: the multimodal module never ships the whole catalogue. */ images?: { fileName: string; dataUrl: string }[] };
 export type TextResult = { aiCallId?: string; provider: 'mock' | 'bailian'; model: string; content: string; latencyMs: number; usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number } };
 export interface TextModelProvider {
   generateText(request: TextRequest): Promise<TextResult>;
@@ -24,7 +24,7 @@ export class BailianTextModelProvider implements TextModelProvider {
   get remainingCalls() { return Math.max(0, this.config.AI_MAX_LIVE_CALLS_PER_SESSION - this.calls); }
   private model(mode: TextRequest['mode']) {
     if (mode === 'premium' && !this.config.AI_ALLOW_PREMIUM) throw new AppError('premium_disabled', 'Premium models require explicit opt-in.', 403);
-    return mode === 'premium' ? this.config.BAILIAN_PREMIUM_MODEL : mode === 'reasoning' ? this.config.BAILIAN_REASONING_MODEL : this.config.BAILIAN_TEXT_MODEL;
+    return mode === 'premium' ? this.config.BAILIAN_PREMIUM_MODEL : mode === 'reasoning' ? this.config.BAILIAN_REASONING_MODEL : mode === 'vision' ? this.config.BAILIAN_VL_MODEL : this.config.BAILIAN_TEXT_MODEL;
   }
   private async call<T>(request: TextRequest, structured?: { schema: z.ZodType<T>; example: T }): Promise<TextResult & { data?: T }> {
     if (!this.config.AI_LIVE_ENABLED) throw new AppError('live_ai_disabled', 'Live AI is disabled.', 403);
@@ -41,7 +41,7 @@ export class BailianTextModelProvider implements TextModelProvider {
       const response = await this.client.chat.completions.create({
         model, messages: [
           { role: 'system', content: request.systemPrompt ?? (structured ? `Return only a JSON object with the same shape as this example: ${JSON.stringify(structured.example)}` : 'Reply briefly.') },
-          { role: 'user', content: request.prompt },
+          { role: 'user', content: request.images?.length ? [{ type: 'text' as const, text: request.prompt }, ...request.images.map(image => ({ type: 'image_url' as const, image_url: { url: image.dataUrl } }))] : request.prompt },
         ], max_tokens: Math.min(3000, Math.max(1, request.maxTokens ?? 128)), temperature: 0,
         ...(structured ? { response_format: { type: 'json_object' as const } } : {}),
         ...{ enable_thinking: false },

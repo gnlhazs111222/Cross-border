@@ -11,7 +11,7 @@
 .capability-footnote{font-size:11px;color:var(--muted);line-height:1.8;padding:15px;background:#f4f7f0;border-radius:6px;margin-top:20px}
 .task-brief .panel-title{padding:15px 20px}.brief-grid{padding:12px 20px}.brief-requirements{padding:12px 20px}.shortlist-heading{margin:14px 0 15px}
 .recommendation-card{padding:17px}.recommendation-card>.button{margin-top:10px}.rec-product{margin:10px 0 13px}.rec-product .product-visual.large{height:82px}.rec-product .product-visual.large svg{height:80px}
-.evidence-heading-actions{display:flex;gap:9px;align-items:center}.mobile-table-hint{display:none}
+.evidence-heading-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.mobile-table-hint{display:none}
 .match-meter{margin:13px 0}.match-reasons{margin-bottom:0}.match-reasons p{margin-bottom:8px}
 .facts-panel>summary{cursor:pointer;padding:14px 18px;border-bottom:0;list-style:none;gap:12px}.facts-panel>summary::-webkit-details-marker{display:none}
 .facts-panel[open]>summary{border-bottom:1px solid var(--border)}.facts-panel>summary h2{font-size:16px;margin-top:4px}.facts-panel>summary p{font-size:11px;margin-top:6px;max-width:660px}
@@ -67,3 +67,7 @@
   .review-aside{display:block}.review-grid{gap:12px}.toast{left:15px;right:15px;bottom:14px;max-width:none}
   .listing-copy>.fact-sources{margin-inline:-19px}.source-facts{grid-template-columns:1fr 1fr}
 }
+
+/* The toolbar wraps instead of squeezing its transport hint into a narrow column on a phone. */
+.studio-toolbar{flex-wrap:wrap}
+.hazmat-hint{flex:1 1 260px;margin:0;font-size:11px;line-height:1.6;color:var(--muted)}

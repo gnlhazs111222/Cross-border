@@ -76,6 +76,8 @@ const COLOR_ALIASES = compile([
   ['蓝色', 'blue'], ['蓝', 'blue'], ['blue', 'blue'], ['灰色', 'gray'], ['灰', 'gray'], ['gray', 'gray'], ['grey', 'gray'],
   ['粉色', 'pink'], ['粉', 'pink'], ['pink', 'pink'], ['红色', 'red'], ['红', 'red'], ['red', 'red'],
   ['金色', 'gold'], ['金', 'gold'], ['gold', 'gold'],
+  ['紫色', 'purple'], ['紫', 'purple'], ['purple', 'purple'], ['棕色', 'brown'], ['棕', 'brown'], ['brown', 'brown'],
+  ['橙色', 'orange'], ['橙', 'orange'], ['orange', 'orange'],
 ]);
 
 const MATERIAL_ALIASES = compile([

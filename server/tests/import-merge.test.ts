@@ -171,7 +171,7 @@ test('a bulk decision resolves a whole class of rows and can be remembered as a 
   const before = await catalog();
   const rows = [
     { sku: HERO, name: 'Black Stainless Steel Travel Bottle', capacity: 640 },
-    { sku: 'BULK-001', name: 'Black Stainless Steel Travel Bottle', capacity: 500 },
+    { sku: 'BULK-001', name: 'Bulk Supplier Travel Flask', capacity: 500 },
   ];
   await call('/api/products/import', 'POST', importPayload('replace', rows, before.revision));
   const revision = (await catalog()).revision;
@@ -197,6 +197,32 @@ test('a bulk decision resolves a whole class of rows and can be remembered as a 
 
   const cleared = await call<ImportRuleDto[]>(`/api/imports/rules/${rules[0].recordId}`, 'DELETE');
   assert.deepEqual(cleared, []);
+});
+
+test('one product written twice inside one file is held, so the file creates it once', async () => {
+  const before = await catalog();
+  // Different codes and different wording, identical facts: one product, written twice in one file.
+  const imported = await call<CatalogResponse>('/api/products/import', 'POST', importPayload('merge', [
+    { sku: 'TWIN-001', name: 'Ceramic Travel Bottle 320ml', capacity: 320, material: 'Ceramic' },
+    { sku: 'TWIN-002', name: 'Ceramic Travel Bottle', capacity: 320, material: 'Ceramic' },
+  ], before.revision));
+  assert.equal(imported.batch?.counts.new, 1);
+  assert.equal(imported.batch?.counts.probable, 1);
+  assert.equal(imported.batch?.createdProducts, 1);
+  assert.ok(imported.products.some(item => item.sku === 'TWIN-001'), 'the first row is kept');
+  assert.equal(imported.products.some(item => item.sku === 'TWIN-002'), false, 'the second row is held');
+
+  const detail = await call<ImportBatchDetail>(`/api/imports/${imported.batch!.recordId}`);
+  const held = detail.occurrences.find(occurrence => occurrence.verdict === 'probable')!;
+  assert.equal(held.sku, 'TWIN-002');
+  assert.equal(held.matchedSku, 'TWIN-001', 'the batch points at the row it duplicates');
+  assert.equal(held.matchedProductId, null, 'nothing is stored for the held row yet');
+
+  const resolved = await resolve(held, 'skipped', imported.revision);
+  assert.equal(resolved.batch.status, 'completed', 'skipping the duplicate closes the batch');
+  const after = await catalog();
+  assert.ok(after.products.some(item => item.sku === 'TWIN-001'));
+  assert.equal(after.products.some(item => item.sku === 'TWIN-002'), false);
 });
 
 test('a bulk decision can be limited to one field and skips rows it cannot apply to', async () => {

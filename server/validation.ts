@@ -14,6 +14,13 @@ export const productInput = z.object({
   sourceFile: z.object({ fileName: text, mimeType: text, contentBase64: z.string().min(1).max(8_000_000) }).strict().optional(),
   assetReferences: z.array(text).max(20).optional(),
   assetUrls: z.array(z.string().url().max(500)).max(20).optional(),
+  transport: z.object({ liquid: z.boolean(), battery: z.boolean(), magnetic: z.boolean(), aerosol: z.boolean(), flammable: z.boolean(), fragile: z.boolean() }).strict().optional(),
+  // A quality report travels with the row: its own result and the values it certified, never ours.
+  qualityReport: z.object({
+    reportNo: text, result: z.enum(['pass', 'fail']),
+    issuedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), validUntil: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    stated: z.object({ capacity: z.number().int().positive().max(1000000).optional(), material: plain.optional() }).strict().optional(),
+  }).strict().optional(),
   status: z.enum(['search_ready', 'missing_data']), duplicateStatus: z.literal('unique'),
   missing: z.array(z.string().max(220)).max(14), visual: z.enum(['bottle', 'bag', 'lamp']),
 }).strict().superRefine((p, ctx) => {
@@ -21,13 +28,26 @@ export const productInput = z.object({
   if (p.visual !== expectedVisual) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['visual'], message: 'Product type must match category.' });
   if (p.visual === 'bottle' && p.capacity <= 0) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['capacity'], message: 'Bottle capacity is required.' });
 });
-const issue = z.object({ code: z.enum(['required', 'number', 'boolean', 'formula', 'extra', 'long', 'duplicate', 'missing', 'category']), field: z.string().max(220) });
+const issue = z.object({ code: z.enum(['required', 'number', 'boolean', 'formula', 'extra', 'long', 'duplicate', 'missing', 'category', 'format']), field: z.string().max(220) });
 export const importSchema = z.object({
   mode: z.enum(['replace', 'append', 'merge']), expectedRevision: z.number().int().positive(), products: z.array(productInput).min(1).max(500),
   sourceFile: z.object({ fileName: text, mimeType: text, contentBase64: z.string().min(1).max(8_000_000) }).strict().optional(),
   report: z.object({ fileName: text, mode: z.enum(['replace', 'append', 'merge']), processed: z.number().int().min(1).max(500), ready: z.number().int().min(0), missing: z.number().int().min(0), duplicates: z.number().int().min(0), invalid: z.number().int().min(0), rows: z.array(z.object({ row: z.number().int().min(2).max(501), sku: z.string().max(220), status: z.enum(['ready', 'missing_data', 'duplicate', 'invalid']), issues: z.array(issue).max(30) })).max(500) }), 
 }).strict();
 export const resolveImportSchema = z.object({ action: z.enum(['keep_existing', 'use_incoming', 'separate', 'skipped']), expectedRevision: z.number().int().positive() }).strict();
+/**
+ * Decisions taken in the check area. `adopt_printed_text` takes the wording the check read in the
+ * picture, `edited` takes a hand-corrected value, and the two discard actions drop a picture or a
+ * quality report from the checks. `edited` is deliberately absent from the import-conflict actions:
+ * it only ever means "a person fixed this dispute by hand".
+ */
+export const checkDecisionSchema = z.discriminatedUnion('action', [
+  z.object({ action: z.literal('adopt_printed_text'), factKey: z.string().min(1).max(60), expectedRevision: z.number().int().positive() }).strict(),
+  z.object({ action: z.literal('edited'), factKey: z.string().min(1).max(60), value: z.string().max(220), expectedRevision: z.number().int().positive() }).strict(),
+  z.object({ action: z.literal('discard_image'), asset: z.string().min(1).max(220), expectedRevision: z.number().int().positive() }).strict(),
+  z.object({ action: z.literal('restore_image'), asset: z.string().min(1).max(220), expectedRevision: z.number().int().positive() }).strict(),
+  z.object({ action: z.literal('discard_report'), reportNo: z.string().min(1).max(120), expectedRevision: z.number().int().positive() }).strict(),
+]);
 export const bulkResolveImportSchema = z.object({
   action: z.enum(['keep_existing', 'use_incoming', 'separate', 'skipped']),
   verdict: z.enum(['conflict', 'probable']).optional(),

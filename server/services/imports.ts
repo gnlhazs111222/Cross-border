@@ -13,6 +13,8 @@ import { downloadAssetUrls } from './asset-urls';
 import type { ServerConfig } from '../config';
 import type { importSchema } from '../validation';
 import { catalog, normalizeImportedProduct, toProduct } from './catalog';
+import { applyImageCheckResolution } from './multimodal';
+import { IMAGE_CHECK_BATCH_MODE } from '../../shared/multimodal';
 
 type DB = Prisma.TransactionClient;
 type ImportInput = z.infer<typeof importSchema>;
@@ -94,14 +96,18 @@ export async function importWithAlignment(db: PrismaClient, config: ServerConfig
     void existingSkus;
     const entries = input.mode === 'replace' ? [] : await catalogEntries(tx, userId);
     const accepted: Product[] = [];
-    const decisions = new Map<string, { verdict: ImportVerdict; matched?: CatalogEntry; conflicts: FieldDifference[] }>();
+    const decisions = new Map<string, { verdict: ImportVerdict; matched?: CatalogEntry; matchedSku?: string; conflicts: FieldDifference[] }>();
+    // Rows already accepted from this same file. Comparing them with the same classifier the pool uses
+    // keeps one rule for both layers: a second row describing one product is held, the first one stays.
+    const seenInFile: CatalogEntry[] = [];
 
     for (const row of input.products) {
       const prepared = normalizeImportedProduct(row as Product);
-      if (input.mode === 'replace') { decisions.set(row.sku, { verdict: 'new', conflicts: [] }); accepted.push(prepared); continue; }
-      const decision = classify(buildProfile(recordFromProduct(row as Product, 'incoming')), entries);
+      const record = recordFromProduct(row as Product, 'incoming');
+      const profile = buildProfile(record);
+      const decision = classify(profile, [...entries, ...seenInFile]);
       decisions.set(row.sku, decision);
-      if (decision.verdict === 'new') accepted.push(prepared);
+      if (decision.verdict === 'new') { accepted.push(prepared); seenInFile.push({ id: '', sku: prepared.sku, profile }); }
     }
 
     if (input.mode === 'replace') {
@@ -121,7 +127,7 @@ export async function importWithAlignment(db: PrismaClient, config: ServerConfig
       counts[verdict]++;
       return {
         userId, rowNumber: row.row, sku: row.sku, name: String(payloadBySku.get(row.sku)?.name ?? ''), verdict,
-        matchedProductId: decision?.matched?.id ?? null, matchedSku: decision?.matched?.sku ?? null,
+        matchedProductId: decision?.matched?.id || null, matchedSku: decision?.matched?.sku ?? decision?.matchedSku ?? null,
         conflicts: decision?.conflicts?.length ? json(decision.conflicts) : undefined,
         payload: json(payloadBySku.get(row.sku) ?? { sku: row.sku, row: row.row, status: row.status, issues: row.issues }),
       };
@@ -181,12 +187,16 @@ export async function previewImportAlignment(db: PrismaClient, userId: string, i
   const rows: ImportPreviewRow[] = [];
   const entries = input.mode === 'replace' ? [] : await catalogEntries(db, userId);
   const bySku = new Map(input.products.map(product => [product.sku, product as unknown as Product]));
+  const seenInFile: CatalogEntry[] = [];
   for (const row of input.report.rows) {
     const payload = bySku.get(row.sku);
-    const decision = payload && input.mode !== 'replace' ? classify(buildProfile(recordFromProduct(payload, 'incoming')), entries) : null;
+    const record = payload ? recordFromProduct(payload, 'incoming') : null;
+    const skipped = row.status === 'invalid' || row.status === 'duplicate';
+    const decision = record && !skipped ? classify(buildProfile(record), [...entries, ...seenInFile]) : null;
     const verdict: ImportVerdict = row.status === 'invalid' ? 'invalid' : row.status === 'duplicate' ? 'duplicate' : decision?.verdict ?? 'new';
     counts[verdict]++;
     rows.push({ row: row.row, sku: row.sku, name: String(payload?.name ?? ''), verdict, matchedSku: decision?.matched?.sku ?? null, conflicts: decision?.conflicts ?? [] });
+    if (verdict === 'new' && record && payload) seenInFile.push({ id: '', sku: payload.sku, profile: buildProfile(record) });
   }
   return { rows, counts };
 }
@@ -236,7 +246,11 @@ const toRuleDto = (row: { id: string; verdict: string; field: string; action: st
   ({ recordId: row.id, verdict: row.verdict, field: row.field, action: row.action as ImportResolution, appliedCount: row.appliedCount, createdAt: row.createdAt.toISOString() });
 
 /** Applies one decision to a single occurrence. Returns the product it affected, if any. */
-async function applyResolution(tx: DB, userId: string, occurrence: { id: string; matchedProductId: string | null; payload: Prisma.JsonValue; sku: string }, action: ResolveAction, only?: string[]): Promise<{ resolvedProductId: string | null; catalogChanged: boolean }> {
+async function applyResolution(tx: DB, userId: string, occurrence: { id: string; matchedProductId: string | null; payload: Prisma.JsonValue; sku: string }, action: ResolveAction, only?: string[], batchMode: string = 'import'): Promise<{ resolvedProductId: string | null; catalogChanged: boolean }> {
+  // Image-check disputes share this queue but carry their own semantics: they may never create a product.
+  if (batchMode === IMAGE_CHECK_BATCH_MODE) return applyImageCheckResolution(tx, userId, occurrence, action);
+  // "Edited by hand" only exists in the check area; an import conflict is never settled by that name.
+  if (action === 'edited') throw new AppError('not_applicable', 'This row is not a picture text check row.', 409);
   const payload = occurrence.payload as unknown as Product;
   let resolvedProductId: string | null = occurrence.matchedProductId;
   let catalogChanged = false;
@@ -262,10 +276,10 @@ export async function resolveImportOccurrence(db: PrismaClient, userId: string, 
   return db.$transaction(async tx => {
     const user = await tx.user.findUniqueOrThrow({ where: { id: userId } });
     if (user.catalogRevision !== expectedRevision) throw new AppError('catalog_changed', 'The dataset changed. Reload before resolving.', 409);
-    const occurrence = await tx.importOccurrence.findFirst({ where: { id: occurrenceId, userId } });
+    const occurrence = await tx.importOccurrence.findFirst({ where: { id: occurrenceId, userId }, include: { batch: { select: { mode: true } } } });
     if (!occurrence) throw new AppError('not_found', 'Import row not found.', 404);
     if (occurrence.resolution !== 'pending') throw new AppError('already_resolved', 'This row has already been resolved.', 409);
-    const { catalogChanged } = await applyResolution(tx, userId, occurrence, action);
+    const { catalogChanged } = await applyResolution(tx, userId, occurrence, action, undefined, occurrence.batch.mode);
     if (catalogChanged) await tx.user.update({ where: { id: userId }, data: { catalogRevision: { increment: 1 } } });
     const pending = await tx.importOccurrence.count({ where: { batchId: occurrence.batchId, resolution: 'pending', verdict: { in: ['conflict', 'probable'] } } });
     await tx.importBatch.update({ where: { id: occurrence.batchId }, data: { status: pending ? 'needs_review' : 'completed' } });
@@ -288,18 +302,19 @@ export async function resolveImportOccurrencesBulk(db: PrismaClient, userId: str
     if (user.catalogRevision !== expectedRevision) throw new AppError('catalog_changed', 'The dataset changed. Reload before resolving.', 409);
     const batch = await tx.importBatch.findFirst({ where: { id: batchId, userId } });
     if (!batch) throw new AppError('not_found', 'Import batch not found.', 404);
-    const candidates = await tx.importOccurrence.findMany({ where: { batchId: batch.id, userId, resolution: 'pending', ...(input.verdict ? { verdict: input.verdict } : { verdict: { in: ['conflict', 'probable'] } }) }, orderBy: { rowNumber: 'asc' } });
+    const candidates = await tx.importOccurrence.findMany({ where: { batchId: batch.id, userId, resolution: 'pending', ...(input.verdict ? { verdict: input.verdict } : { verdict: { in: ['conflict', 'probable'] } }) }, orderBy: { rowNumber: 'asc' }, include: { batch: { select: { mode: true } } } });
     let applied = 0; let skipped = 0; let catalogChanged = false;
     for (const occurrence of candidates) {
       if (input.field && input.field !== '*' && !(occurrence.conflicts as unknown as FieldDifference[] | null)?.some(difference => difference.field === input.field)) continue;
       try {
-        const outcome = await applyResolution(tx, userId, occurrence, input.action, input.field && input.field !== '*' ? [input.field] : undefined);
+        const outcome = await applyResolution(tx, userId, occurrence, input.action, input.field && input.field !== '*' ? [input.field] : undefined, occurrence.batch.mode);
         catalogChanged = catalogChanged || outcome.catalogChanged;
         applied++;
       } catch { skipped++; }
     }
     if (catalogChanged) await tx.user.update({ where: { id: userId }, data: { catalogRevision: { increment: 1 } } });
-    if (input.remember && applied) {
+    // A remembered import rule describes supplier rows; an image decision is not a rule for them.
+    if (input.remember && applied && batch.mode !== IMAGE_CHECK_BATCH_MODE) {
       const field = input.field && input.field !== '*' ? input.field : '*';
       const verdict = input.verdict ?? 'conflict';
       await tx.importResolutionRule.upsert({

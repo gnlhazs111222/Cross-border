@@ -7,8 +7,11 @@ import type { WorkflowSnapshot, FactSnapshot, FactPreview, ProductAsset, AssetRo
 import { apiClient, SERVER_MODE } from './apiClient';
 import { enrichProductEvidence, makeTemplateListing, rankProducts, reviewAgainstTemplate } from '../../shared/domain';
 import { bagDemoTask, demoTask, products as builtInProducts } from '../data/mockData';
-import { requiredCopyFactsFor, PRICING_FACTS, editableFact, factEditor } from './factReview';
+import { COPY_FACTS, requiredCopyFactsFor, PRICING_FACTS, editableFact, factEditor } from './factReview';
 import { SUPPLIER_COLUMNS } from '../data/supplierTemplate';
+import { MULTIMODAL_PROMPT_VERSION, describeImageAssets, factImageCheck, imageCheckCounts, imageCheckFindingText, localImageCheckFindings, type ImageCheckEvidence, type ImageCheckResult } from '../../shared/multimodal';
+import { appliedFactDecision, type CheckDecisionTarget } from '../../shared/checks';
+import type { CheckDecisionRequest } from '../../server/services/checks';
 import type { DemoState, Evidence, Fact, FactCard, ImportMode, ImportPreview, Listing, Platform, Pricing, Product, Recommendation, Stage, Task, Workspace } from '../types';
 
 export const STORAGE_KEY = 'prismlaunch.demo.v1';
@@ -80,7 +83,7 @@ async function refreshRecommendation() {
   serverRecommendation = serverOwner && current.task ? await apiClient.recommendations.get(current.task.recordId!) : null;
 }
 async function useServerTask(task: Task) {
-  current.task = task; current.platform = task.platform === 'Shopify US' ? 'shopify' : 'amazon'; current.selectedSku = null; current.v1 = null; current.v2 = null; current.pricing = null; current.factsRevision = undefined;
+  current.task = task; current.platform = task.platform === 'Shopify US' ? 'shopify' : 'amazon'; current.selectedSku = null; current.v1 = null; current.v2 = null; current.pricing = null; current.factsRevision = undefined; current.listingFactsRevision = undefined;
   current.listings = {}; current.reviews = {}; current.publications = {}; serverWorkflow = null; serverSnapshots = {};
   for (const snap of await apiClient.facts.list(task.recordId!)) serverSnapshots[snap.product.sku] = snap;
   await refreshRecommendation(); current.workspace = 'tasks'; advance('task_created'); return save();
@@ -91,7 +94,8 @@ function applyWorkflow(workflow: WorkflowSnapshot) {
   current.listings = clone(workflow.listings); current.reviews = clone(workflow.reviews); current.publications = clone(workflow.publications);
   const platform = current.platform;
   if (current.publications[platform]) advance('published');
-  else if (current.reviews[platform]) advance(workflow.publishAllowed[platform] ? 'review_passed' : current.reviews[platform]!.status === 'blocked' ? 'review_blocked' : 'listing_generated');
+  // A passed review stays passed while only pricing is incomplete: publishing waits for the price.
+  else if (current.reviews[platform]) advance(workflow.publishAllowed[platform] || (current.reviews[platform]!.status === 'passed' && current.pricing?.status !== 'ready') ? 'review_passed' : current.reviews[platform]!.status === 'blocked' ? 'review_blocked' : 'listing_generated');
   else if (current.listings[platform]) advance('listing_generated');
   else if (current.v2) advance(current.pricing?.status === 'ready' ? 'pricing_ready' : 'evidence_analyzed');
   else advance(current.selectedSku ? 'sku_selected' : current.task ? 'task_created' : 'materials_ready');
@@ -113,10 +117,11 @@ function applySnapshot(snapshot: FactSnapshot) {
   serverSnapshots[snapshot.product.sku] = clone(snapshot);
   serverAssets[snapshot.product.sku] = clone(snapshot.assets ?? []);
   if (current.selectedSku !== snapshot.product.sku) return;
-  const changed = current.factsRevision !== snapshot.factsRevision;
+  // Only copy facts invalidate the listing: a price-only edit keeps the approved wording in place.
+  const listingChanged = current.listingFactsRevision !== undefined && current.listingFactsRevision !== snapshot.listingFactsRevision;
   current.v1 = clone(snapshot.v1); current.v2 = clone(snapshot.v2); current.pricing = clone(snapshot.pricing);
-  current.factsRevision = snapshot.factsRevision; current.factEdits = {};
-  if (changed || snapshot.downstreamInvalidated) {
+  current.factsRevision = snapshot.factsRevision; current.listingFactsRevision = snapshot.listingFactsRevision; current.factEdits = {};
+  if (listingChanged || snapshot.downstreamInvalidated) {
     serverWorkflow = null; current.listings = {}; current.reviews = {}; current.publications = {};
     advance(snapshot.v2 ? snapshot.pricingReadiness.ready ? 'pricing_ready' : 'evidence_analyzed' : 'sku_selected');
   }
@@ -131,7 +136,6 @@ async function mutateServerFact(key: string, action: 'edit' | 'confirm' | 'rejec
     const snap = action === 'edit' ? await apiClient.facts.update(before.recordId!, value ?? '', current.factsRevision!) : await apiClient.facts[action](before.recordId!, current.factsRevision!);
     applySnapshot(snap);
     await refreshWorkflow(); await refreshRecommendation();
-    advance(snap.pricingReadiness.ready ? 'pricing_ready' : snap.v2 ? 'evidence_analyzed' : 'sku_selected');
     return save();
   } catch (error) { await refreshServerFacts(); throw error; }
 }
@@ -197,10 +201,15 @@ function changeFact(key: string, action: 'edit' | 'confirm' | 'reject', input?: 
   const sku = current.selectedSku!;
   current.factEdits = { ...current.factEdits, [sku]: { ...editsFor(sku), [key]: updated } };
   synchronizeFacts();
-  // Both platforms depend on this product's facts and price. Never retain an old approval.
-  current.listings = {}; current.reviews = {}; current.publications = {};
+  // Price-only facts clear the drafts' numbers, copy facts clear the whole approval.
+  const pricingOnly = PRICING_FACTS.includes(key) && !COPY_FACTS.includes(key);
+  if (pricingOnly) current.publications = {};
+  else { current.listings = {}; current.reviews = {}; current.publications = {}; }
   current.pricing = pricingFor(selected());
-  advance(current.pricing.status === 'ready' ? 'pricing_ready' : current.v2 ? 'evidence_analyzed' : 'sku_selected');
+  const review = current.reviews[current.platform];
+  if (review) advance(review.status === 'passed' ? 'review_passed' : 'review_blocked');
+  else if (current.listings[current.platform]) advance('listing_generated');
+  else advance(current.pricing.status === 'ready' ? 'pricing_ready' : current.v2 ? 'evidence_analyzed' : 'sku_selected');
   return save();
 }
 function safeListing(platform: Platform, revision = 1): Listing {
@@ -208,9 +217,79 @@ function safeListing(platform: Platform, revision = 1): Listing {
   // leaves the suggested price pending and never stops a draft from being generated.
   if (!current.v2) throw new Error('Analyze evidence before generating a listing.');
   if (selected().duplicateStatus !== 'unique' || selected().category !== (serverOwner ? current.task?.category : demoTask.category)) throw new Error('Duplicate or out-of-category products cannot generate listings for this task.');
-  return makeTemplateListing({ factCard: serverOwner ? serverSnapshots[current.selectedSku!].v2! : current.v2, pricing: current.pricing!, platform, revision, factRevision: factRevision(current.selectedSku!) });
+  return makeTemplateListing({ factCard: serverOwner ? serverSnapshots[current.selectedSku!].v2! : current.v2, pricing: current.pricing!, platform, revision, factRevision: factRevision(current.selectedSku!, COPY_FACTS) });
 }
 function reviewIssues(listing: Listing) { return reviewAgainstTemplate(listing, safeListing(listing.platform, listing.revision)); }
+
+/**
+ * Offline picture text check. It cannot read the printed words, so it reports the file-level findings and
+ * marks every attribute not_checked; a guess would be worse than an honest "needs a look".
+ */
+function offlineImageCheck(card: FactCard, product: Product): ImageCheckResult {
+  const described = describeImageAssets({ references: product.assetReferences ?? [], assets: [], reuseByHash: {} });
+  const findings = localImageCheckFindings(card.facts.map(f => ({ key: f.key, label: f.label, value: f.value, status: f.status, allowed: f.allowed, sourceKind: f.sourceKind })), '');
+  return { sku: product.sku, mode: 'local', provider: 'local', model: 'local-resource-check', status: findings.length ? 'needs_review' : 'no_images',
+    promptVersion: MULTIMODAL_PROMPT_VERSION, baseVersion: 2, findings, assets: described.assets, transmitted: [], counts: imageCheckCounts(findings),
+    notes: [...described.notes, 'Local mode reads no picture content, so the listed attributes still need a person or a live multimodal model.'],
+    checkedAt: new Date().toISOString() };
+}
+function annotateFactsWithImageCheck(card: FactCard, result: ImageCheckResult): FactCard {
+  return { ...card, facts: card.facts.map(fact => {
+    const finding = result.findings.find(candidate => candidate.factKey === fact.key);
+    return finding ? { ...fact, imageCheck: factImageCheck(finding, { mode: result.mode, model: result.model, checkedAt: result.checkedAt }) } : fact;
+  }) };
+}
+/** The offline evidence list grows one card once the facts carry a picture verdict. */
+function imageCheckEvidence(card: FactCard | null): Evidence | null {
+  const findings = (card?.facts ?? []).flatMap(fact => fact.imageCheck ? [fact.imageCheck] : []);
+  const first = findings[0];
+  if (!first) return null;
+  const counts = imageCheckCounts(findings);
+  const payload: ImageCheckEvidence = { mode: first.mode, model: first.model, status: 'needs_review', promptVersion: MULTIMODAL_PROMPT_VERSION, checkedAt: first.checkedAt,
+    counts, transmitted: [], assets: [], notes: [], findings };
+  return { id: `IMGCHK-${first.mode.toUpperCase()}`, name: 'Multimodal picture text check', type: 'image_check', sourceKind: 'image', file: first.model,
+    anchor: `${counts.agree} agree · ${counts.differ} differ · ${counts.not_visible} no such text · ${counts.not_checked} not checked`,
+    extracted: findings.map(imageCheckFindingText), imageCheck: payload };
+}
+
+/**
+ * The decisions the check area offers. They are the same three answers wherever a problem is raised,
+ * so the picture table and the report panel share one implementation, and the queue row that opened
+ * the dispute is closed by the very same action on the server.
+ */
+async function checkDecision(input: CheckDecisionRequest) {
+  await delay(220);
+  if (!current.v2 || !current.task) throw new Error('Analyze evidence before deciding on a check.');
+  if (serverOwner) {
+    applySnapshot(await apiClient.facts.checkDecision(current.task.recordId!, selected().recordId!, input, current.factsRevision!));
+    // Dropping evidence is recorded on the product, so the pool copy the checks read is refreshed too.
+    if (input.action === 'discard_image' || input.action === 'discard_report' || input.action === 'restore_image') {
+      const catalog = await apiClient.products.list();
+      serverPreviews = catalog.factPreviews; current.catalog = catalog.products; current.serverRevision = catalog.revision;
+    }
+    await refreshWorkflow(); await refreshRecommendation();
+    return save();
+  }
+  if (input.action === 'discard_image' || input.action === 'discard_report' || input.action === 'restore_image') {
+    const target: CheckDecisionTarget = input.action === 'discard_report' ? 'quality_report' : 'image_text';
+    const ref = input.action === 'discard_report' ? input.reportNo : input.asset;
+    const product = selected();
+    const kept = (product.checkDecisions ?? []).filter(decision => !(decision.target === target && decision.ref === ref));
+    product.checkDecisions = input.action === 'restore_image' ? kept : [...kept, { target, ref, by: 'Demo operator', at: new Date().toISOString() }];
+    if (target === 'image_text' && input.action === 'discard_image') current.v2.facts = current.v2.facts.map(fact => fact.imageCheck?.asset === ref ? { ...fact, imageCheck: undefined } : fact);
+    return save();
+  }
+  const fact = current.v2.facts.find(candidate => candidate.key === input.factKey);
+  if (!fact) throw new Error('That fact is not on the task card.');
+  const updated = appliedFactDecision(fact, input);
+  current.v2.facts = current.v2.facts.map(candidate => candidate.key === updated.key ? updated : candidate);
+  const pricingOnly = PRICING_FACTS.includes(updated.key) && !COPY_FACTS.includes(updated.key);
+  if (pricingOnly) current.publications = {};
+  else { current.listings = {}; current.reviews = {}; current.publications = {}; }
+  current.pricing = pricingFor(selected());
+  advance(current.pricing.status === 'ready' ? 'pricing_ready' : 'evidence_analyzed');
+  return save();
+}
 
 export const mockApi = {
   getState: () => clone(current),
@@ -257,7 +336,23 @@ export const mockApi = {
   async loadBuiltInDataset() { await this.reset(); advance('materials_ready'); return save(); },
   getSupplierTemplate: () => [...SUPPLIER_COLUMNS],
   /** Display units: the task market decides the default, a manual choice wins until the task changes. */
+  /** Records the transport paperwork for a declared-dangerous product, then refreshes the pool. */
+  async releaseHazmat(sku: string, documents: string) {
+    if (!serverOwner) throw new Error('Transport release requires the server-backed workspace.');
+    const product = await apiClient.assets.hazmatRelease(this.assetProductId(sku), documents);
+    const catalog = await apiClient.products.list();
+    serverPreviews = catalog.factPreviews; current.catalog = catalog.products; current.serverRevision = catalog.revision;
+    return product;
+  },
   unitSystem(): UnitSystem { return current.units ?? systemForMarket(serverOwner ? current.task?.market : undefined); },
+  /** Records the quality report a person submits for a SKU, then refreshes the pool it is read from. */
+  async submitQualityReport(sku: string, input: { reportNo: string; result: 'pass' | 'fail'; validUntil?: string }) {
+    if (!serverOwner) throw new Error('Submitting a quality report requires the server-backed workspace.');
+    const recorded = await apiClient.assets.qualityReport(this.assetProductId(sku), input);
+    const catalog = await apiClient.products.list();
+    serverPreviews = catalog.factPreviews; current.catalog = catalog.products; current.serverRevision = catalog.revision;
+    return recorded;
+  },
   setUnits(units: UnitSystem) { current.units = units; return save(); },
   /** Classifies the pending file against the pool before anything is written. Server mode only. */
   async previewImportAlignment(): Promise<import('../../server/services/imports').ImportPreviewResult | null> {
@@ -461,7 +556,9 @@ export const mockApi = {
   evidence(sku: string): Evidence[] {
     if (serverOwner) return clone(serverSnapshots[sku]?.evidence ?? []);
     const p = current.catalog.find(p => p.sku === sku);
-    return p ? productEvidence(p) : [];
+    if (!p) return [];
+    const check = current.selectedSku === sku ? imageCheckEvidence(current.v2) : null;
+    return [...productEvidence(p), ...(check ? [check] : [])];
   },
   async analyzeEvidence() {
     await delay(700);
@@ -474,17 +571,39 @@ export const mockApi = {
     if (!current.v2) {
       current.v2 = enrichProductEvidence(p, current.v1, current.task);
       synchronizeFacts();
+      // The picture text check runs with the analysis, exactly as it does on the server.
+      if (current.v2) current.v2 = annotateFactsWithImageCheck(current.v2, offlineImageCheck(current.v2, p));
       advance('evidence_analyzed');
       current.pricing = pricingFor(p);
       if (current.pricing.status === 'ready') advance('pricing_ready');
     }
     return save();
   },
+  /** Re-runs only the picture text check, so a new photo does not force a whole new fact card. */
+  async recheckImages() {
+
+    await delay(500);
+    const p = selected();
+    if (!current.v2 || !current.task) throw new Error('Analyze evidence before rechecking images.');
+    if (serverOwner) { applySnapshot(await apiClient.facts.imageCheck(current.task.recordId!, p.recordId!, current.factsRevision!)); return save(); }
+    current.v2 = annotateFactsWithImageCheck(current.v2, offlineImageCheck(current.v2, p));
+    return save();
+  },
+  /** Adopt the wording the check read in the picture, exactly as the ImportReview queue would. */
+  async adoptPrintedText(factKey: string) { return checkDecision({ action: 'adopt_printed_text', factKey }); },
+  /** Correct the value by hand from the check area; the picture verdict is re-read against the new value. */
+  async saveImageCheckEdit(factKey: string, value: string) { return checkDecision({ action: 'edited', factKey, value }); },
+  /** Drop this picture from the checks: the decision is recorded and honoured on every later run. */
+  async discardImageCheck(asset: string) { return checkDecision({ action: 'discard_image', asset }); },
+  /** Take that decision back: the picture joins the check again on the next run. */
+  async restoreImageCheck(asset: string) { return checkDecision({ action: 'restore_image', asset }); },
+  /** Drop a quality report from the checks. A failed report cannot be dropped this way. */
+  async discardQualityReport(reportNo: string) { return checkDecision({ action: 'discard_report', reportNo }); },
   setPlatform(platform: Platform) {
     current.platform = platform;
     const review = current.reviews[platform];
     if (current.publications[platform]) advance('published');
-    else if (review) advance(serverOwner ? serverWorkflow?.publishAllowed[platform] ? 'review_passed' : review.status === 'blocked' ? 'review_blocked' : 'listing_generated' : review.status === 'passed' ? 'review_passed' : 'review_blocked');
+    else if (review) advance(serverOwner ? serverWorkflow?.publishAllowed[platform] || (review.status === 'passed' && current.pricing?.status !== 'ready') ? 'review_passed' : review.status === 'blocked' ? 'review_blocked' : 'listing_generated' : review.status === 'passed' ? 'review_passed' : 'review_blocked');
     else if (current.listings[platform]) advance('listing_generated');
     else if (current.pricing?.status === 'ready') advance('pricing_ready');
     return save();
@@ -541,7 +660,7 @@ export const mockApi = {
     if (serverOwner) return !!serverWorkflow?.publishAllowed[current.platform];
     if (!this.listingReady()) return false;
     const listing = current.listings[current.platform]; const review = current.reviews[current.platform];
-    return !!listing && (listing.factRevision ?? 0) === factRevision(current.selectedSku!) && review?.status === 'passed' && review.revision === listing.revision && reviewIssues(listing).length === 0;
+    return !!listing && (listing.factRevision ?? 0) === factRevision(current.selectedSku!, COPY_FACTS) && review?.status === 'passed' && review.revision === listing.revision && reviewIssues(listing).length === 0;
   },
   async publish() {
     await delay(750);

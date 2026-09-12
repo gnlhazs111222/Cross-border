@@ -2,13 +2,36 @@
 
 .table-scroll{position:relative}
 .fact-review-intro{padding:0 22px 17px;font-size:12px;color:var(--muted);line-height:1.8}
+/* The picture-text notice and its tally sit between the intro and the permission note, so they need
+   the same inline inset as the intro: without it both hug the panel border instead of the text column. */
+.fact-review>.notice{margin:0 22px 14px}
+.fact-review>.image-check-summary{margin:0 22px 14px}
 .fact-review-table{min-width:900px}.fact-review-table tbody th{background:#fff;white-space:normal;min-width:120px;font-weight:600;vertical-align:top}
 .fact-review-table .review-fact-value{min-width:140px;max-width:220px;overflow-wrap:anywhere}
 .review-fact-source{min-width:180px;max-width:245px;overflow-wrap:anywhere}.review-fact-source details{margin-top:9px}.review-fact-source small{max-width:220px!important}
 .fact-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:135px}.fact-actions .button{min-height:32px;padding:7px 9px;font-size:10px}
 .restricted-claim{display:block;max-width:190px;margin-top:9px;line-height:1.7;font-size:9px;color:var(--muted)}
 .fact-change-policy{padding:15px 22px;background:#f7faf4;border-top:1px solid var(--border)}.fact-unit{margin:-6px 0 18px;font-size:12px;color:var(--muted)}
-@media(max-width:700px){.fact-review-intro,.fact-change-policy{padding-inline:16px}.fact-review-intro{font-size:11px}.fact-actions .button{min-height:40px}.fact-review-table{min-width:920px}}
+/* The two cards side by side: V1 as it arrived, V2 as the task stands, with the changes marked. */
+.fact-compare>.fact-version-header{cursor:pointer}
+.fact-compare-table th[scope=row]{min-width:130px}
+.fact-compare-table .compare-before{color:var(--muted);min-width:150px;overflow-wrap:anywhere}
+.fact-compare-table .compare-after{min-width:170px;overflow-wrap:anywhere}
+.fact-compare-table .compare-after span{font-weight:600;margin-right:8px}
+.fact-compare-table .compare-after small{display:block;color:var(--muted);font-size:10px;margin-top:6px}
+.fact-compare-table .compare-after .badge{margin:0 5px 5px 0}
+.fact-compare-table .compare-status{min-width:130px}
+.fact-compare-table .compare-status .badge{margin:0 5px 5px 0}
+.fact-compare-count{padding:0 22px 12px}
+@media(max-width:700px){.fact-review-intro,.fact-change-policy{padding-inline:16px}.fact-review>.notice,.fact-review>.image-check-summary{margin-inline:16px}.fact-review-intro{font-size:11px}.fact-actions .button{min-height:40px}.fact-review-table{min-width:920px}
+  /* Three columns stop being readable on a phone: the same table stacks, each cell keeping its label. */
+  .check-alerts .check-table,.check-alerts .check-table tbody,.check-alerts .check-table tr,.check-alerts .check-table td{display:block;width:auto;table-layout:auto}
+  .check-alerts .check-table thead{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden}
+  .check-alerts .check-table td{padding:14px 16px;border-bottom:0}
+  .check-alerts .check-table td+td{border-top:1px solid var(--border)}
+  .check-alerts .check-table td::before{content:attr(data-label);display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+  .check-alerts .check-table td.red::before{color:var(--red)}
+  .check-alerts .check-table td.amber::before{color:#8a611c}}
 .supplier-import-toolbar{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:19px 21px}
 .supplier-import-toolbar h2{font-size:15px}
 .supplier-import-toolbar p{font-size:11px;color:var(--muted);margin-top:6px}
@@ -90,6 +113,10 @@ html[lang=zh-CN] .page-heading p,html[lang=zh-CN] .notice{line-height:1.9}
 .import-row-diffs li{margin:5px 0;list-style:disc}
 .import-row-diffs li.key{color:var(--red)}
 .import-row-diffs strong{margin-right:6px;color:var(--ink)}
+.import-row-details{margin-top:8px}
+.import-row-details .fact-table{margin-top:4px}
+.import-row-details .fact-table tr.conflict td,.import-row-details .fact-table tr.conflict th{background:#fff7f5}
+.import-row-details small{display:block;font-size:10px;margin-top:7px}
 .import-row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
 .import-batch-summary{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--muted);padding:0 22px 18px}
 .import-bulk{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:4px 22px 16px}
@@ -109,3 +136,48 @@ html[lang=zh-CN] .page-heading p,html[lang=zh-CN] .notice{line-height:1.9}
 
 .import-alignment{margin-bottom:16px}
 .import-alignment .notice{margin:12px 0 0}
+.review-fact-image .badge{margin-right:6px}
+.review-fact-image small{display:block;color:#6b7568;margin-top:3px}
+.file-icon.image_check{background:#eef1f8;color:#687c9e}
+
+/* Check area: a ruled table — every cell carries a line — laid out one column per check, with each
+   check keeping its own colour down its whole column. */
+.check-alerts .check-table-wrap{padding-bottom:16px}
+.check-alerts .check-table{width:100%;border-collapse:collapse;text-align:left;table-layout:fixed}
+.check-alerts .check-table th,.check-alerts .check-table td{border:1px solid var(--border)}
+.check-alerts .check-table th{padding:11px 19px;font-size:10px;font-weight:600;color:var(--muted);background:#f7f9f4;vertical-align:bottom;text-align:center}
+.check-alerts .check-table thead tr+tr th{padding-block:8px 10px}
+.check-alerts .check-table td{padding:14px 19px;vertical-align:top}
+.check-alerts .check-table th.red{background:#fdf0ed;color:var(--red)}
+.check-alerts .check-table td.red{background:#fff7f5}
+.check-alerts .check-table th.amber{background:#fff7e8;color:#8a611c}
+.check-alerts .check-table td.amber{background:#fffcf3}
+.check-alerts .col-evidence{width:26%}.check-alerts .col-action{width:20%}.check-alerts .col-report{width:29%}.check-alerts .col-transport{width:25%}
+.check-alerts .check-name{display:flex;align-items:center;justify-content:center;gap:7px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.check-alerts .check-table th.red .check-name{color:var(--red)}
+.check-alerts .check-table th.amber .check-name{color:#8a611c}
+.check-alerts .check-sub{font-weight:550;letter-spacing:.06em;text-transform:none}
+.check-alerts .check-line{margin:0;font-size:12px;line-height:1.7}
+.check-alerts .check-line+.check-line{margin-top:6px}
+.check-alerts td.clear .check-line{color:var(--muted)}
+.check-decision{display:flex;align-items:center;gap:7px;margin-top:10px}
+.check-decision select{flex:1;min-width:0;height:33px;border:1px solid #ced9cf;border-radius:6px;background:#fff;font-size:11px;color:var(--ink);padding:0 7px}
+.check-alerts td .check-decision:first-child{margin-top:0}
+/* In the cell the notice is the body of the check, not a second frame drawn inside it. */
+.check-alerts .check-table td .notice{margin:0;border:0;background:transparent;padding:0;font-size:12px}
+.check-alerts .check-table td .fact-actions{margin-top:11px}
+.check-alerts .check-table td .fact-actions:first-child{margin-top:0}
+.image-mismatch{margin:7px 0 8px;font-size:11px;font-weight:600;color:var(--red);line-height:1.6}
+.review-fact-image .fact-actions{margin-top:2px}
+.check-alerts .check-dispute{border:1px solid var(--border);border-radius:8px;background:#fff;padding:8px 10px;margin:8px 0}
+.check-alerts .check-dispute small{display:block;color:var(--muted);font-size:11px;margin:0 0 6px}
+.check-alerts .check-dispute .image-mismatch{margin:0 0 2px}
+.check-alerts .check-dispute .fact-actions{margin-top:0}
+/* A file name, an error code or a hosted URL is one unbroken token: inside the page it has to break
+   instead of widening the layout and pushing the rest of the row off screen. */
+main,.modal,.toast{overflow-wrap:anywhere}
+/* Tailwind's preflight makes every <svg> a block, so an icon written inside a sentence drops onto a
+   line of its own. These icons belong to the text flow; the flex and grid containers that lay most of
+   them out blockify them anyway, so this only restores the inline case. */
+svg{display:inline-block;vertical-align:middle}
+.hazmat-release{display:flex;align-items:center;gap:7px}

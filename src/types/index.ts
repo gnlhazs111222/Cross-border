@@ -11,17 +11,29 @@ export type Product = {
   /** File names listed in the spreadsheet; the bytes come from the folder chosen at import time. */
   assetReferences?: string[];
   assetUrls?: string[];
+  /** Declared transport attributes; absent means "not declared", never "no risk". */
+  transport?: { liquid: boolean; battery: boolean; magnetic: boolean; aerosol: boolean; flammable: boolean; fragile: boolean };
+  /** A human recorded the missing paperwork for the declared transport attributes. */
+  transportRelease?: { by: string; at: string; documents: string; attributes: string };
+  /** Quality report on file for this SKU as the supplier file states it; absent means none was registered. */
+  qualityReport?: import('../../shared/checks').QualityReport;
+  /** Human decisions that drop a picture or a report from the checks; recorded, never silent. */
+  checkDecisions?: import('../../shared/checks').CheckDecision[];
   missing: string[]; visual: 'bottle' | 'bag' | 'lamp';
 };
 export type Fact = {
   recordId?: string; sourceMetadata?: { fileName: string; sheetName: string; rowNumber: number; fieldName: string };
   key: string; label: string; value: string; source: string; anchor: string;
   status: 'Confirmed' | 'Requires Confirmation' | 'Rejected' | 'Missing'; allowed: boolean;
-  sourceKind?: 'supplier' | 'mock' | 'manual';
+  sourceKind?: 'supplier' | 'mock' | 'manual' | 'image';
+  /** Verdict of the multimodal picture text check for this attribute: does the text printed in the picture agree with what we hold? */
+  imageCheck?: import('../../shared/multimodal').FactImageCheck;
   previousValue?: string; previousSource?: string; confirmedAt?: string; updatedAt?: string; revision?: number;
 };
 export type FactCard = { recordId?: string; revision?: number; productRevision?: number; version: 1 | 2; sku: string; taskId?: string; facts: Fact[] };
-export type Evidence = { recordId?: string; sourceKind?: 'supplier' | 'mock' | 'manual'; id: string; name: string; type: 'sheet' | 'pdf' | 'image'; file: string; anchor: string; extracted: string[] };
+export type Evidence = { recordId?: string; sourceKind?: 'supplier' | 'mock' | 'manual' | 'image'; id: string; name: string; type: 'sheet' | 'pdf' | 'image' | 'image_check'; file: string; anchor: string; extracted: string[];
+  /** Present on the image-check evidence row: what was compared, what was sent, and who decided. */
+  imageCheck?: import('../../shared/multimodal').ImageCheckEvidence };
 export type Recommendation = { productId?: string; summary?: string; generation?: import('../../shared/recommendation').RecommendationGeneration; sku: string; score: number; reasons: string[]; deductions: string[] };
 export type Task = { recordId?: string; revision?: number; id: string; platform: string; market: string; category: string; requirements: string[]; minProfit: number };
 export type Pricing = { version: string; status: 'ready' | 'blocked'; supplierCost: number; shipping: number; duty: number; platformCost: number; targetProfit: number; suggestedPrice: number | null; missing: string[] };
@@ -31,7 +43,7 @@ export type Issue = { id: string; severity: 'HIGH'; title: string; text: string;
 export type Review = { recordId?: string; highRiskCount?: number; reviewMode?: string; metadata?: import('../../shared/review').ReviewMetadata; status: import('../../shared/review').ReviewStatus; revision: number; issues: Issue[] };
 export type Publication = { recordId?: string; platform: Platform; productId: string; status: string; revision: number };
 export type ImportMode = 'replace' | 'append' | 'merge';
-export type ImportIssue = { code: 'required' | 'number' | 'boolean' | 'formula' | 'extra' | 'long' | 'duplicate' | 'missing' | 'category'; field: string };
+export type ImportIssue = { code: 'required' | 'number' | 'boolean' | 'formula' | 'extra' | 'long' | 'duplicate' | 'missing' | 'category' | 'format'; field: string };
 export type ImportRow = { row: number; sku: string; status: 'ready' | 'missing_data' | 'duplicate' | 'invalid'; issues: ImportIssue[] };
 export type ImportReport = { fileName: string; mode: ImportMode; processed: number; ready: number; missing: number; duplicates: number; invalid: number; rows: ImportRow[] };
 export type ImportPreview = ImportReport & { products: Product[] };

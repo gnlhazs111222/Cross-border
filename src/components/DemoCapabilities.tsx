@@ -27,7 +27,8 @@ export function DemoCapabilities() {
   if (capabilities?.review.activeProvider === 'qwen') local.push(['Semantic review', 'Hard rules and opt-in Qwen check facts against copy. Failures and ambiguous results keep publishing locked.']);
   const simulated = [
     ['Recommendation', capabilities?.recommendation.activeProvider === 'qwen' ? 'Deterministic eligibility checks run first. Qwen ranks only eligible products.' : 'Deterministic ranking follows the saved task; scores are not model confidence.'],
-    ['Evidence enrichment', 'Supplemental PDF and image facts are seeded examples, not OCR results.'],
+    ['Evidence enrichment', 'Supplier rows are imported for real. No PDF or image parsing is claimed; the picture text check only marks agreement between the printed words and these facts.'],
+    ['Picture text check', capabilities?.evidence.activeProvider === 'qwen' ? 'A vision model reads the words printed in the selected SKU pictures and compares them with the facts; wording it cannot read stays undecided.' : 'Offline mode reports file-level findings only. Every attribute stays "not checked" until a person or a vision model reads the printed words.'],
     ['Pricing external data', 'Shipping, tariffs and platform fees use fixed demo assumptions.'],
     ...(capabilities?.listing.activeProvider === 'qwen' ? [] : [['Listing intelligence', 'English copy is assembled from authorized facts using templates, not an LLM.']]),
     ['Platform publish', 'Amazon / Shopify results are simulated; no marketplace request is sent.'],
@@ -42,7 +43,7 @@ export function DemoCapabilities() {
           <p><strong>{t('Browser persisted:')}</strong> {capabilities.storage.browser.join(' · ')}</p>
           <p><strong>{t('Live text connection:')}</strong> {t(capabilities.textModel.liveAvailable ? 'Available for explicit smoke only' : capabilities.textModel.configured ? 'Configured, live calls disabled' : 'Not configured')} · {capabilities.textModel.model}</p>
           <p><strong>{t('Active business providers:')}</strong> {capabilities.recommendation.activeProvider} / {capabilities.evidence.activeProvider} / {capabilities.listing.activeProvider} / {capabilities.review.activeProvider}</p>
-          <small>{t(capabilities.review.liveImplemented ? 'Qwen listing, recommendation and semantic review are implemented and opt-in. Current active providers are shown above. Evidence stays mocked. Automated tests make no live AI calls.' : 'Qwen Listing and Recommendation are implemented and opt-in. Evidence stays mocked; review stays rule-based. Automated tests make no live AI calls.')}</small>
+          <small>{t(capabilities.review.liveImplemented ? 'Qwen listing, recommendation and semantic review are implemented and opt-in. Current active providers are shown above. The picture text check is implemented and runs offline or with an opt-in vision model. Automated tests make no live AI calls.' : 'Qwen Listing and Recommendation are implemented and opt-in. The picture text check is implemented; review stays rule-based. Automated tests make no live AI calls.')}</small>
         </>}
       </section>}
       <div className="capability-grid">{([{ title: 'REAL / LOCAL', tone: 'green' as const, items: local }, { title: 'DEMO / MOCK', tone: 'amber' as const, items: simulated }]).map(group => <section key={group.title}><Badge tone={group.tone}>{group.title}</Badge>{group.items.map(([label, detail]) => <div className="capability-row" key={label}><h3>{t(label)}</h3><p>{t(detail)}</p></div>)}</section>)}</div>

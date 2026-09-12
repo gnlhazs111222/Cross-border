@@ -11,10 +11,11 @@ export function UnitSwitcher() {
   const { t } = useI18n();
   const { state, setState } = useDemo();
   const system = state.units ?? mockApi.unitSystem();
-  const label: Record<UnitSystem, string> = { us: t('US units'), uk: t('UK units'), metric: t('Metric units') };
+  // Short labels keep the top bar on one row on a phone; the full system stays in the tooltip.
+  const label: Record<UnitSystem, string> = { us: t('US'), uk: t('UK'), metric: t('Metric') };
   return <label className="language-switcher unit-switcher" title={t('Unit conversion')}>
     <select aria-label={t('Unit conversion')} value={system} onChange={event => setState(mockApi.setUnits(event.target.value as UnitSystem))}>
-      {UNIT_CHOICES.map(choice => <option key={choice.system} value={choice.system}>{label[choice.system]}</option>)}
+      {UNIT_CHOICES.map(choice => <option key={choice.system} value={choice.system} title={t(choice.label)}>{label[choice.system]}</option>)}
     </select>
   </label>;
 }

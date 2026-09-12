@@ -116,7 +116,8 @@ test('append aligns rows with the pool instead of skipping them', async ({ page 
   // comparison happens; only the duplicate row inside the file itself is.
   await expect(page.getByRole('dialog').locator('.import-counts strong').nth(3)).toHaveText('1');
   await page.getByRole('button', { name: /^Import \d+ products?$/ }).click();
-  expect(await page.locator('.product-table tbody tr').count()).toBeGreaterThan(10);
+  // Only the sample rows the pool does not hold yet are added; the rest align with a stored product.
+  await expect(page.locator('.product-table tbody tr')).toHaveCount(12);
   const saved = await snapshot(page);
   // Alignment never overwrites an existing product from an appended file.
   expect(saved.catalog.find((p: { sku: string }) => p.sku === HERO).supplierCost).toBe(8.2);
@@ -125,6 +126,38 @@ test('append aligns rows with the pool instead of skipping them', async ({ page 
   const batches = await (await page.context().request.get('/api/imports')).json();
   expect(batches.data[0].mode).toBe('append');
   expect(batches.data[0].counts.same).toBeGreaterThan(0);
+});
+
+/**
+ * The decisions panel exists for the rows an import could not settle on its own, so a new import has
+ * to become the batch under review. Keeping the previously selected batch is what made the conflict
+ * rows look like they had disappeared right after an import.
+ */
+test('a new import surfaces its own rows waiting for a decision', async ({ page }) => {
+  const sample = (name: string) => resolve(`evaluation/asset-import-sample/${name}`);
+  const importFile = async (path: string, mode: 'replace' | 'append') => {
+    await page.getByRole('button', { name: 'Import Supplier File', exact: true }).click();
+    if (mode !== 'replace') await page.getByRole('combobox', { name: 'Import mode' }).selectOption(mode);
+    await page.getByLabel('Supplier file', { exact: true }).setInputFiles(path);
+    await expect(page.getByRole('dialog').getByLabel('Import summary')).toBeVisible();
+    await page.getByRole('button', { name: /^Import \d+ products?$/ }).click();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+  };
+  await page.goto('/');
+  await importFile(sample('商品参数信息表-图文核对修订版-已修正.csv'), 'replace');
+  await expect(page.locator('.product-table tbody tr')).toHaveCount(20);
+  await importFile(sample('商品参数信息表-含故意错误.csv'), 'append');
+  const decisions = page.getByTestId('import-decisions');
+  await expect(decisions).toBeVisible();
+  await expect(decisions.locator('.import-row')).toHaveCount(5);
+  await expect(decisions).toContainText('PL-BTL-003-BLK');
+  await expect(decisions).toContainText('750');
+  // The mugs the anomaly file lists twice under other codes are offered for a human to dedupe.
+  await expect(decisions).toContainText('Closest match: PL-BTL-005-UNK');
+  await decisions.getByRole('button', { name: 'Use incoming value' }).first().click();
+  await expect(decisions.locator('.import-row')).toHaveCount(4);
+  const catalog = await (await page.context().request.get('/api/products')).json();
+  expect(catalog.data.products.find((p: { sku: string }) => p.sku === 'PL-BTL-003-BLK').capacity).toBe(750);
 });
 
 test('unsupported headers, empty and corrupt files leave the current dataset and task intact', async ({ page }) => {
@@ -162,10 +195,13 @@ test('validation retains quoted CSV values and rejects invalid rows and XLSX for
   const missingPackaging = [...hero]; missingPackaging[0] = 'MISSING-BOTH'; missingPackaging[10] = ''; missingPackaging[11] = '';
   const data = csvBytes([valid, missingSku, missingName, badNumber, badBool, missingPackaging]);
   const preview = await parseSupplierFile(new File([new Uint8Array(data)], 'test.csv'), 'replace', []);
-  expect([preview.processed, preview.ready, preview.missing, preview.invalid]).toEqual([6, 1, 1, 4]);
+  // A missing code or name is a gap to complete later, so only the wrong formats are fatal.
+  expect([preview.processed, preview.ready, preview.missing, preview.invalid]).toEqual([6, 1, 3, 2]);
   expect(preview.products[0].name).toBe(valid[1]); expect(preview.products[0].declaredValue).toBe(6.75);
   expect(preview.products[0].straw).toBe(false);
-  expect(preview.products[1].missing).toEqual(['Packaging Weight', 'Packaging Dimensions']);
+  expect(preview.products[1].missing).toEqual(['SKU']);
+  expect(preview.products[2].missing).toEqual(['Product name']);
+  expect(preview.products[3].missing).toEqual(['Packaging Weight', 'Packaging Dimensions']);
   const workbook = utils.book_new(); const sheet = utils.aoa_to_sheet([header.split(','), hero]);
   sheet.G2 = { t: 'b', v: false };
   sheet.I2 = { t: 'n', v: 8.2, f: '4.1*2' };
@@ -183,18 +219,20 @@ test('validation retains quoted CSV values and rejects invalid rows and XLSX for
   await expect(parseSupplierFile(new File([header + '\n' + (hero.join(',') + '\n').repeat(501)], 'many.csv'), 'replace', [])).rejects.toThrow('Too many rows');
 });
 
-test('mixed-validity CSV shows invalid rows and uses imported costs and declared value', async ({ page }) => {
+test('mixed-validity CSV keeps incomplete rows out of ranking and uses imported costs and declared value', async ({ page }) => {
   const valid = [...hero]; valid[0] = 'CSV-CUSTOM-350'; valid[1] = 'Real Uploaded 350ml Bottle'; valid[4] = '350'; valid[8] = '12'; valid[9] = '6.75';
-  const noSku = [...hero]; noSku[0] = '';
-  const noName = [...hero]; noName[1] = '';
+  // Selection facts are what a candidate needs, so rows missing one stay in the pool as gaps only.
+  const noColor = [...hero]; noColor[0] = 'NO-COLOR-001'; noColor[3] = '';
+  const noMaterial = [...hero]; noMaterial[0] = 'NO-MATERIAL-001'; noMaterial[5] = '';
   await page.goto('/');
   await page.getByRole('button', { name: 'Import Supplier File', exact: true }).click();
-  await page.getByLabel('Supplier file', { exact: true }).setInputFiles({ name: 'custom.csv', mimeType: 'text/csv', buffer: csvBytes([valid, noSku, noName, valid]) });
-  await expect(page.getByRole('dialog').locator('.import-counts strong')).toHaveText(['4', '1', '0', '1', '2']);
-  await expect(page.getByRole('dialog')).toContainText('Missing required field: sku');
-  await expect(page.getByRole('dialog')).toContainText('Missing required field: productName');
-  await page.getByRole('button', { name: 'Import 1 products' }).click();
-  await expect(page.locator('.product-table tbody tr')).toHaveCount(1);
+  await page.getByLabel('Supplier file', { exact: true }).setInputFiles({ name: 'custom.csv', mimeType: 'text/csv', buffer: csvBytes([valid, noColor, noMaterial, valid]) });
+  await expect(page.getByRole('dialog').locator('.import-counts strong')).toHaveText(['4', '1', '2', '1', '0']);
+  await expect(page.getByRole('dialog')).toContainText('Missing Color; pricing is blocked.');
+  await expect(page.getByRole('dialog')).toContainText('Missing Material; pricing is blocked.');
+  // Rows with a gap are still stored; only the row with every selection fact can be ranked.
+  await page.getByRole('button', { name: 'Import 3 products' }).click();
+  await expect(page.locator('.product-table tbody tr')).toHaveCount(3);
   await expect(page.locator('.product-table')).toContainText('Real Uploaded 350ml Bottle');
   await page.getByRole('button', { name: 'Create Demo Task', exact: true }).click();
   await expect(page.getByTestId('recommendation-1')).toContainText('CSV-CUSTOM-350');

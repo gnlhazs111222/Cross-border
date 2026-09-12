@@ -1,5 +1,6 @@
 import { read, utils, type WorkBook } from 'xlsx';
-import { MAX_IMPORT_BYTES, MAX_IMPORT_COLUMNS, MAX_IMPORT_ROWS, OPTIONAL_COLUMNS, SUPPLIER_COLUMNS } from '../data/supplierTemplate';
+import { ASSET_REFERENCE_COLUMNS, MAX_IMPORT_BYTES, MAX_IMPORT_COLUMNS, MAX_IMPORT_ROWS, SUPPLIER_COLUMNS } from '../data/supplierTemplate';
+import type { QualityReport } from '../../shared/checks';
 import { parseCapacityMl, toHalfWidth } from '../../shared/alignment';
 import type { ImportIssue, ImportMode, ImportPreview, Product } from '../types';
 
@@ -118,12 +119,40 @@ export async function parseSupplierFile(file: File, mode: ImportMode, _existing:
     if (strawValue !== '' && !['true', 'false', '1', '0'].includes(strawValue)) issue('boolean', 'hasStraw');
     const sku = text(values.sku) || `IMPORT-${row + 1}`;
     const columnIndex = columns as unknown as Record<string, number | undefined>;
-    const optionalValues = (OPTIONAL_COLUMNS as readonly string[]).flatMap(column => {
+    const optionalValues = (ASSET_REFERENCE_COLUMNS as readonly string[]).flatMap(column => {
       const index = columnIndex[column];
       if (index === undefined) return [];
       return text(sheet[utils.encode_cell({ r: row, c: index })]?.v).split(/[;,\n]/).map(entry => entry.trim()).filter(Boolean);
     }).slice(0, 20);
     // Anything that looks like a link goes to the download channel; the rest is a local file name.
+    const transportFlags = ['liquid', 'battery', 'magnetic', 'aerosol', 'flammable', 'fragile'] as const;
+    const declared = transportFlags.some(flag => columnIndex[flag] !== undefined);
+    const transport = Object.fromEntries(transportFlags.map(flag => {
+      const index = columnIndex[flag];
+      const raw = index === undefined ? '' : text(sheet[utils.encode_cell({ r: row, c: index })]?.v).toLowerCase();
+      return [flag, ['true', '1', 'yes', 'y', '是', '有'].includes(raw)];
+    })) as { liquid: boolean; battery: boolean; magnetic: boolean; aerosol: boolean; flammable: boolean; fragile: boolean };
+    // A quality report travels in its own columns. The result and the certified values come from the
+    // document, never from our product columns, so a disagreement between the two stays visible.
+    const reportCell = (column: string) => {
+      const index = columnIndex[column];
+      return index === undefined ? '' : text(sheet[utils.encode_cell({ r: row, c: index })]?.v);
+    };
+    const reportNo = reportCell('reportNo');
+    const reportResult = reportCell('reportResult').toLowerCase();
+    const reportValidUntil = reportCell('reportValidUntil');
+    const reportCapacity = reportCell('reportCapacityMl');
+    const reportMaterial = reportCell('reportMaterial');
+    // A report whose own fields do not parse is refused instead of being half-read.
+    if (reportNo && !/^(pass|fail|ok|合格|不合格|通过|不通过|失败)/.test(reportResult)) issue('format', 'reportResult');
+    if (reportNo && reportValidUntil && !/^\d{4}-\d{2}-\d{2}$/.test(reportValidUntil)) issue('format', 'reportValidUntil');
+    if (reportNo && reportCapacity && !/^\d+(?:\.\d+)?$/.test(reportCapacity)) issue('number', 'reportCapacityMl');
+    const qualityReport: QualityReport | undefined = reportNo ? {
+      reportNo,
+      result: /^(fail|不合格|不通过|失败)/.test(reportResult) ? 'fail' : 'pass',
+      ...(reportValidUntil ? { validUntil: reportValidUntil } : {}),
+      ...((reportCapacity || reportMaterial) ? { stated: { ...(reportCapacity ? { capacity: Number(reportCapacity) } : {}), ...(reportMaterial ? { material: reportMaterial } : {}) } } : {}),
+    } : undefined;
     const references = optionalValues.filter(entry => !/^https?:\/\//i.test(entry));
     const urls = optionalValues.filter(entry => /^https?:\/\//i.test(entry)).slice(0, 20);
     // Type and name must agree; the category is authoritative. Bags and lamps carry no capacity,
@@ -152,6 +181,8 @@ export async function parseSupplierFile(file: File, mode: ImportMode, _existing:
       importSource: { fileName: file.name, sheetName, row: row + 1 },
       ...(references.length ? { assetReferences: references } : {}),
       ...(urls.length ? { assetUrls: urls } : {}),
+      ...(declared ? { transport } : {}),
+      ...(qualityReport ? { qualityReport } : {}),
     };
     preview.products.push(product);
     if (missing.length) preview.missing++; else preview.ready++;

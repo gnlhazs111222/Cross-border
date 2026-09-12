@@ -7,10 +7,17 @@ const IMPORT_MISSING = 'LM-KT-IMP-005-BLK-500';
 const KEY = 'prismlaunch.demo.v1';
 const snapshot = (page: Page) => page.evaluate(key => JSON.parse(localStorage.getItem(key)!), KEY);
 async function navigate(page: Page, name: string) { await page.getByRole('navigation').getByRole('button', { name, exact: true }).click(); }
+/** The comparison is collapsed by default, so a test that edits a fact opens it the way a person does. */
+async function openComparison(page: Page, zh = false) {
+  const panel = page.locator('details#fact-review');
+  await expect(panel).toBeVisible();
+  if (!(await panel.evaluate((node: HTMLDetailsElement) => node.open))) await panel.locator('summary').click();
+  await expect(page.getByRole('heading', { name: zh ? '事实卡对照' : 'Fact card comparison', exact: true })).toBeVisible();
+}
 async function openFacts(page: Page, sku: string, zh = false) {
   await page.getByRole('button', { name: `${zh ? '查看' : 'View'} ${sku}`, exact: true }).click();
   await page.getByRole('dialog').getByRole('button', { name: zh ? '核对事实' : 'Review Facts', exact: true }).click();
-  await expect(page.getByRole('heading', { name: zh ? '事实人工核对' : 'Fact Review', exact: true })).toBeVisible();
+  await openComparison(page, zh);
 }
 async function editFact(page: Page, key: string, value: string, zh = false) {
   const row = page.getByTestId(`fact-review-${key}`);
@@ -90,7 +97,8 @@ for (const imported of [false, true]) {
     await expect(page.getByRole('button', { name: zh ? '继续前往文案工作室' : 'Continue to Listing Studio' })).toBeVisible();
     expect((await snapshot(page)).v1).toEqual(v1);
     await page.reload();
-    await expect(page.getByTestId('fact-review-packagingWeight')).toContainText('0.42 kg');
+    // Stored canonically in kg, shown in the market system the top bar selects (US by default).
+    await expect(page.getByTestId('fact-review-packagingWeight')).toContainText('0.93 lb');
     await expect(page.locator('.suggested-price>strong')).toHaveText(imported ? 'USD 18.90' : 'USD 19.20');
     await page.screenshot({ path: info.outputPath('manual-weight-ready.png'), fullPage: true });
     await navigate(page, zh ? '商品资料' : 'Materials');

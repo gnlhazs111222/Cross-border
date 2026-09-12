@@ -59,6 +59,7 @@ packageLengthCm, packageWidthCm, packageHeightCm
 ```
 
 没有智能猜测表头；列不匹配会明确拒绝。支持预览、逐行错误、替换目录或仅追加新 SKU。包装重量/尺寸缺失的商品可保存并参与选品，但选中后定价仍会阻断；同 SKU 重复行跳过，不覆盖首条有效记录。
+除必填 14 列外，还识别两组可选列：物流申报 `liquid` / `battery` / `magnetic` / `aerosol` / `flammable` / `fragile`，质检报告 `reportNo` / `reportResult` / `reportValidUntil` / `reportCapacityMl` / `reportMaterial`（`reportNo` 留空 = 该 SKU 没有质检报告，静默不报警）。其他认不出的列名会被忽略，不会让整表失败；但质检报告有效期必须是 `YYYY-MM-DD`，写错该行报 `Unsupported format`。
 
 样例：
 
@@ -72,7 +73,7 @@ packageLengthCm, packageWidthCm, packageHeightCm
 
 V1 保存基础事实，V2 保存增强事实，不覆盖 V1。来源区分供应商文件、Mock 证据与人工确认。人工编辑先进入待确认，必须再确认；支持拒绝和补齐。未确认、缺失、拒绝、禁止公开的事实不能进入正常文案。
 
-导入的文件值/行号是真实来源记录；补充 PDF/图片仍是 Mock，没有通用 OCR、图片理解或原始证据真伪核验。Confirmed 是当前授权状态，不是产品检测认证。
+导入的文件值/行号是真实来源记录；没有通用 OCR 或文档解析，V2 新增字段是标注为“模拟分析”的演示样例，PDF／图片不做解析（商品图片另有图片核对，只标一致／不一致）。Confirmed 是当前授权状态，不是产品检测认证。
 
 缺重量支线：内置 `LM-KT-BTL-005-BLK-500` → 核对事实 → 包装重量补填 0.42 → 保存 → 确认 → Pricing Ready，模拟建议价 USD 19.20。导入样例中的缺重量商品是另一个 SKU `LM-KT-IMP-005-BLK-500`，补齐后 USD 18.90。两者均不是强行套用主角 USD 19.99。
 

@@ -7,7 +7,8 @@ export type CatalogResponse = { products: ServerProduct[]; revision: number; fac
 
 /** How an imported row relates to the pool. `new` is the only verdict that creates a product. */
 export type ImportVerdict = 'new' | 'same' | 'conflict' | 'probable' | 'duplicate' | 'invalid';
-export type ImportResolution = 'pending' | 'keep_existing' | 'use_incoming' | 'separate' | 'skipped';
+/** `edited` only ever comes from the check area: a person corrected the value by hand instead of taking the picture wording. */
+export type ImportResolution = 'pending' | 'keep_existing' | 'use_incoming' | 'separate' | 'skipped' | 'edited';
 export type ImportOccurrenceDto = {
   recordId: string; rowNumber: number; sku: string; name: string; verdict: ImportVerdict;
   resolution: ImportResolution; matchedProductId: string | null; matchedSku: string | null;
@@ -43,7 +44,8 @@ export type Capabilities = {
   assets: { storage: 'server'; acceptedTypes: string[]; maxBytesPerFile: number; maxPerProduct: number };
   textModel: { activeProvider: 'mock'; liveAvailable: boolean; configured: boolean; liveEnabled: boolean; model: string; remainingCalls: number };
   recommendation: { activeProvider: 'rule' | 'qwen'; liveAvailable: boolean; liveImplemented: true; liveModel: string };
-  evidence: { activeProvider: 'mock'; liveAvailable: boolean; liveImplemented: false };
+  /** Module 4: printed-text-versus-fact checking. local reads no printed words, qwen uses a vision model. */
+  evidence: { activeProvider: 'local' | 'qwen'; liveAvailable: boolean; liveImplemented: true; liveModel: string };
   listing: { activeProvider: 'template' | 'qwen'; liveAvailable: boolean; liveImplemented: true; liveModel: string };
   review: { activeProvider: 'rules' | 'qwen'; liveAvailable: boolean; liveImplemented: true; liveModel: string };
 };

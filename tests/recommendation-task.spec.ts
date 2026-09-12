@@ -17,7 +17,7 @@ for (const zh of [false, true]) test(`editable task save and explicit recommenda
   const before = await state(page); expect(before.task.platform).toBe('Shopify US');
   await page.reload(); await expect(page.getByTestId('recommendation-1')).toContainText('LM-KT-BTL-002-BLK-500'); expect(posts).toBe(1);
   await page.getByTestId('recommendation-1').getByRole('button', { name: text('Select SKU', '选择 SKU'), exact: true }).click();
-  await expect(page.getByRole('heading', { name: text('Fact Review', '事实人工核对'), exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: text('Fact card comparison', '事实卡对照'), exact: true })).toBeVisible();
   await navigation(page, text('Launch Tasks', '上新任务')); await page.getByRole('button', { name: text('Edit Current Task', '编辑当前任务'), exact: true }).click();
   await page.getByRole('dialog').getByLabel(text('Requirements', '选品要求'), { exact: true }).fill('Black 750ml without a straw.');
   await page.getByRole('button', { name: text('Save Task', '保存任务'), exact: true }).click(); await expect(page.getByRole('dialog')).toHaveCount(0);

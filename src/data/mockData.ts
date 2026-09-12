@@ -6,6 +6,9 @@ const base: Product = {
   color: 'Black', capacity: 500, localizedCapacity: '16.9 fl oz', material: 'Stainless Steel',
   straw: false, countryOfOrigin: 'China', status: 'search_ready', duplicateStatus: 'unique',
   packagingWeight: 0.38, packagingDimensions: '8 × 8 × 25 cm', supplierCost: 8.2, declaredValue: 8.2, missing: [], visual: 'bottle',
+  // The built-in pool ships with a report on file, so the demo flow shows the quiet state. The sample
+  // supplier files deliberately carry no report, which is what raises the "submit a report" alarm.
+  qualityReport: { reportNo: 'QC-2026-1001', result: 'pass', validUntil: '2027-06-30' },
 };
 export const products: Product[] = [
   base,

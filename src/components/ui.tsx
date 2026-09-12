@@ -42,8 +42,8 @@ export function ProductVisual({ product, large = false }: { product: Product; la
   const color = colorHex(product.color);
   return <div className={`product-visual ${large ? 'large' : ''}`} aria-hidden="true">
     {product.visual === 'bottle' ? <svg viewBox="0 0 100 140" fill="none"><ellipse cx="50" cy="126" rx="26" ry="5" fill="#d7dfd9" /><rect x="35" y="13" width="30" height="19" rx="5" fill={color} /><path d="M35 28h30v9c0 5 10 9 10 21v56c0 9-5 13-13 13H38c-8 0-13-4-13-13V58c0-12 10-16 10-21v-9Z" fill={color} /><path d="M34 57v53c0 5 1 7 4 8" stroke="white" strokeOpacity=".15" strokeWidth="3" strokeLinecap="round" /><path d="M37 23h26M36 29h28" stroke="white" strokeOpacity=".14" /><path d="m46 91 4-7 4 7h-8Z" stroke={product.color === 'Black' ? '#a9b6ad' : '#6d776e'} strokeWidth="1.2" />{product.straw && <path d="M51 14V3h12" stroke="#58635b" strokeWidth="4" strokeLinecap="round" />}</svg>
-    : product.visual === 'bag' ? <svg viewBox="0 0 100 140"><path d="M23 49h54l7 73H16l7-73Z" fill="#4c5551" /><path d="M35 56V35a15 15 0 0 1 30 0v21" fill="none" stroke="#859087" strokeWidth="5" /></svg>
-    : <svg viewBox="0 0 100 140"><path d="M48 62v52M24 120h52" stroke="#45554d" strokeWidth="7" strokeLinecap="round" /><path d="M31 26h36l15 43H16l15-43Z" fill="#607468" /></svg>}
+    : product.visual === 'bag' ? <svg viewBox="0 0 100 140"><path d="M23 49h54l7 73H16l7-73Z" fill={color} /><path d="M31 49v73" stroke="white" strokeOpacity=".14" strokeWidth="3" /><path d="M35 56V35a15 15 0 0 1 30 0v21" fill="none" stroke={product.color === 'Black' ? '#a9b6ad' : '#6d776e'} strokeWidth="5" /></svg>
+    : <svg viewBox="0 0 100 140"><path d="M48 62v52M24 120h52" stroke={product.color === 'Black' ? '#7d8880' : '#45554d'} strokeWidth="7" strokeLinecap="round" /><path d="M31 26h36l15 43H16l15-43Z" fill={color} /></svg>}
   </div>;
 }
 export function CheckLine({ children }: { children: ReactNode }) { return <div className="check-line"><Check size={15} aria-hidden="true" /><span>{children}</span></div>; }

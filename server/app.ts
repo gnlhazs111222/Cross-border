@@ -2,8 +2,9 @@ import { getRecommendations, runRecommendations } from './services/recommendatio
 import { createRecommendationRuntime } from './providers/qwenRecommendation';
 import { createListingRuntime } from './providers/qwenListing';
 import { createReviewRuntime } from './providers/qwenReview';
+import { createMultimodalRuntime } from './providers/multimodalRuntime';
 import { getWorkflow, getListing, createListing, reviseListing, reviewListing, publishListing, publishedAmazonCsv } from './services/listings';
-import { createV1, factSnapshot, taskFactSnapshots, analyzeFacts, mutateFact, templateFromFacts } from './services/facts';
+import { createV1, factSnapshot, taskFactSnapshots, analyzeFacts, recheckImages, mutateFact, templateFromFacts } from './services/facts';
 import Fastify from 'fastify';
 import cookie from '@fastify/cookie';
 import { z } from 'zod';
@@ -12,12 +13,14 @@ import type { Capabilities, PublicUser } from '../shared/contracts';
 import type { ServerConfig } from './config';
 import { AppError } from './errors';
 import { credentialsSchema, importSchema, registerSchema, taskSchema } from './validation';
-import { bulkResolveImportSchema, resolveImportSchema } from './validation';
+import { bulkResolveImportSchema, checkDecisionSchema, resolveImportSchema } from './validation';
+import { decideCheck, recordQualityReport } from './services/checks';
 import { hashPassword, newSessionToken, tokenHash, verifyPassword } from './auth/password';
 import { catalog, resetCatalog, seedProducts, toProduct } from './services/catalog';
 import { deleteImportRule, importBatchDetail, importBatchSourceFile, importWithAlignment, listImportBatches, listImportRules, previewImportAlignment, resolveImportOccurrence, resolveImportOccurrencesBulk } from './services/imports';
 import { createTask, selectProduct, tasks, updateTask } from './services/tasks';
 import { ASSET_MIME_TYPES, deleteProductAsset, listProductAssets, pruneOrphanAssetFiles, readProductAsset, storeProductAsset } from './services/assets';
+import { recordHazmatRelease } from './services/hazmat';
 import { assetUploadSchema } from './validation';
 import { createTextProviders } from './providers/text';
 
@@ -30,6 +33,7 @@ export async function buildApp(config: ServerConfig, db: PrismaClient, options: 
   const listingRuntime = createListingRuntime(config, providers.bailian, (id, errorCode) => db.aiCall.update({ where: { id }, data: { success: false, errorCode } }));
   const reviewRuntime = createReviewRuntime(config, providers.bailian, (id, errorCode) => db.aiCall.update({ where: { id }, data: { success: false, errorCode } }));
   const recommendationRuntime = createRecommendationRuntime(config, providers.bailian, (id, errorCode) => db.aiCall.update({ where: { id }, data: { success: false, errorCode } }), options.recommendationAudit);
+  const multimodalRuntime = createMultimodalRuntime(config, providers.bailian);
   await app.register(cookie);
   app.decorateRequest('user', null);
   app.setErrorHandler((error, request, reply) => {
@@ -111,6 +115,15 @@ export async function buildApp(config: ServerConfig, db: PrismaClient, options: 
   const assetUploadRoute = { preHandler: requireUser, bodyLimit: Math.ceil(config.ASSET_MAX_BYTES * 1.4) + 8192 };
   app.get('/api/products/:id/assets', protectedRoute, async request => ({ data: await listProductAssets(db, request.user!.id, productParams.parse(request.params).id) }));
   app.post('/api/products/:id/assets', assetUploadRoute, async request => ({ data: await storeProductAsset(db, config, request.user!.id, productParams.parse(request.params).id, assetUploadSchema.parse(request.body)) }));
+  app.post('/api/products/:id/hazmat-release', protectedRoute, async request => {
+    const input = z.object({ documents: z.string().trim().min(1).max(500) }).strict().parse(request.body);
+    return { data: await recordHazmatRelease(db, request.user!.id, productParams.parse(request.params).id, input.documents) };
+  });
+  /** The quality report is required before the task moves on, so it can be submitted here as well as imported. */
+  app.post('/api/products/:id/quality-report', protectedRoute, async request => {
+    const input = z.object({ reportNo: z.string().trim().min(1).max(120), result: z.enum(['pass', 'fail']), validUntil: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() }).strict().parse(request.body);
+    return { data: await recordQualityReport(db, request.user!.id, productParams.parse(request.params).id, input) };
+  });
   app.get('/api/assets/:id/content', protectedRoute, async (request, reply) => {
     const file = await readProductAsset(db, config, request.user!.id, productParams.parse(request.params).id);
     return reply.type(file.mimeType).header('Content-Disposition', `inline; filename="${file.fileName.replace(/["\\]/g, '')}"`).send(file.bytes);
@@ -167,7 +180,20 @@ export async function buildApp(config: ServerConfig, db: PrismaClient, options: 
   });
   app.post(`${factPath}/analyze`, protectedRoute, async request => {
     const p = factParams.parse(request.params); const input = revisionBody.parse(request.body);
-    return { data: await analyzeFacts(db, request.user!.id, p.taskId, p.productId, input.expectedRevision) };
+    return { data: await analyzeFacts(db, config, request.user!.id, p.taskId, p.productId, input.expectedRevision, multimodalRuntime.provider) };
+  });
+  /** Re-runs only the picture text check, so a new photo does not force a whole new fact card. */
+  app.post(`${factPath}/image-check`, protectedRoute, async request => {
+    const p = factParams.parse(request.params); const input = revisionBody.parse(request.body);
+    return { data: await recheckImages(db, config, request.user!.id, p.taskId, p.productId, input.expectedRevision, multimodalRuntime.provider) };
+  });
+  /**
+   * The decision half of the check area: take what the picture prints, correct the value by hand,
+   * drop the picture, or drop a quality report. Every action is recorded, and none of them rewrites V1.
+   */
+  app.post(`${factPath}/check-decisions`, protectedRoute, async request => {
+    const p = factParams.parse(request.params);
+    return { data: await decideCheck(db, request.user!.id, p.taskId, p.productId, checkDecisionSchema.parse(request.body)) };
   });
   for (const action of ['edit', 'confirm', 'reject'] as const) {
     app.route({ method: action === 'edit' ? 'PATCH' : 'POST', url: `/api/facts/:factId${action === 'edit' ? '' : `/${action}`}`, ...protectedRoute, handler: async request => {
@@ -213,7 +239,7 @@ export async function buildApp(config: ServerConfig, db: PrismaClient, options: 
       storage: { server: ['User', 'Product', 'ProductAsset', 'LaunchTask', 'TaskSelection', 'FactCard', 'Fact', 'Evidence', 'ListingDraft', 'ReviewResult', 'PublishResult'], browser: ['Language', 'UI preferences', 'Non-authoritative cache'] },
       assets: { storage: 'server', acceptedTypes: [...ASSET_MIME_TYPES], maxBytesPerFile: config.ASSET_MAX_BYTES, maxPerProduct: config.ASSET_MAX_PER_PRODUCT },
       textModel: { activeProvider: 'mock', liveAvailable: available, configured: !!config.BAILIAN_API_KEY, liveEnabled: config.AI_LIVE_ENABLED, model: config.BAILIAN_TEXT_MODEL, remainingCalls: providers.bailian.remainingCalls },
-      recommendation: { activeProvider: config.RECOMMENDATION_PROVIDER === 'qwen' && available ? 'qwen' : 'rule', liveAvailable: available, liveImplemented: true, liveModel: config.BAILIAN_TEXT_MODEL }, evidence: { activeProvider: 'mock', liveAvailable: available, liveImplemented: false },
+      recommendation: { activeProvider: config.RECOMMENDATION_PROVIDER === 'qwen' && available ? 'qwen' : 'rule', liveAvailable: available, liveImplemented: true, liveModel: config.BAILIAN_TEXT_MODEL }, evidence: { activeProvider: multimodalRuntime.mode, liveAvailable: available, liveImplemented: true, liveModel: multimodalRuntime.model },
       listing: { activeProvider: config.LISTING_PROVIDER === 'qwen' && available ? 'qwen' : 'template', liveAvailable: available, liveImplemented: true, liveModel: config.BAILIAN_TEXT_MODEL }, review: { activeProvider: reviewRuntime.mode, liveAvailable: available, liveImplemented: true, liveModel: config.BAILIAN_TEXT_MODEL },
     }; return { data: result };
   });

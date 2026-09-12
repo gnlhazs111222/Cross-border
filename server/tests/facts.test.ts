@@ -47,9 +47,9 @@ test('V1 is idempotent, source-backed, owner-scoped and stored with evidence in 
   assert.equal(s.facts.find(f => f.key === 'packagingWeight')!.status, 'Missing');
   assert.equal(s.pricing.status, 'blocked'); assert.equal(s.pricing.suggestedPrice, null);
   assert.deepEqual(await call(`${route(s)}/fact-cards/v1`, 'POST', {}), s);
-  assert.equal((await call(`${route(s)}/facts`)).length, 11); assert.equal((await call(`${route(s)}/evidence`)).length, 3);
+  assert.equal((await call(`${route(s)}/facts`)).length, 11); assert.equal((await call(`${route(s)}/evidence`)).length, 1);
   const reopened = createDb(config.DATABASE_URL);
-  try { assert.equal(await reopened.fact.count(), 11); assert.equal(await reopened.evidence.count(), 3); } finally { await reopened.$disconnect(); }
+  try { assert.equal(await reopened.fact.count(), 11); assert.equal(await reopened.evidence.count(), 1); } finally { await reopened.$disconnect(); }
   assert.equal((await app.inject(`${route(s)}/fact-snapshot`)).statusCode, 401);
 });
 for (const ext of ['xlsx', 'csv']) test(`${ext} actual parser imports retain file/sheet/row/field provenance and numeric values`, async () => {
@@ -63,7 +63,8 @@ for (const ext of ['xlsx', 'csv']) test(`${ext} actual parser imports retain fil
   const f = s.facts.find(f => f.key === 'supplierCost')!;
   assert.equal(f.value, 'USD 8.20'); assert.equal(f.sourceKind, 'supplier');
   assert.deepEqual(f.sourceMetadata, { fileName, sheetName: products[0].importSource!.sheetName, rowNumber: 2, fieldName: 'supplierCost' });
-  assert.match(f.anchor, /row 2/); assert.equal(s.evidence[0].sourceKind, 'supplier'); assert.equal(s.evidence[1].sourceKind, 'mock');
+  assert.match(f.anchor, /row 2/); assert.equal(s.evidence.length, 1); assert.equal(s.evidence[0].sourceKind, 'supplier');
+  assert.ok(!s.evidence.some(e => e.type === 'pdf' || e.type === 'image'), 'no mock PDF or image evidence card is stored');
 });
 
 test('analyze keeps V1 byte-for-byte, persists V2 and does not re-create pending enhanced facts', async () => {

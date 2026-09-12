@@ -24,6 +24,10 @@ test('hard filter uses candidate facts and ignores pricing readiness and the pri
   assert.ok(filtered.eligible.some(p => p.status === 'missing_data' && !p.packagingWeight));
   const missingSelectionFact = { ...example.candidates[0], status: 'missing_data' as const, missing: ['Material'] };
   assert.equal(hardFilter([missingSelectionFact], example.task).excluded[0].reason, 'Missing candidate facts');
+  // A nameless row may sit in the pool as a gap, but nothing can be recommended or written from it.
+  const nameless = { ...example.candidates[0], status: 'missing_data' as const, name: '', missing: ['Product name'] };
+  assert.equal(hardFilter([nameless], example.task).excluded[0].reason, 'Missing candidate facts');
+  assert.equal(hardFilter([{ ...nameless, name: 'Named again' }], example.task).eligible.length, 1);
   const higherTarget = hardFilter(example.candidates, { ...example.task, minProfit: 1000 });
   assert.deepEqual(higherTarget.eligible.map(p => p.sku), filtered.eligible.map(p => p.sku));
   assert.equal(hardFilter(example.candidates, { ...example.task, category: 'home & kitchen' }).eligible.length, 0); // Same canonical category contract as the existing Fact / Listing workflow.

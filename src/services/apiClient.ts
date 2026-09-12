@@ -1,6 +1,7 @@
 import type { RecommendationSnapshot } from '../../shared/recommendation';
 import type { WorkflowSnapshot, FactSnapshot, Capabilities, CatalogResponse, PublicUser, ServerProduct, ServerTask, ProductAsset, AssetRole, ImportBatchDto, ImportBatchDetail, ImportBulkResult, ImportResolution, ImportRuleDto } from '../../shared/contracts';
 import type { ImportPreviewResult } from '../../server/services/imports';
+import type { CheckDecisionRequest } from '../../server/services/checks';
 import type { ImportPreview, Listing, Platform, Task } from '../types';
 
 export const SERVER_MODE = typeof window !== 'undefined' && import.meta.env?.MODE !== 'competition' && new URLSearchParams(window.location.search).get('mode') !== 'local';
@@ -42,6 +43,9 @@ export const apiClient = {
     },
   },
   assets: {
+    hazmatRelease: (productId: string, documents: string) => request<ServerProduct>(`/products/${encodeURIComponent(productId)}/hazmat-release`, 'POST', { documents }),
+    qualityReport: (productId: string, input: { reportNo: string; result: 'pass' | 'fail'; validUntil?: string }) =>
+      request<{ productId: string; report: { reportNo: string; result: 'pass' | 'fail'; validUntil?: string } }>(`/products/${encodeURIComponent(productId)}/quality-report`, 'POST', input),
     list: (productId: string) => request<{ sku: string; assets: ProductAsset[] }>(`/products/${encodeURIComponent(productId)}/assets`),
     upload: (productId: string, input: { fileName: string; mimeType: string; role?: AssetRole; contentBase64: string }) =>
       request<{ asset: ProductAsset; duplicate: boolean; assets: ProductAsset[] }>(`/products/${encodeURIComponent(productId)}/assets`, 'POST', input),
@@ -74,6 +78,11 @@ export const apiClient = {
     getSnapshot: (taskId: string, productId: string) => request<FactSnapshot>(`${factPath(taskId, productId)}/fact-snapshot`),
     createV1: (taskId: string, productId: string) => request<FactSnapshot>(`${factPath(taskId, productId)}/fact-cards/v1`, 'POST', {}),
     analyze: (taskId: string, productId: string, expectedRevision: number) => request<FactSnapshot>(`${factPath(taskId, productId)}/analyze`, 'POST', { expectedRevision }),
+    /** Re-runs only the picture text check, for when a photo changed but the facts did not. */
+    imageCheck: (taskId: string, productId: string, expectedRevision: number) => request<FactSnapshot>(`${factPath(taskId, productId)}/image-check`, 'POST', { expectedRevision }),
+    /** The check area's decisions: take the printed wording, correct by hand, or drop a picture or a report. */
+    checkDecision: (taskId: string, productId: string, input: CheckDecisionRequest, expectedRevision: number) =>
+      request<FactSnapshot>(`${factPath(taskId, productId)}/check-decisions`, 'POST', { ...input, expectedRevision }),
     update: (id: string, value: string, expectedRevision: number) => request<FactSnapshot>(`/facts/${encodeURIComponent(id)}`, 'PATCH', { value, expectedRevision }),
     confirm: (id: string, expectedRevision: number) => request<FactSnapshot>(`/facts/${encodeURIComponent(id)}/confirm`, 'POST', { expectedRevision }),
     reject: (id: string, expectedRevision: number) => request<FactSnapshot>(`/facts/${encodeURIComponent(id)}/reject`, 'POST', { expectedRevision }),

@@ -16,14 +16,14 @@ export function enrichProductEvidence(p: Product, v1: FactCard, task: Task): Fac
   const confirmed = p.sku === HERO_SKU;
   const make = (key: string, label: string, value: string, source: string, anchor: string, allowed = true): Fact => ({ key, label, value, source, anchor, sourceKind: 'mock', status: allowed && confirmed ? 'Confirmed' : 'Requires Confirmation', allowed: allowed && confirmed });
   const added = p.visual === 'bag' ? [
-    make('packageIncludes', 'Package includes', 'Tote bag, Care card', p.importSource ? 'Mock Packaging Image' : 'Packaging Image', 'Image 2 · contents'),
-    make('finish', 'Finish', 'Natural woven texture', p.importSource ? 'Mock Product Image' : 'Product Image', 'Image 1 · exterior'),
-    make('closureType', 'Closure type', 'Open top', p.importSource ? 'Mock Product Image' : 'Product Image', 'Image 2 · opening'),
-    make('strapType', 'Strap type', 'Dual shoulder straps', p.importSource ? 'Mock Product Image' : 'Product Image', 'Image 1 · straps'),
+    make('packageIncludes', 'Package includes', 'Tote bag, Care card', 'Mock analysis', 'Sample result · no file was parsed'),
+    make('finish', 'Finish', 'Natural woven texture', 'Mock analysis', 'Sample result · no file was parsed'),
+    make('closureType', 'Closure type', 'Open top', 'Mock analysis', 'Sample result · no file was parsed'),
+    make('strapType', 'Strap type', 'Dual shoulder straps', 'Mock analysis', 'Sample result · no file was parsed'),
   ] : [
-    make('packageIncludes', 'Package includes', 'Bottle, Lid, Instruction card', p.importSource ? 'Mock Packaging Image' : 'Packaging Image', 'Image 2 · contents'),
-    make('finish', 'Finish', `Matte ${p.color.toLowerCase()}`, p.importSource ? 'Mock Product Image' : 'Product Image', 'Image 1 · exterior'),
-    make('lidType', 'Lid type', 'Screw-top lid', p.importSource ? 'Mock Specification PDF' : 'Specification PDF', 'Page 1 · closure'),
+    make('packageIncludes', 'Package includes', 'Bottle, Lid, Instruction card', 'Mock analysis', 'Sample result · no file was parsed'),
+    make('finish', 'Finish', `Matte ${p.color.toLowerCase()}`, 'Mock analysis', 'Sample result · no file was parsed'),
+    make('lidType', 'Lid type', 'Screw-top lid', 'Mock analysis', 'Sample result · no file was parsed'),
     make('leakproof', 'Leakproof performance', '100% leakproof', 'Supplier claim', 'Unverified · no supporting test report', false),
   ];
   return { version: 2, sku: p.sku, taskId: task.id, facts: [...structuredClone(v1.facts), ...added] };

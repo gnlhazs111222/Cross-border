@@ -18,7 +18,10 @@ export function eligibilityReason(p: Product, task: Task): string | null {
   if (p.category !== task.category) return 'Category mismatch';
   if (!['bottle', 'bag'].includes(p.visual)) return 'Unsupported product type';
   // Candidate selection depends on product identity and searchable attributes.
-  // Pricing-only inputs are deliberately checked after an operator selects a SKU.
+  // A row may be imported with a gap and shown as "Missing Data", but a product without a name has
+  // no identity to recommend or to write copy from, so it stays out of the pool until that gap is
+  // filled. Pricing-only inputs are deliberately checked after an operator selects a SKU.
+  if (!p.name?.trim()) return 'Missing candidate facts';
   const requiredLabels = p.visual === 'bag' ? REQUIRED_BAG_SELECTION_FACT_LABELS : REQUIRED_BOTTLE_SELECTION_FACT_LABELS;
   if (!['search_ready', 'missing_data'].includes(p.status) || p.missing.some(label => requiredLabels.has(label)) || !p.color || !p.material || (p.visual === 'bottle' && p.capacity <= 0)) return 'Missing candidate facts';
   return null;

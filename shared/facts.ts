@@ -9,8 +9,8 @@ export function baseFactCard(p: Product): FactCard {
   const dimensions = p.packagingDimensions?.split(' × ').map(Number.parseFloat);
   const facts = [
     fact('color', 'Color', p.color, 'Supplier Spreadsheet', 'Products · column D'),
-    ...(p.visual === 'bottle' ? [fact('capacity', 'Capacity', `${p.capacity}ml / ${p.localizedCapacity}`, 'Specification PDF', 'Page 1 · specifications')] : []),
-    fact('material', 'Material', p.material, 'Specification PDF', 'Page 1 · body material'),
+    ...(p.visual === 'bottle' ? [fact('capacity', 'Capacity', `${p.capacity}ml / ${p.localizedCapacity}`, 'Supplier Spreadsheet', 'Products · capacityMl')] : []),
+    fact('material', 'Material', p.material, 'Supplier Spreadsheet', 'Products · material'),
     ...(p.visual === 'bottle' ? [fact('straw', 'Straw', p.straw ? 'Included' : 'No straw', 'Supplier Spreadsheet', 'Products · column F')] : []),
     ...(p.visual === 'bag' ? [fact('bagType', 'Bag type', 'Tote bag', 'Supplier Spreadsheet', 'Products · product name')] : []),
     fact('countryOfOrigin', 'Country of origin', p.countryOfOrigin, 'Supplier Spreadsheet', 'Products · column G'),
@@ -71,16 +71,13 @@ export function pricingFromFacts(p: Product, facts: Fact[], revision = 0, target
 }
 
 export function productEvidence(p: Product): Evidence[] {
-    if (p.visual === 'bag') return [
-      { id: 'EV-001', type: 'sheet', name: p.importSource ? 'Imported Supplier File' : 'Supplier Spreadsheet', file: p.importSource?.fileName ?? 'supplier_catalog.xlsx', anchor: p.importSource ? `${p.importSource.fileName} · ${p.importSource.sheetName} · row ${p.importSource.row}` : `${p.sku} · Products & Packaging`, extracted: [`Product type: Tote bag`, `Color: ${p.color}`, `Packaging weight: ${p.packagingWeight ? `${p.packagingWeight} kg` : 'Missing'}`] },
-      { id: 'EV-002', type: 'pdf', name: p.importSource ? 'Mock Specification PDF' : 'Specification PDF', file: 'canvas_tote_specification.pdf', anchor: 'Page 1 · materials', extracted: [`Body material: ${p.material}`, `Country of origin: ${p.countryOfOrigin}`, 'Load capacity: Not verified'] },
-      { id: 'EV-003', type: 'image', name: p.importSource ? 'Mock Product / Packaging Images' : 'Product / Packaging Images', file: 'tote_front.jpg + tote_opening.jpg', anchor: 'Image 1 · exterior; image 2 · opening', extracted: ['Finish: Natural woven texture', 'Closure: Open top', 'Straps: Dual shoulder straps', 'Load capacity: Not verified'] },
-    ];
-    return [
-      { id: 'EV-001', type: 'sheet', name: p.importSource ? 'Imported Supplier File' : 'Supplier Spreadsheet', file: p.importSource?.fileName ?? 'supplier_catalog.xlsx', anchor: p.importSource ? `${p.importSource.fileName} · ${p.importSource.sheetName} · row ${p.importSource.row}` : `${p.sku} · Products & Packaging`, extracted: [`Color: ${p.color}`, `Straw: ${p.straw ? 'Included' : 'No straw'}`, `Packaging weight: ${p.packagingWeight ? `${p.packagingWeight} kg` : 'Missing'}`] },
-      { id: 'EV-002', type: 'pdf', name: p.importSource ? 'Mock Specification PDF' : 'Specification PDF', file: 'bottle_specification.pdf', anchor: 'Page 1 · specifications', extracted: [`Capacity: ${p.capacity}ml / ${p.localizedCapacity}`, `Body: ${p.material}`, 'Lid: Screw-top lid'] },
-      { id: 'EV-003', type: 'image', name: p.importSource ? 'Mock Product / Packaging Images' : 'Product / Packaging Images', file: 'product_front.jpg + package_contents.jpg', anchor: 'Image 1 · exterior; image 2 · contents', extracted: [`Finish: Matte ${p.color.toLowerCase()}`, 'Package: Bottle, Lid, Instruction card', 'Leakproof performance: Not verified'] },
-    ];
+  const extracted = p.visual === 'bag'
+    ? [`Product type: Tote bag`, `Color: ${p.color}`, `Packaging weight: ${p.packagingWeight ? `${p.packagingWeight} kg` : 'Missing'}`]
+    : [`Color: ${p.color}`, `Straw: ${p.straw ? 'Included' : 'No straw'}`, `Packaging weight: ${p.packagingWeight ? `${p.packagingWeight} kg` : 'Missing'}`];
+  return [{ id: 'EV-001', type: 'sheet', name: p.importSource ? 'Imported Supplier File' : 'Supplier Spreadsheet',
+    file: p.importSource?.fileName ?? 'supplier_catalog.xlsx',
+    anchor: p.importSource ? `${p.importSource.fileName} · ${p.importSource.sheetName} · row ${p.importSource.row}` : `${p.sku} · Products & Packaging`,
+    extracted }];
 }
 export function reviewFact(before: Fact, action: 'edit' | 'confirm' | 'reject', input?: string): Fact {
   const key = before.key;

@@ -4,7 +4,10 @@ import { Prisma, type PrismaClient, type ListingDraft } from '@prisma/client';
 import type { Listing, Platform } from '../../src/types';
 import type { WorkflowSnapshot, FactSnapshot } from '../../shared/contracts';
 import { amazonCsv } from '../../shared/csv';
+import { toProduct } from './catalog';
 import { AppError } from '../errors';
+import { assessHazmat } from '../../shared/hazmat';
+import { assessInspection, ignoredRefs, inspectionTargets } from '../../shared/checks';
 import { domainProviders } from '../providers/domain';
 import { factSnapshotTx } from './facts';
 import { hardReviewIssues, reviewInputHash, rulesReviewRuntime } from '../providers/qwenReview';
@@ -68,8 +71,25 @@ async function insert(db: DB, userId: string, snap: FactSnapshot, listing: Listi
 // Authorization is always computed from the current DB version and facts, never client flags.
 export async function canPublishListing(db: DB, userId: string, id: string, knownSnapshot?: FactSnapshot, reviewRuntime = rulesReviewRuntime): Promise<boolean> {
   const row = await owned(db, userId, id); const head = await latest(db, row);
+  // Transport verdict: declared-dangerous goods stay blocked until their paperwork is recorded,
+  // and a factual shipping ban is never overridable here.
+  const hazmatRow = await db.product.findUnique({ where: { id: row.productId } });
+  if (hazmatRow) {
+    const hazmatProduct = toProduct(hazmatRow);
+    const verdict = assessHazmat(hazmatProduct.transport);
+    if (verdict.verdict === 'forbidden') return false;
+    if (verdict.verdict === 'needs_documents' && !hazmatProduct.transportRelease) return false;
+  }
   if (head?.id !== row.id || !['review_passed', 'published'].includes(row.status)) return false;
   const snap = knownSnapshot ?? await factSnapshotTx(db, userId, row.taskId, row.productId);
+  // Quality report: a failed report blocks for good, while an expired or contradictory one blocks
+  // until a person reconciles the facts or drops that report from the checks.
+  if (hazmatRow) {
+    const reportProduct = toProduct(hazmatRow);
+    const report = assessInspection({ ...inspectionTargets(snap.facts, reportProduct), report: reportProduct.qualityReport,
+      ignored: ignoredRefs(reportProduct.checkDecisions, 'quality_report') });
+    if (report.publishBlocked) return false;
+  }
   if (snap.listingFactsRevision !== row.factRevision || !snap.listingReadiness.ready || !snap.pricingReadiness.ready) return false;
   const review = await db.reviewResult.findFirst({ where: { listingDraftId: row.id, invalidatedAt: null }, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }] });
   if (!review || review.revision !== row.revision || review.status !== 'passed' || review.highRiskCount !== 0 || (review.issues as unknown[]).length !== 0) return false;

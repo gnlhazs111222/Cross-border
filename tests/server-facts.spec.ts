@@ -6,6 +6,10 @@ const state = (page: Page) => page.evaluate(key => JSON.parse(localStorage.getIt
 async function open(page: Page, sku: string, zh = false) {
   await page.getByRole('button', { name: `${zh ? '查看' : 'View'} ${sku}`, exact: true }).click();
   await page.getByRole('dialog').getByRole('button', { name: zh ? '核对事实' : 'Review Facts', exact: true }).click();
+  // The fact cards are collapsed by default: open them the way a person would before editing.
+  const comparison = page.locator('details#fact-review');
+  await expect(comparison).toBeVisible();
+  if (!(await comparison.evaluate((node: HTMLDetailsElement) => node.open))) await comparison.locator('summary').click();
   await expect(page.getByTestId('fact-review-packagingWeight')).toBeVisible();
 }
 async function edit(page: Page, key: string, value: string, zh = false) {
@@ -37,7 +41,7 @@ for (const zh of [false, true]) test(`server facts survive all localStorage dele
   await page.evaluate(() => localStorage.clear()); await page.reload();
   await expect(page.locator('.product-table tbody tr')).toHaveCount(10);
   await page.getByRole('navigation').getByRole('button', { name: 'Evidence & Facts', exact: true }).click();
-  await expect(page.getByTestId('fact-review-packagingWeight')).toContainText('0.42 kg');
+  await expect(page.getByTestId('fact-review-packagingWeight')).toContainText('0.93 lb');
   expect((await serverSnapshot(page)).factsRevision).toBe(snap.factsRevision);
   expect((await state(page)).v2).not.toBeNull();
   await page.evaluate(key => {

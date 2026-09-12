@@ -10,6 +10,7 @@ import { DemoContext } from './components/DemoContext';
 import { Badge, Button } from './components/ui';
 import { mockApi } from './services/mockApi';
 import type { DemoState, Workspace } from './types';
+import { ignoredRefs, inspectionTargets, reportClearsNextStep } from '../shared/checks';
 import { Materials } from './pages/Materials';
 import { LaunchTasks } from './pages/LaunchTasks';
 import { EvidenceFacts } from './pages/EvidenceFacts';
@@ -42,7 +43,17 @@ export default function App() {
     catch (error) { setState(mockApi.getState()); notify(error instanceof Error ? error.message : 'Something went wrong. Please retry.', true); return false; }
     finally { lock.current = false; setBusy(null); }
   };
-  const navigate = (workspace: Workspace) => { if (lock.current) return; setState(mockApi.navigate(workspace)); window.scrollTo({ top: 0 }); };
+  /** The listing stage is closed until a quality report is on file: the evidence page is the door. */
+  const reportReadyForStudio = () => {
+    const product = products.find(candidate => candidate.sku === state.selectedSku);
+    if (!product) return true;
+    return reportClearsNextStep({ ...inspectionTargets((state.v2 ?? state.v1)?.facts ?? [], product), report: product.qualityReport, ignored: ignoredRefs(product.checkDecisions, 'quality_report') });
+  };
+  const navigate = (workspace: Workspace) => {
+    if (lock.current) return;
+    if (workspace === 'studio' && !reportReadyForStudio()) { notify(t('Submit the quality report first: without one the next step stays closed.'), true); return; }
+    setState(mockApi.navigate(workspace)); window.scrollTo({ top: 0 });
+  };
   const index = workspaces.findIndex(w => w.id === state.workspace);
   const completed = [products.length > 0, !!state.selectedSku, !!state.v2, !!state.listings[state.platform], !!state.publications[state.platform]];
   const pages = { materials: Materials, tasks: LaunchTasks, evidence: EvidenceFacts, studio: ListingStudio, review: ReviewPublish };

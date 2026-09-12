@@ -68,7 +68,7 @@ Prisma / SQLite 已迁移创建 12 个模型：
 | --- | --- |
 | User | email、passwordHash、displayName、目录 revision，真实使用 |
 | Session | tokenHash、userId、过期时间，真实 Cookie 会话 |
-| Product | userId、sku、name、category、position、revision、完整商品 JSON，真实持久化 |
+| Product | userId、sku、name、category、position、revision、完整商品 JSON，真实持久化；商品 JSON 含物流申报 `transport`、质检报告 `qualityReport` 与人工处置记录 `checkDecisions` |
 | LaunchTask | platform、market、category、requirements、minimumProfit、revision，真实持久化 |
 | TaskSelection | 任务与商品关系，selected / fact_review 用途及 revision，真实持久化 |
 | FactCard / Fact | V1/V2、字段、来源、状态、权限和修订历史，已真实持久化 |
@@ -151,6 +151,8 @@ GET  /api/tasks/:taskId/products/:productId/evidence
 GET  /api/tasks/:taskId/fact-snapshots
 POST /api/tasks/:taskId/products/:productId/fact-cards/v1
 POST /api/tasks/:taskId/products/:productId/analyze
+POST /api/tasks/:taskId/products/:productId/image-check
+POST /api/tasks/:taskId/products/:productId/check-decisions
 POST /api/tasks/:taskId/products/:productId/listing-template
 PATCH /api/facts/:factId
 POST /api/facts/:factId/confirm
@@ -175,6 +177,7 @@ POST /api/ai/smoke-test
 - 开发日志不记录请求 body；Authorization / Cookie / Set-Cookie 配置脱敏。
 - reset 只重置当前认证用户，保留账户和会话；生产环境禁用 Demo reset、注册及 smoke。
 - Capabilities 实际查询数据库，并从服务端配置计算 liveAvailable，前端弹窗读取 API，不再只显示写死的状态。
+- 事实核对与报警：`analyze` 顺带跑一次图片文字核对，`image-check` 单独重跑（不动 v2 已有人工确认的数据）；`check-decisions` 处理报警——采纳图中印字 / 手改（`invalid_fact` 409）/ 放弃该图 / 放弃报告，请求带 `expectedRevision`，陈旧版本 409 `facts_changed`，没有争议的字段 409 `not_a_dispute`。
 
 ## 7. Providers
 
@@ -188,9 +191,9 @@ POST /api/ai/smoke-test
 - ListingProvider / TemplateListingProvider。
 - ReviewProvider / RuleReviewProvider。
 
-QwenListingProvider 已实现，经 TextModelProvider 调用百炼，以结构化输出、事实授权校验和模板回退接入服务端版本链。QwenRecommendationProvider、QwenEvidenceProvider、QwenReviewProvider 仍是未实现的预留适配器。
+QwenListingProvider、QwenRecommendationProvider、QwenReviewProvider 与多模态的 QwenImageCheckProvider 均已实现，各自经 TextModelProvider 调用百炼，以结构化输出、字段授权校验和回退路径接入服务端版本链。`QwenEvidenceProvider`（补充 PDF／图片事实）仍是未实现的预留适配器，对应能力由离线本地 provider 承担。
 
-Capabilities 的 Listing 已返回 `liveImplemented: true` 和 liveModel；activeProvider 只有在选择 qwen 且配置满足时才为 qwen。其余三个业务 Qwen adapter 仍为 false。默认工作流为 mock / template / rules，Listing 可显式切换 Qwen。
+Capabilities 的 listing / recommendation / review / evidence 都已返回 `liveImplemented: true` 和 liveModel；activeProvider 只有在选择 qwen 且配置满足时才为 qwen。默认工作流为 template / rule / rules / local：图片文字核对默认离线运行（不读图上文字，只做文件级核对，属性一律标未核对），可显式切换视觉模型。
 
 ## 8. 百炼配置和预算
 

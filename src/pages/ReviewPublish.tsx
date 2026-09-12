@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { apiClient, SERVER_MODE } from '../services/apiClient';
 import { SemanticReviewDetails, semanticStatusLabel, semanticStatusDescription } from '../components/SemanticReviewDetails';
 import { useI18n } from '../i18n/I18nContext';
+import { HazmatNotice } from '../components/HazmatNotice';
 import { Check, CheckCircle2, Download, ExternalLink, LockKeyhole, Rocket, ShieldCheck, ShieldX } from 'lucide-react';
 import { useDemo } from '../components/DemoContext';
 import { ListingPreview } from '../components/ListingPreview';
@@ -27,7 +28,7 @@ export function ReviewPublish() {
       setTimeout(() => URL.revokeObjectURL(url), 1000); notify('Amazon CSV downloaded.');
     } catch (error) { setState(mockApi.getState()); notify(error instanceof Error ? error.message : 'Export failed.', true); }
   };
-  return <><PageHeader eyebrow={t("05 / REVIEW & PUBLISH")} title={t("One final check. A confident launch.")} description={t("Catch unsupported claims, make a human correction, then publish your reviewed revision.")} action={<Badge tone="blue">{t("Mock publish only")}</Badge>} /><div className="studio-toolbar"><PlatformTabs value={state.platform} disabled={!!busy} onChange={p => setState(mockApi.setPlatform(p))} />{listing && <span className="muted">{t('Reviewing revision {revision}', { revision: listing.revision })}</span>}</div>
+  return <><PageHeader eyebrow={t("05 / REVIEW & PUBLISH")} title={t("One final check. A confident launch.")} description={t("Catch unsupported claims, make a human correction, then publish your reviewed revision.")} action={<Badge tone="blue">{t("Mock publish only")}</Badge>} /><div className="studio-toolbar"><HazmatNotice product={mockApi.getState().catalog.find(item => item.sku === state.selectedSku)} /><PlatformTabs value={state.platform} disabled={!!busy} onChange={p => setState(mockApi.setPlatform(p))} />{listing && <span className="muted">{t('Reviewing revision {revision}', { revision: listing.revision })}</span>}</div>
     {!listing ? <EmptyState title={t("Generate a listing before review")} description={t('There is no {platform} draft for this product yet.', { platform: state.platform === 'amazon' ? 'Amazon' : 'Shopify' })} action={<NextButton onClick={() => navigate('studio')}>{t("Go to Listing Studio")}</NextButton>} /> : <>
       {publication && <section className="publish-success" role="status"><div className="success-symbol"><Check size={30} /></div><div><div className="eyebrow">{t("MOCK PUBLISH SUCCESS")}</div><h2>{t(publication.platform === 'shopify' ? 'Shopify Draft Created' : 'Amazon Listing Export Ready')}</h2><p>{t("Demo Product ID:")} <strong>{publication.productId}</strong><span> {t("· Status:")} <strong>{t(publication.status)}</strong></span></p><p>{t('Revision {revision} passed review. No live marketplace was contacted.', { revision: publication.revision })}</p></div>{publication.platform === 'amazon' ? <Button onClick={exportCsv}><Download size={16} />{t("Export Amazon CSV")}</Button> : <Badge tone="green">{t("Draft")}</Badge>}</section>}
       {!publication && <div className={`review-stage-banner ${approvalExpired ? 'pending' : review?.status ?? 'pending'}`} role="status" data-testid="review-stage-banner">

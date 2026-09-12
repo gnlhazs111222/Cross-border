@@ -16,10 +16,13 @@ const schema = z.object({
   LISTING_PROVIDER: z.enum(['template', 'qwen']).default('template'),
   REVIEW_PROVIDER: z.enum(['rules', 'qwen']).default('rules'),
   REVIEW_MAX_TOKENS: z.coerce.number().int().min(300).max(3000).default(1800),
+  /** Multimodal module: local keeps the image check offline, qwen sends the selected SKU pictures to a vision model. */
+  MULTIMODAL_PROVIDER: z.enum(['local', 'qwen']).default('local'),
+  MULTIMODAL_MAX_TOKENS: z.coerce.number().int().min(300).max(3000).default(1800),
   BAILIAN_LISTING_MAX_TOKENS: z.coerce.number().int().min(300).max(3000).default(1800),
   BAILIAN_API_KEY: z.string().default(''),
   BAILIAN_BASE_URL: z.string().url().default('https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1'),
-  BAILIAN_TEXT_MODEL: z.string().default('qwen3.6-flash'), BAILIAN_REASONING_MODEL: z.string().default('qwen3.7-plus'), BAILIAN_PREMIUM_MODEL: z.string().default('qwen3.8-max'),
+  BAILIAN_TEXT_MODEL: z.string().default('qwen3.6-flash'), BAILIAN_REASONING_MODEL: z.string().default('qwen3.7-plus'), BAILIAN_PREMIUM_MODEL: z.string().default('qwen3.8-max'), BAILIAN_VL_MODEL: z.string().default('qwen3.7-plus'),
   BAILIAN_REQUEST_TIMEOUT_MS: z.coerce.number().int().min(100).max(120000).default(30000),
   ASSET_STORAGE_DIR: z.string().default('.local/assets'),
   ASSET_MAX_BYTES: z.coerce.number().int().min(1024).max(20 * 1024 * 1024).default(4 * 1024 * 1024),
@@ -40,6 +43,7 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env) {
     RECOMMENDATION_PROVIDER: c.NODE_ENV === 'test' ? 'rule' as const : c.RECOMMENDATION_PROVIDER,
     LISTING_PROVIDER: c.NODE_ENV === 'test' ? 'template' as const : c.LISTING_PROVIDER,
     REVIEW_PROVIDER: c.NODE_ENV === 'test' ? 'rules' as const : c.REVIEW_PROVIDER,
+    MULTIMODAL_PROVIDER: c.NODE_ENV === 'test' ? 'local' as const : c.MULTIMODAL_PROVIDER,
     AI_LIVE_ENABLED: c.NODE_ENV === 'test' ? false : c.AI_LIVE_ENABLED,
     BAILIAN_API_KEY: c.NODE_ENV === 'test' ? '' : c.BAILIAN_API_KEY,
   };

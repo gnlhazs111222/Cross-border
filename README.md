@@ -1,6 +1,6 @@
 # PrismLaunch Full Demo
 
-当前集成版本包含 A 线（可编辑任务、候选过滤、Qwen 推荐与评测）和 B 线（Qwen 语义审核、版本授权与审核评测）。集成审查与验证见 [A_B_INTEGRATION.md](docs/A_B_INTEGRATION.md)，模块说明见 [A 线](docs/A_LINE_RECOMMENDATION.md) 和 [B 线](docs/B_REVIEW_IMPLEMENTATION.md)。
+当前集成版本包含 A 线（可编辑任务、候选过滤、Qwen 推荐与评测）、B 线（Qwen 语义审核、版本授权与审核评测）和 C 线（多模态图片文字核对，以及随行的质检报告与物流属性报警）。集成审查与验证见 [A_B_INTEGRATION.md](docs/A_B_INTEGRATION.md)，模块说明见 [A 线](docs/A_LINE_RECOMMENDATION.md)、[B 线](docs/B_REVIEW_IMPLEMENTATION.md) 和 [C 线](docs/MULTIMODAL.md)。
 
 当前默认是完整演示模式：**React → Fastify → Prisma / SQLite → Cookie 登录**。商品、任务、事实、文案、审核和模拟发布均由服务端持久化。浏览器保留界面偏好与非权威快照。
 
@@ -48,9 +48,12 @@ npm run preview:local
 - 当前完整流程支持水杯与托特包，台灯继续在推荐前明确排除。托特包有独立的选品展示、事实字段、文案模板和承重风险审核；不是套用水杯容量、吸管或防漏规则。
 - 模板生成、规则审核、发布授权与 CSV 下载全部由后端执行。事实变化使历史结果 stale；文案修改创建新版本并使该平台旧结果失效，保留历史。
 - Key 只存服务端 `.env`，不提交、不打包到浏览器。默认 `AI_LIVE_ENABLED=false`。
-- 推荐默认规则、文案默认模板、审核默认规则；三者均支持单独显式开启 Qwen。证据补充仍为 Mock，发布仍为模拟。
+- 推荐默认规则、文案默认模板、审核默认规则、图片文字核对默认离线；四者均支持单独显式开启 Qwen。证据区只保留供应商表格一条，PDF 与图片不做解析；发布仍为模拟。
 - Qwen 推荐和生成使用结构化校验、版本检查及缓存，失败时分别回退规则或模板。Qwen 审核先执行本地硬规则，再验证模型结果；失败或歧义不会回退成通过。
-- 配置默认：`RECOMMENDATION_PROVIDER=rule`、`LISTING_PROVIDER=template`、`REVIEW_PROVIDER=rules`。对应模块改为 `qwen`，并开启 `AI_LIVE_ENABLED=true`、配置后端 Key 后才尝试真实调用。查询、刷新、发布和 CSV 下载不会调用模型。
+- 配置默认：`RECOMMENDATION_PROVIDER=rule`、`LISTING_PROVIDER=template`、`REVIEW_PROVIDER=rules`、`MULTIMODAL_PROVIDER=local`。对应模块改为 `qwen`，并开启 `AI_LIVE_ENABLED=true`、配置后端 Key 后才尝试真实调用（图片文字核对还需 `BAILIAN_VL_MODEL`，默认 `qwen3.7-plus`）。查询、刷新、发布和 CSV 下载不会调用模型。
+- 「核对与报警」面板（Evidence & Facts 页，事实表上方）随事实卡给出三条核对：图片文字、质检报告、物流属性确认。**正常一律静默，只有异常才报警**；报警必须由人处置：图片印字与事实不一致的那一行直接写出差异并给三个选项（直接保存图中印字 / 修改后保存 / 放弃该图），质检报告过期或与事实不一致可选采纳报告值或放弃该报告，不合格报告不可放弃、永久阻断发布。
+- 处置走 `POST /api/tasks/:taskId/products/:productId/check-decisions`（带 `expectedRevision` 乐观锁）。放弃图片 / 报告是**记在商品上**的决定，重跑核对不再读取该证据；采纳印字或手改只写 v2，仍须人工确认才能进文案。
+- 供应商表格新增两组可选列：物流申报 `liquid` / `battery` / `magnetic` / `aerosol` / `flammable` / `fragile`，质检报告 `reportNo` / `reportResult` / `reportValidUntil` / `reportCapacityMl` / `reportMaterial`（`reportNo` 留空表示没有报告）。必填列仍是原来 14 列。
 
 ## 检查与构建
 
@@ -83,6 +86,8 @@ AI_LIVE_ENABLED=true NODE_TLS_REJECT_UNAUTHORIZED=1 npm run ai:smoke -- --live
 ## 文档与素材
 
 - [Qwen Listing 本轮实现与使用说明](docs/QWEN_LISTING.md)
+- [多模态模块：图片文字与事实核对](docs/MULTIMODAL.md)
+- [危险品样本图片与质检报告样本（含手动测试步骤）](evaluation/asset-import-sample/质检报告样本说明.md)
 - [Qwen 真实调用验收与截图](artifacts/full-demo/QWEN_LISTING_VERIFICATION.md)
 - [Full Demo 架构、API、持久化、Provider 与真实调用报告](docs/FULL_DEMO.md)
 - [文案 / 审核 / 发布迁移与本轮验收](docs/LISTING_SERVER_MIGRATION.md)
