@@ -45,8 +45,6 @@ export function CheckAlerts({ product, facts, evidence }: { product?: Product; f
   const { adoptPrintedText, discardPicture, editDisputedFact, replacePicture } = useFactCheckActions();
   const [reportOpen, setReportOpen] = useState(false);
   const [reportNo, setReportNo] = useState('');
-  const [reportResult, setReportResult] = useState<'pass' | 'fail'>('pass');
-  const [reportValidUntil, setReportValidUntil] = useState('');
   const [reportError, setReportError] = useState('');
   const [reportFile, setReportFile] = useState<File | null>(null);
   const reportFileRef = useRef<HTMLInputElement>(null);
@@ -69,22 +67,22 @@ export function CheckAlerts({ product, facts, evidence }: { product?: Product; f
   };
   /**
    * Submitting a report stores the document with the product and records what the laboratory states.
-   * The number without its file would be a claim with nothing behind it, so the file comes first.
+   * The picture is what makes the report a document: the server reads the validity date from it, so a
+   * submission without one has nothing to check and is refused.
    */
   const submitReport = async () => {
     setReportError('');
     const submitted = reportNo.trim();
     const ok = await act('quality-report', async () => {
       try {
-        // The report is the statement, the file is optional evidence of it: the number and the verdict are
-        // what the checks read, so a report can be recorded without a document attached.
-        if (reportFile) await mockApi.uploadAsset(product.sku, { fileName: reportFile.name, mimeType: assetMimeType(reportFile), role: 'spec', contentBase64: await fileToBase64(reportFile) });
-        await mockApi.submitQualityReport(product.sku, { reportNo: submitted, result: reportResult, ...(reportValidUntil ? { validUntil: reportValidUntil } : {}) });
+        if (!reportFile) throw new Error('Attach the report picture first.');
+        const uploaded = await mockApi.uploadAsset(product.sku, { fileName: reportFile.name, mimeType: assetMimeType(reportFile), role: 'spec', contentBase64: await fileToBase64(reportFile) });
+        await mockApi.submitQualityReport(product.sku, { reportNo: submitted, assetId: uploaded.asset.recordId });
       }
       catch (error) { setReportError(error instanceof Error ? error.message : 'Could not record the report.'); throw error; }
       return mockApi.getState();
     }, t('Report {report} is on file. The next step is open again.', { report: submitted }));
-    if (ok) { setReportOpen(false); setReportNo(''); setReportValidUntil(''); setReportResult('pass'); setReportFile(null); if (reportFileRef.current) reportFileRef.current.value = ''; }
+    if (ok) { setReportOpen(false); setReportNo(''); setReportFile(null); if (reportFileRef.current) reportFileRef.current.value = ''; }
   };
   const submitReportButton = <Button variant="secondary" disabled={!!busy} onClick={() => setReportOpen(true)}>{t('Submit a quality report')}</Button>;
 
@@ -193,9 +191,7 @@ export function CheckAlerts({ product, facts, evidence }: { product?: Product; f
     <Modal open={reportOpen} onOpenChange={value => !value && !busy && setReportOpen(false)} title={t('Submit a quality report')} description={t('The report is the laboratory statement, not our own reading: nothing in it changes the product facts.')}>
       <form noValidate onSubmit={event => { event.preventDefault(); void submitReport(); }}>
         <label className="form-field">{t('Report number')}<input autoFocus maxLength={120} value={reportNo} disabled={!!busy} onChange={event => setReportNo(event.target.value)} placeholder={t('For example: QC-2026-1001')} /></label>
-        <label className="form-field">{t('Report file')}<input ref={reportFileRef} type="file" accept=".pdf,.png,.jpg,.jpeg,.webp" disabled={!!busy} onChange={event => setReportFile(event.target.files?.[0] ?? null)} /></label>
-        <label className="form-field">{t('Report verdict')}<select value={reportResult} disabled={!!busy} onChange={event => setReportResult(event.target.value === 'fail' ? 'fail' : 'pass')}><option value="pass">{t('Qualified')}</option><option value="fail">{t('Unqualified')}</option></select></label>
-        <label className="form-field">{t('Valid until')}<input type="date" value={reportValidUntil} disabled={!!busy} onChange={event => setReportValidUntil(event.target.value)} /></label>
+        <label className="form-field">{t('Report picture')}<input ref={reportFileRef} type="file" accept=".png,.jpg,.jpeg,.webp" disabled={!!busy} onChange={event => setReportFile(event.target.files?.[0] ?? null)} /></label>
         {reportError && <div className="notice red" role="alert">{t(reportError)}</div>}
         <div className="modal-actions"><Button type="button" variant="secondary" disabled={!!busy} onClick={() => setReportOpen(false)}>{t('Cancel')}</Button><Button type="submit" disabled={!!busy || !reportNo.trim()} busy={busy === 'quality-report'}>{t('Submit the report')}</Button></div>
       </form>

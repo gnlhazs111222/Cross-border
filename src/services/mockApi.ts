@@ -391,7 +391,7 @@ export const mockApi = {
   },
   unitSystem(): UnitSystem { return current.units ?? systemForMarket(serverOwner ? current.task?.market : undefined); },
   /** Records the quality report a person submits for a SKU, then refreshes the pool it is read from. */
-  async submitQualityReport(sku: string, input: { reportNo: string; result: 'pass' | 'fail'; validUntil?: string }) {
+  async submitQualityReport(sku: string, input: { reportNo: string; result?: 'pass' | 'fail'; validUntil?: string; assetId?: string }) {
     if (!serverOwner) throw new Error('Submitting a quality report requires the server-backed workspace.');
     const recorded = await apiClient.assets.qualityReport(this.assetProductId(sku), input);
     const catalog = await apiClient.products.list();

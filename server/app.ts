@@ -3,6 +3,7 @@ import { createRecommendationRuntime } from './providers/qwenRecommendation';
 import { createListingRuntime } from './providers/qwenListing';
 import { createReviewRuntime } from './providers/qwenReview';
 import { createMultimodalRuntime } from './providers/multimodalRuntime';
+import { createQualityReportReader } from './providers/qualityReport';
 import { getWorkflow, getListing, createListing, reviseListing, reviewListing, publishListing, publishedAmazonCsv } from './services/listings';
 import { createV1, factSnapshot, taskFactSnapshots, analyzeFacts, recheckImages, mutateFact, templateFromFacts } from './services/facts';
 import Fastify from 'fastify';
@@ -35,6 +36,10 @@ export async function buildApp(config: ServerConfig, db: PrismaClient, options: 
   const reviewRuntime = createReviewRuntime(config, providers.bailian, (id, errorCode) => db.aiCall.update({ where: { id }, data: { success: false, errorCode } }));
   const recommendationRuntime = createRecommendationRuntime(config, providers.bailian, (id, errorCode) => db.aiCall.update({ where: { id }, data: { success: false, errorCode } }), options.recommendationAudit);
   const multimodalRuntime = createMultimodalRuntime(config, providers.bailian);
+  // The validity date is read from the submitted report picture. Only a provider that can actually see
+  // picture content can do that, so an offline run files the submission exactly as before.
+  const reportReader = multimodalRuntime.provider.readsPictures
+    ? createQualityReportReader(providers.bailian, { model: config.BAILIAN_VL_MODEL, maxTokens: config.MULTIMODAL_MAX_TOKENS }) : undefined;
   await app.register(cookie);
   app.decorateRequest('user', null);
   app.setErrorHandler((error, request, reply) => {
@@ -120,11 +125,16 @@ export async function buildApp(config: ServerConfig, db: PrismaClient, options: 
     const input = z.object({ documents: z.string().trim().min(1).max(500) }).strict().parse(request.body);
     return { data: await recordHazmatRelease(db, request.user!.id, productParams.parse(request.params).id, input.documents) };
   });
-  /** The quality report is required before the task moves on, so it can be submitted here as well as imported. */
-  app.post('/api/products/:id/quality-report', protectedRoute, async request => {
-    const input = z.object({ reportNo: z.string().trim().min(1).max(120), result: z.enum(['pass', 'fail']), validUntil: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() }).strict().parse(request.body);
-    return { data: await recordQualityReport(db, request.user!.id, productParams.parse(request.params).id, input) };
-  });
+    /**
+     * The quality report is required before the task moves on, so it can be submitted here as well as
+     * imported. With a picture attached the document itself is read: the validity date is never typed in
+     * by hand, and a report without a date or issued for another product is refused.
+     */
+    app.post('/api/products/:id/quality-report', protectedRoute, async request => {
+      const input = z.object({ reportNo: z.string().trim().min(1).max(120), result: z.enum(['pass', 'fail']).optional(),
+        validUntil: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), assetId: z.string().trim().min(1).max(220).optional() }).strict().parse(request.body);
+      return { data: await recordQualityReport(db, config, request.user!.id, productParams.parse(request.params).id, input, reportReader) };
+    });
   app.get('/api/assets/:id/content', protectedRoute, async (request, reply) => {
     const file = await readProductAsset(db, config, request.user!.id, productParams.parse(request.params).id);
     return reply.type(file.mimeType).header('Content-Disposition', `inline; filename="${file.fileName.replace(/["\\]/g, '')}"`).send(file.bytes);

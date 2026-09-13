@@ -44,7 +44,7 @@ export const apiClient = {
   },
   assets: {
     hazmatRelease: (productId: string, documents: string) => request<ServerProduct>(`/products/${encodeURIComponent(productId)}/hazmat-release`, 'POST', { documents }),
-    qualityReport: (productId: string, input: { reportNo: string; result: 'pass' | 'fail'; validUntil?: string }) =>
+    qualityReport: (productId: string, input: { reportNo: string; result?: 'pass' | 'fail'; validUntil?: string; assetId?: string }) =>
       request<{ productId: string; report: { reportNo: string; result: 'pass' | 'fail'; validUntil?: string } }>(`/products/${encodeURIComponent(productId)}/quality-report`, 'POST', input),
     list: (productId: string) => request<{ sku: string; assets: ProductAsset[] }>(`/products/${encodeURIComponent(productId)}/assets`),
     upload: (productId: string, input: { fileName: string; mimeType: string; role?: AssetRole; contentBase64: string }) =>

@@ -3,6 +3,9 @@ import { appliedFactDecision, type CheckDecision } from '../../shared/checks';
 import type { FactSnapshot } from '../../shared/contracts';
 import type { Fact, Product } from '../../src/types';
 import { AppError } from '../errors';
+import type { ServerConfig } from '../config';
+import { readProductAsset } from './assets';
+import { reportNameMatches, type QualityReportReader } from '../providers/qualityReport';
 import { factSnapshotTx, readFact, storedFact } from './facts';
 import { invalidateDownstream } from './invalidation';
 import { settleImageOccurrences } from './multimodal';
@@ -35,16 +38,51 @@ export type CheckDecisionInput =
  * no report cannot move on, so the check area has to be able to produce one without re-importing the
  * whole supplier sheet. What is stored is the laboratory's statement, never our own comparison: the
  * capacity and material in it are only ever compared against the facts, never written over them.
+ *
+ * When the submission carries a picture, the document itself is read: the validity date comes from the
+ * picture (it is never typed in), a report that prints no date or an expired one is refused, and a
+ * report issued for another product is refused rather than filed against this SKU.
  */
-export async function recordQualityReport(db: PrismaClient, userId: string, productId: string, input: { reportNo: string; result: 'pass' | 'fail'; validUntil?: string }) {
+export async function recordQualityReport(db: PrismaClient, config: ServerConfig, userId: string, productId: string,
+  input: { reportNo: string; result?: 'pass' | 'fail'; validUntil?: string; assetId?: string }, readReport?: QualityReportReader) {
   const row = await db.product.findFirst({ where: { userId, OR: [{ id: productId }, { sku: productId }] } });
   if (!row) throw new AppError('not_found', 'Product not found.', 404);
   const data = row.data as unknown as Product;
-  const report = { reportNo: input.reportNo, result: input.result, ...(input.validUntil ? { validUntil: input.validUntil } : {}) };
+  const read = input.assetId && readReport ? await readSubmittedReport(db, config, userId, row.id, data, input.assetId, readReport, input.reportNo, input.result) : null;
+  // The verdict is read from the document like the date; a submission without a picture and without a
+  // verdict is filed as a pass, which is what the reference samples state.
+  const report = read ?? { reportNo: input.reportNo, result: input.result ?? 'pass', ...(input.validUntil ? { validUntil: input.validUntil } : {}) };
   // Submitting a report can close or open publishing, which the publish gate reads live, so no
   // downstream result has to be invalidated here: nothing already produced quotes this document.
   await db.product.update({ where: { id: row.id }, data: { revision: { increment: 1 }, data: json({ ...data, qualityReport: report }) } });
   return { productId: row.id, report };
+}
+
+/**
+ * The picture half of a submission: the stored file is read by the vision model, and only a document
+ * that prints a usable validity date and names this product is filed. Nothing here writes a fact.
+ */
+async function readSubmittedReport(db: PrismaClient, config: ServerConfig, userId: string, productRowId: string, product: Product,
+  assetId: string, readReport: QualityReportReader, submittedNo: string, submittedResult: 'pass' | 'fail' | undefined) {
+  const asset = await db.productAsset.findFirst({ where: { userId, productId: productRowId, id: assetId } });
+  if (!asset) throw new AppError('asset_not_found', 'That file is not attached to this product.', 404);
+  if (asset.kind !== 'image') throw new AppError('report_not_a_picture', 'Attach the report as a picture: the validity date is read from it.', 400);
+  const stored = await readProductAsset(db, config, userId, asset.id);
+  const reading = await readReport({ fileName: asset.fileName, mimeType: stored.mimeType,
+    dataUrl: `data:${stored.mimeType};base64,${stored.bytes.toString('base64')}`, product: { sku: product.sku, name: product.name } });
+  if (!reading.validUntil) throw new AppError('report_without_valid_date', 'The picture prints no valid date. Submit a report that states one.', 422);
+  if (reading.validUntil < new Date().toISOString().slice(0, 10)) throw new AppError('report_expired', 'The report on this picture is already expired. Submit a current one.', 422);
+  // The reading itself decides whether the document names this product; the word comparison only covers
+  // the case where the model returned a name but no verdict on it.
+  const namesAnotherProduct = reading.productMatch === false
+    || (reading.productMatch === undefined && !!reading.productName && !reportNameMatches(reading.productName, product.name));
+  if (namesAnotherProduct) {
+    // Say what the picture actually printed: a person has to be able to see why it was refused.
+    throw new AppError('report_name_mismatch', `报告图片上的产品名称是「${reading.productName ?? '未读到'}」，当前商品是（${product.sku}）「${product.name}」，两者不符，请换成本商品的质检报告图片。`, 422);
+  }
+  // The date is never typed in, so it comes from the document; the number stays what the operator filed,
+  // with the printed one as the fallback for a number they did not type.
+  return { reportNo: submittedNo || reading.reportNo || product.sku, result: reading.result ?? submittedResult ?? 'pass', validUntil: reading.validUntil };
 }
 
 export async function decideCheck(db: PrismaClient, userId: string, taskId: string, productId: string, input: CheckDecisionInput): Promise<FactSnapshot> {
