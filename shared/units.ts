@@ -78,12 +78,12 @@ export function dimensionsFromText(text: string | undefined): [number, number, n
 }
 
 /**
- * Projects one stored fact value into the display system. Facts keep their metric text ("0.38 kg",
- * "8 cm", "500ml / 16.9 fl oz"), and only the unit-bearing keys are rewritten; anything else is
- * returned untouched.
+ * Projects one stored fact value into the display system. Facts keep their supplier text — often both
+ * systems at once ("500ml / 16.9 fl oz") — and every screen shows the single system the person picked,
+ * so the unit-bearing keys are always rewritten and anything else is returned untouched.
  */
 export function projectFactValue(key: string, value: string, system: UnitSystem): string {
-  if (system === 'metric' || !value) return value;
+  if (!value) return value;
   const first = (value.match(/\d+(?:\.\d+)?/g) ?? []).map(Number)[0];
   if (first === undefined) return value;
   if (key === 'capacity') return formatCapacity(first, system);

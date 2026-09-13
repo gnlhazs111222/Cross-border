@@ -12,8 +12,6 @@
 .task-brief .panel-title{padding:15px 20px}.brief-grid{padding:12px 20px}.brief-requirements{padding:12px 20px}.shortlist-heading{margin:14px 0 15px}
 .recommendation-card{padding:17px}.recommendation-card>.button{margin-top:10px}.rec-product{margin:10px 0 13px}.rec-product .product-visual.large{height:82px}.rec-product .product-visual.large svg{height:80px}
 .evidence-heading-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.mobile-table-hint{display:none}
-/* The product code on the evidence page: a quiet label with the code itself easy to read and copy. */
-.evidence-sku{margin:0 0 20px;font-size:14px;color:var(--muted)}.evidence-sku code{font-size:15px;font-weight:650;color:var(--ink)}
 .match-meter{margin:13px 0}.match-reasons{margin-bottom:0}.match-reasons p{margin-bottom:8px}
 .facts-panel>summary{cursor:pointer;padding:14px 18px;border-bottom:0;list-style:none;gap:12px}.facts-panel>summary::-webkit-details-marker{display:none}
 .facts-panel[open]>summary{border-bottom:1px solid var(--border)}.facts-panel>summary h2{font-size:16px;margin-top:4px}.facts-panel>summary p{font-size:14px;margin-top:6px;max-width:660px}

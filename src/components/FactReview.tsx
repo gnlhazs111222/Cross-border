@@ -56,7 +56,7 @@ export function FactReview() {
       <div className="fact-version">
         <div className="section-heading"><h3>{t("FactCard V1")}</h3><Badge>{t(state.v1!.facts.some(f => f.sourceKind === 'manual') ? 'Base facts · manually reviewed' : 'Original · preserved')}</Badge></div>
         <p className="footnote">{t('Supplier facts · {count} fields', { count: state.v1!.facts.length })}</p>
-        <dl className="fact-list">{state.v1!.facts.map(f => <div key={f.key}><dt>{t(f.label)}</dt><dd>{t(f.value)}</dd></div>)}</dl>
+        <dl className="fact-list">{state.v1!.facts.map(f => <div key={f.key}><dt>{t(f.label)}</dt><dd>{t(projectFactValue(f.key, f.value, unit))}</dd></div>)}</dl>
       </div>
       <div className="fact-version v2">
         <div className="section-heading"><h3>{t("FactCard V2")}</h3><Badge tone={state.v2 ? 'green' : 'neutral'}>{state.v2 ? state.v2.taskId : t('Awaiting analysis')}</Badge></div>

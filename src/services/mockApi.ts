@@ -242,7 +242,13 @@ function safeListing(platform: Platform, revision = 1): Listing {
   // leaves the suggested price pending and never stops a draft from being generated.
   if (!current.v2) throw new Error('Analyze evidence before generating a listing.');
   if (selected().duplicateStatus !== 'unique' || selected().category !== (serverOwner ? current.task?.category : demoTask.category)) throw new Error('Duplicate or out-of-category products cannot generate listings for this task.');
-  return makeTemplateListing({ factCard: serverOwner ? serverSnapshots[current.selectedSku!].v2! : current.v2, pricing: current.pricing!, platform, revision, factRevision: factRevision(current.selectedSku!, COPY_FACTS) });
+  // The marketplace decides the copy language and its unit system, so the generator is told which one it
+  // writes for instead of guessing from the platform code.
+  const task = serverOwner ? current.task : demoTask;
+  return makeTemplateListing({ factCard: serverOwner ? serverSnapshots[current.selectedSku!].v2! : current.v2, pricing: current.pricing!, platform, revision,
+    factRevision: factRevision(current.selectedSku!, COPY_FACTS),
+    context: { market: task?.market ?? demoTask.market, category: task?.category ?? demoTask.category, requirements: task?.requirements ?? demoTask.requirements,
+      product: { sku: selected().sku, name: selected().name } } });
 }
 function reviewIssues(listing: Listing) { return reviewAgainstTemplate(listing, safeListing(listing.platform, listing.revision)); }
 

@@ -37,9 +37,13 @@ async function current(db: DB, userId: string, id: string, input: VersionInput, 
   if (!allowStale && (!active(row) || row.factRevision !== snap.listingFactsRevision)) throw new AppError('listing_stale', 'The listing is stale. Regenerate from the current facts.', 409);
   return { row, snap };
 }
-async function supported(snap: FactSnapshot, platform: Platform, revision: number) {
+async function supported(db: DB, snap: FactSnapshot, platform: Platform, revision: number) {
   if (!snap.listingReadiness.ready) throw new AppError('listing_blocked', 'Confirm the required listing facts before generating a listing.', 409);
-  return domainProviders.listing.generate({ factCard: snap.v2!, pricing: snap.pricing, platform, revision, factRevision: snap.listingFactsRevision });
+  // The baseline the review compares against has to be written for the same marketplace as the draft:
+  // without it the marketplace language and unit system would differ from the listed copy.
+  const task = await db.launchTask.findUniqueOrThrow({ where: { id: snap.taskId } });
+  return domainProviders.listing.generate({ factCard: snap.v2!, pricing: snap.pricing, platform, revision, factRevision: snap.listingFactsRevision,
+    context: { market: task.market, category: task.category, requirements: task.requirements as string[], product: { sku: snap.product.sku, name: snap.product.name } } });
 }
 const defaultListingRuntime: ListingRuntime = { requested: 'template', provider: domainProviders.listing };
 async function generationInput(db: DB, snap: FactSnapshot, platform: Platform, revision: number) {
@@ -48,14 +52,14 @@ async function generationInput(db: DB, snap: FactSnapshot, platform: Platform, r
   return { factCard: snap.v2!, pricing: snap.pricing, platform, revision, factRevision: snap.listingFactsRevision,
     context: { market: task.market, category: task.category, requirements: task.requirements as string[], product: { sku: snap.product.sku, name: snap.product.name } } };
 }
-async function reviewBaseline(snap: FactSnapshot, row: ListingDraft): Promise<Listing> {
+async function reviewBaseline(db: DB, snap: FactSnapshot, row: ListingDraft): Promise<Listing> {
   const data = row.data as unknown as AuthorizedListing;
   if (row.generationMode === 'qwen' && data.authorization?.factsRevision === snap.listingFactsRevision) {
     const output = validateGeneratedListingAgainstFacts(listingOutputSchema(row.platform as Platform).parse(data.authorization.output), snap.facts);
     const { usedFacts: _used, ...copy } = output; void _used;
     return { ...toListing(row), ...copy, riskDemoInjected: false };
   }
-  return supported(snap, row.platform as Platform, row.revision);
+  return supported(db, snap, row.platform as Platform, row.revision);
 }
 async function retire(db: DB, row: ListingDraft) {
   const invalidatedAt = new Date();
@@ -100,7 +104,7 @@ export async function canPublishListing(db: DB, userId: string, id: string, know
       && meta.inputHash === reviewInputHash(input, reviewRuntime.model) && hardReviewIssues(input).length === 0;
   }
   if (reviewRuntime.mode === 'qwen') return false;
-  const issues = await domainProviders.review.review(toListing(row), await reviewBaseline(snap, row));
+  const issues = await domainProviders.review.review(toListing(row), await reviewBaseline(db, snap, row));
   return issues.length === 0;
 }
 async function workflow(db: DB, userId: string, taskId: string, productId: string, reviewRuntime = rulesReviewRuntime): Promise<WorkflowSnapshot> {
@@ -167,7 +171,7 @@ export async function reviseListing(db: PrismaClient, userId: string, id: string
       listing = { ...(row.data as unknown as AuthorizedListing), generationMode: row.generationMode, revision: row.revision + 1 };
       if (action === 'edit') Object.assign(listing, { title: input.title!, bullets: input.bullets!, description: input.description! });
       else { listing.bullets = [...listing.bullets]; listing.bullets[Math.min(2, listing.bullets.length)] = demoRiskClaim(snap.product.visual); listing.riskDemoInjected = true; }
-    } else { listing = await supported(snap, row.platform as Platform, row.revision + 1); listing.generationMode = 'template'; }
+    } else { listing = await supported(db, snap, row.platform as Platform, row.revision + 1); listing.generationMode = 'template'; }
     await insert(tx, userId, snap, listing, row); return workflow(tx, userId, row.taskId, row.productId, reviewRuntime);
   });
 }
@@ -216,7 +220,7 @@ export async function reviewListing(db: PrismaClient, userId: string, id: string
   }
   return transaction(db, async tx => {
     const { row, snap } = await current(tx, userId, id, input);
-    const issues = await domainProviders.review.review(toListing(row), await reviewBaseline(snap, row));
+    const issues = await domainProviders.review.review(toListing(row), await reviewBaseline(db, snap, row));
     const invalidatedAt = new Date();
     await tx.reviewResult.updateMany({ where: { listingDraftId: id, invalidatedAt: null }, data: { invalidatedAt } });
     await tx.publishResult.updateMany({ where: { listingDraftId: id, invalidatedAt: null }, data: { invalidatedAt } });

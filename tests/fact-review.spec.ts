@@ -109,7 +109,7 @@ for (const imported of [false, true]) {
     await page.getByRole('button', { name: zh ? '继续前往文案工作室' : 'Continue to Listing Studio' }).click();
     await page.getByRole('tab', { name: zh ? 'Shopify 美国站' : 'Shopify US' }).click();
     await page.getByRole('button', { name: zh ? '生成 Shopify 文案' : 'Generate Shopify Listing' }).click();
-    await expect(page.locator('.listing-copy')).toContainText('500ml / 16.9 fl oz');
+    await expect(page.locator('.listing-copy')).toContainText('16.9 fl oz');
     expect(errors).toEqual([]);
   });
 }
@@ -227,7 +227,7 @@ test('pending and rejected facts never enter normal copy; V2 edits do not overwr
   await expect(page.getByTestId('fact-review-straw')).toBeVisible();
   await navigate(page, 'Listing Studio');
   await page.getByRole('button', { name: 'Generate Shopify Listing' }).click();
-  await expect(page.locator('.listing-copy')).toContainText('650ml / 22.0 fl oz');
+  await expect(page.locator('.listing-copy')).toContainText('22.0 fl oz');
   await expect(page.locator('.listing-copy')).toContainText('Tritan');
   await expect(page.locator('.listing-copy')).toContainText('Vietnam');
   await expect(page.locator('.listing-copy')).toContainText('Flip-top lid');

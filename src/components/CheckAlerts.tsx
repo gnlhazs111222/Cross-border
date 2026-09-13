@@ -3,6 +3,7 @@ import { CircleAlert, ScanLine, ShieldCheck, TriangleAlert } from 'lucide-react'
 import type { Evidence, Fact, Product } from '../types';
 import { assessImageText, assessInspection, ignoredRefs, inspectionTargets, type InspectionProblem } from '../../shared/checks';
 import { assessHazmat } from '../../shared/hazmat';
+import { projectFactValue } from '../../shared/units';
 import { mockApi } from '../services/mockApi';
 import { useDemo } from './DemoContext';
 import { useI18n } from '../i18n/I18nContext';
@@ -109,7 +110,7 @@ export function CheckAlerts({ product, facts, evidence }: { product?: Product; f
         : <Button variant="secondary" busy={busy === 'analyze'} disabled={!!busy} onClick={() => void act('analyze', () => mockApi.analyzeEvidence(), 'FactCard V2 created. Review the facts before continuing.')}><ScanLine size={16} />{t('Analyze Evidence')}</Button>}</div>
     : null;
   const imageRows = disputes.length
-    ? disputes.map(fact => ({ evidence: <p className="check-line" key={fact.key} data-testid={`check-dispute-${fact.key}`}>{t('{field}: the picture prints “{image}”, the fact says “{fact}”.', { field: t(fact.label), image: fact.imageCheck?.imageValue || '—', fact: t(fact.imageCheck?.factValue || fact.value) })}</p>, action: imageDecision(fact) }))
+    ? disputes.map(fact => ({ evidence: <p className="check-line" key={fact.key} data-testid={`check-dispute-${fact.key}`}>{t('{field}: the picture prints “{image}”, the fact says “{fact}”.', { field: t(fact.label), image: fact.imageCheck?.imageValue || '—', fact: t(projectFactValue(fact.key, fact.imageCheck?.factValue || fact.value, mockApi.unitSystem())) })}</p>, action: imageDecision(fact) }))
     : [{ evidence: imageStateEvidence, action: imageStateActions }];
 
   // A report on file is required: without one the task cannot move on, so its absence is raised and
