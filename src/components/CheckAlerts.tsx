@@ -8,21 +8,21 @@ import { useDemo } from './DemoContext';
 import { useI18n } from '../i18n/I18nContext';
 import { Badge, Button, Modal, Notice } from './ui';
 import { HazmatNotice } from './HazmatNotice';
-import { openFactComparison, requestFactEdit, useFactCheckActions } from './factCheckActions';
+import { requestFactEdit, useFactCheckActions } from './factCheckActions';
 import { assetMimeType, fileToBase64 } from './SourceAssets';
 
 /**
  * One problem, one decision. When a check offers more than two answers they live in a select instead
  * of a row of buttons, so the cell stays a line of text plus one control.
  */
-export function CheckDecision({ label, options, busy }: { label: string; options: { label: string; run: () => void | Promise<void> }[]; busy: string | null }) {
+export function CheckDecision({ options, busy }: { options: { label: string; run: () => void | Promise<void> }[]; busy: string | null }) {
   const { t } = useI18n();
   const [picked, setPicked] = useState(0);
   if (!options.length) return null;
   const chosen = options[Math.min(picked, options.length - 1)];
   return <div className="check-decision">
     <select aria-label={t('Decision')} value={picked} disabled={!!busy} onChange={event => setPicked(Number(event.target.value))}>
-      {options.map((option, index) => <option key={option.label} value={index}>{label} · {option.label}</option>)}
+      {options.map((option, index) => <option key={option.label} value={index}>{option.label}</option>)}
     </select>
     <Button variant="secondary" disabled={!!busy} onClick={() => void chosen.run()}>{t('Apply')}</Button>
   </div>;
@@ -42,7 +42,7 @@ export function CheckDecision({ label, options, busy }: { label: string; options
 export function CheckAlerts({ product, facts, evidence }: { product?: Product; facts: Fact[]; evidence?: Evidence[] }) {
   const { t } = useI18n();
   const { state, busy, act, navigate } = useDemo();
-  const { adoptPrintedText, discardPicture, editDisputedFact } = useFactCheckActions();
+  const { adoptPrintedText, discardPicture, editDisputedFact, replacePicture } = useFactCheckActions();
   const [reportOpen, setReportOpen] = useState(false);
   const [reportNo, setReportNo] = useState('');
   const [reportResult, setReportResult] = useState<'pass' | 'fail'>('pass');
@@ -76,8 +76,9 @@ export function CheckAlerts({ product, facts, evidence }: { product?: Product; f
     const submitted = reportNo.trim();
     const ok = await act('quality-report', async () => {
       try {
-        if (!reportFile) throw new Error('Attach the report file before submitting.');
-        await mockApi.uploadAsset(product.sku, { fileName: reportFile.name, mimeType: assetMimeType(reportFile), role: 'spec', contentBase64: await fileToBase64(reportFile) });
+        // The report is the statement, the file is optional evidence of it: the number and the verdict are
+        // what the checks read, so a report can be recorded without a document attached.
+        if (reportFile) await mockApi.uploadAsset(product.sku, { fileName: reportFile.name, mimeType: assetMimeType(reportFile), role: 'spec', contentBase64: await fileToBase64(reportFile) });
         await mockApi.submitQualityReport(product.sku, { reportNo: submitted, result: reportResult, ...(reportValidUntil ? { validUntil: reportValidUntil } : {}) });
       }
       catch (error) { setReportError(error instanceof Error ? error.message : 'Could not record the report.'); throw error; }
@@ -88,10 +89,12 @@ export function CheckAlerts({ product, facts, evidence }: { product?: Product; f
   const submitReportButton = <Button variant="secondary" disabled={!!busy} onClick={() => setReportOpen(true)}>{t('Submit a quality report')}</Button>;
 
   // One row per problem: each piece of evidence sits on the same table line as the decision that closes
-  // it, so a second disagreement never pushes the first one's control out of sight.
-  const imageDecision = (fact: Fact) => <CheckDecision key={fact.key} label={t(fact.label)} busy={busy} options={[
-    { label: t('Save what the picture prints'), run: () => adoptPrintedText(fact) },
-    { label: t('Edit and save'), run: () => editDisputedFact(fact) },
+  // it, so a second disagreement never pushes the first one's control out of sight. The four answers are
+  // the field's own: keep what the picture prints, change the picture, change the fact, or drop the picture.
+  const imageDecision = (fact: Fact) => <CheckDecision key={fact.key} busy={busy} options={[
+    { label: t('Save as printed'), run: () => adoptPrintedText(fact) },
+    { label: t('Replace the picture'), run: () => replacePicture(fact) },
+    { label: t('Edit the fact'), run: () => editDisputedFact(fact) },
     { label: t('Discard the picture'), run: () => discardPicture(fact) },
   ]} />;
   const imageStateEvidence = imageText.verdict === 'dropped' ? <p className="check-line" data-testid="check-alert-image_text-dropped">{t('The picture on file was dropped from the checks.')}</p>
@@ -101,7 +104,11 @@ export function CheckAlerts({ product, facts, evidence }: { product?: Product; f
     : <p className="check-line" data-testid="check-clear-image_text">{t('The picture agrees with the stored facts.')}</p>;
   const imageStateActions = imageText.verdict === 'dropped' && droppedPicture ? <div className="fact-actions"><Button variant="secondary" busy={busy === 'image-restore'} disabled={!!busy} onClick={() => void act('image-restore', () => mockApi.restoreImageCheck(droppedPicture.fileName), t('The picture takes part in the check again on the next run.'))}>{t('Restore this picture')}</Button></div>
     : imageText.verdict === 'no_pictures' ? <div className="fact-actions"><Button variant="secondary" disabled={!!busy} onClick={() => navigate('materials')}>{t('Upload pictures in Materials')}</Button></div>
-    : imageText.verdict === 'not_read' || imageText.verdict === 'not_run' ? <div className="fact-actions"><Button variant="secondary" busy={busy === 'image-check'} disabled={!!busy} onClick={() => void act('image-check', () => mockApi.recheckImages(), t('Printed text re-checked against the current facts.'))}><ScanLine size={16} />{t('Re-check printed text')}</Button></div>
+    // The picture text check is part of building the task card, so before V2 exists the way to run it is
+    // the analysis itself — offering "re-check" here only produced an error nobody could act on.
+    : imageText.verdict === 'not_read' || imageText.verdict === 'not_run' ? <div className="fact-actions">{state.v2
+        ? <Button variant="secondary" busy={busy === 'image-check'} disabled={!!busy} onClick={() => void act('image-check', () => mockApi.recheckImages(), t('Printed text re-checked against the current facts.'))}><ScanLine size={16} />{t('Re-check printed text')}</Button>
+        : <Button variant="secondary" busy={busy === 'analyze'} disabled={!!busy} onClick={() => void act('analyze', () => mockApi.analyzeEvidence(), 'FactCard V2 created. Review the facts before continuing.')}><ScanLine size={16} />{t('Analyze Evidence')}</Button>}</div>
     : null;
   const imageRows = disputes.length
     ? disputes.map(fact => ({ evidence: <p className="check-line" key={fact.key} data-testid={`check-dispute-${fact.key}`}>{t('{field}: the picture prints “{image}”, the fact says “{fact}”.', { field: t(fact.label), image: fact.imageCheck?.imageValue || '—', fact: t(fact.imageCheck?.factValue || fact.value) })}</p>, action: imageDecision(fact) }))
@@ -119,7 +126,7 @@ export function CheckAlerts({ product, facts, evidence }: { product?: Product; f
     : report.verdict === 'expired' ? <div className="fact-actions">{submitReportButton}<Button variant="ghost" disabled={!!busy} busy={busy === 'report-discard'} onClick={() => void discardReport(report.reportNo)}>{t('Discard this report')}</Button></div>
     : report.verdict === 'failed' ? <div className="fact-actions">{submitReportButton}</div>
     : report.verdict === 'mismatch' ? (report.problems.length > 1
-      ? <CheckDecision label={t('Quality report')} busy={busy} options={[...report.problems.map(problem => ({ label: `${t('Adopt the report value')} · ${t(problem.label)}`, run: () => adoptReportValue(problem) })), { label: t('Discard this report'), run: () => discardReport(report.reportNo) }]} />
+      ? <CheckDecision busy={busy} options={[...report.problems.map(problem => ({ label: `${t('Adopt the report value')} · ${t(problem.label)}`, run: () => adoptReportValue(problem) })), { label: t('Discard this report'), run: () => discardReport(report.reportNo) }]} />
       : <div className="fact-actions">{report.problems.map(problem => <Button key={problem.factKey} variant="secondary" disabled={!!busy} busy={busy === `report-adopt-${problem.factKey}`} onClick={() => void adoptReportValue(problem)}>{t('Adopt the report value')}</Button>)}<Button variant="ghost" disabled={!!busy} busy={busy === 'report-discard'} onClick={() => void discardReport(report.reportNo)}>{t('Discard this report')}</Button></div>)
     : null;
 
@@ -162,22 +169,22 @@ export function CheckAlerts({ product, facts, evidence }: { product?: Product; f
 
   return <section className="panel check-alerts" aria-label={t('Check alerts')} data-testid="check-alerts">
     <div className="panel-title"><ShieldCheck size={20} /><h2>{t('Check alerts')}</h2><Badge tone={alarms ? 'red' : 'green'}>{t(alarms ? '{count} alarm(s) to decide' : 'No alarm', { count: alarms })}</Badge></div>
-    <div className="check-table-wrap"><table className="check-table">
-      <colgroup><col className="col-evidence" /><col className="col-action" /><col className="col-report" /><col className="col-transport" /><col className="col-pricing" /></colgroup>
-      <thead>
-        <tr>
-          <th colSpan={2} rowSpan={2} className={imageTone}>{name(t('Picture information check'), imageTone)}</th>
-          <th rowSpan={2} className={reportTone}>{name(t('Quality report'), reportTone)}</th>
-          <th rowSpan={2} className={hazmatTone}>{name(t('Transport attributes'), hazmatTone)}</th>
-          <th rowSpan={2} className={pricingTone}>{name(t('Pricing facts'), pricingTone)}</th>
-        </tr>
-        <tr><th className={`check-sub ${imageTone}`}>{t('Evidence description')}</th><th className={`check-sub ${imageTone}`}>{t('Action')}</th></tr>
-      </thead>
-      <tbody>{imageRows.map((row, index) => <tr key={index}>
-        <td className={imageTone} data-label={`${t('Picture information check')} · ${t('Evidence description')}`} data-testid="check-row-image-text">{row.evidence}</td>
-        <td className={imageTone} data-label={`${t('Picture information check')} · ${t('Action')}`} data-testid="check-actions-image-text">{row.action}
-          {disputes.length > 0 && index === imageRows.length - 1 && <div className="fact-actions"><Button variant="ghost" disabled={!!busy} onClick={() => openFactComparison()?.scrollIntoView({ block: 'start' })}>{t('Show them in Fact Review')}</Button></div>}
-        </td>
+      <div className="check-table-wrap"><table className="check-table">
+        <colgroup><col className="col-evidence" /><col className="col-report" /><col className="col-transport" /><col className="col-pricing" /></colgroup>
+        <thead>
+          <tr>
+            <th className={imageTone}>{name(t('Picture information check'), imageTone)}</th>
+            <th className={reportTone}>{name(t('Quality report'), reportTone)}</th>
+            <th className={hazmatTone}>{name(t('Transport attributes'), hazmatTone)}</th>
+            <th className={pricingTone}>{name(t('Pricing facts'), pricingTone)}</th>
+          </tr>
+        </thead>
+        <tbody>{imageRows.map((row, index) => <tr key={index}>
+          {/* One column: what the check says, and under it the answer it offers. */}
+          <td className={imageTone} data-label={t('Picture information check')}>
+            <div data-testid="check-row-image-text">{row.evidence}</div>
+            <div data-testid="check-actions-image-text">{row.action}</div>
+          </td>
         {index === 0 && <td rowSpan={imageRows.length} className={reportTone} data-label={t('Quality report')} data-testid="check-row-quality-report">{reportEvidence}{reportActions}</td>}
         {index === 0 && <td rowSpan={imageRows.length} className={hazmatTone} data-label={t('Transport attributes')} data-testid="check-row-transport">{hazmatCell}</td>}
         {index === 0 && <td rowSpan={imageRows.length} className={pricingTone} data-label={t('Pricing facts')} data-testid="check-row-pricing">{pricingCell}</td>}
@@ -190,7 +197,7 @@ export function CheckAlerts({ product, facts, evidence }: { product?: Product; f
         <label className="form-field">{t('Report verdict')}<select value={reportResult} disabled={!!busy} onChange={event => setReportResult(event.target.value === 'fail' ? 'fail' : 'pass')}><option value="pass">{t('Qualified')}</option><option value="fail">{t('Unqualified')}</option></select></label>
         <label className="form-field">{t('Valid until')}<input type="date" value={reportValidUntil} disabled={!!busy} onChange={event => setReportValidUntil(event.target.value)} /></label>
         {reportError && <div className="notice red" role="alert">{t(reportError)}</div>}
-        <div className="modal-actions"><Button type="button" variant="secondary" disabled={!!busy} onClick={() => setReportOpen(false)}>{t('Cancel')}</Button><Button type="submit" disabled={!!busy || !reportNo.trim() || !reportFile} busy={busy === 'quality-report'}>{t('Submit the report')}</Button></div>
+        <div className="modal-actions"><Button type="button" variant="secondary" disabled={!!busy} onClick={() => setReportOpen(false)}>{t('Cancel')}</Button><Button type="submit" disabled={!!busy || !reportNo.trim()} busy={busy === 'quality-report'}>{t('Submit the report')}</Button></div>
       </form>
     </Modal>
   </section>;

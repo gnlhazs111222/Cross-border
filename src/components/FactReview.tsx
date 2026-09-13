@@ -5,7 +5,7 @@ import { useDemo } from './DemoContext';
 import { projectFactValue } from '../../shared/units';
 import { useI18n } from '../i18n/I18nContext';
 import { mockApi } from '../services/mockApi';
-import { EDIT_FACT_EVENT, scrollToFactRow } from './factCheckActions';
+import { EDIT_FACT_EVENT, requestFactEdit, scrollToFactRow, takePendingFactEdit } from './factCheckActions';
 import { Badge, Button, Modal, Notice } from './ui';
 
 /**
@@ -44,16 +44,14 @@ export function FactReview() {
     window.addEventListener(EDIT_FACT_EVENT, openEditor);
     return () => window.removeEventListener(EDIT_FACT_EVENT, openEditor);
   }, [facts]);
+  // An edit asked for from another workspace opens here, on the page that owns the editor.
+  useEffect(() => { const pending = takePendingFactEdit(); if (pending) requestFactEdit(pending); }, []);
   const closeEditor = () => { setEditing(null); setImageEdit(false); };
   return <details className="panel facts-panel fact-compare" id="fact-review" aria-label={t('Fact card comparison')} data-testid="fact-compare">
-    <summary className="fact-version-header">
-      <div>
-        <span className="eyebrow">{t("VERSIONED PRODUCT KNOWLEDGE")}</span>
-        <h2>{t("Fact card comparison")}</h2>
-        <p>{t('V1 holds supplied base facts. V2 adds task facts without replacing V1; manual changes remain traceable.')}</p>
-      </div>
-      <Badge tone={state.v2 ? 'green' : 'neutral'}>{t('Click to open')}</Badge>
-    </summary>
+      <summary className="fact-version-header">
+        <div><h2>{t("Fact card comparison")}</h2></div>
+        <Badge tone={state.v2 ? 'green' : 'neutral'}>{t('Click to open')}</Badge>
+      </summary>
     <div className="facts-columns">
       <div className="fact-version">
         <div className="section-heading"><h3>{t("FactCard V1")}</h3><Badge>{t(state.v1!.facts.some(f => f.sourceKind === 'manual') ? 'Base facts · manually reviewed' : 'Original · preserved')}</Badge></div>
@@ -64,6 +62,8 @@ export function FactReview() {
         <div className="section-heading"><h3>{t("FactCard V2")}</h3><Badge tone={state.v2 ? 'green' : 'neutral'}>{state.v2 ? state.v2.taskId : t('Awaiting analysis')}</Badge></div>
         {state.v2 ? <>
           <p className="footnote">{t('Inherits {count} V1 fields + 4 sample fields', { count: state.v1!.facts.length })}</p>
+          {/* V2 reports, it does not carry controls: only the fields that say something V1 does not, so the
+              right-hand column is the task card's own work rather than a second copy of the supplier card. */}
           {taskFacts.length === 0
             ? <p className="footnote" data-testid="fact-compare-none">{t('No field differs from the supplier card yet.')}</p>
             : <dl className="fact-list">{taskFacts.map(fact => <div key={fact.key} data-testid={`fact-review-${fact.key}`}>

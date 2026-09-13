@@ -16,6 +16,14 @@ export const requestFactEdit = (factKey: string, disputed = false) => {
 };
 export const factRowSelector = (factKey: string) => `[data-testid="fact-review-${factKey}"]`;
 
+/**
+ * A workspace that has to send the person somewhere else to fix a fact cannot open the editor itself: the
+ * key is handed over here and the page that owns the editor opens it once it is on screen.
+ */
+let pendingFactEdit: string | null = null;
+export const requestFactEditAfterNavigation = (factKey: string) => { pendingFactEdit = factKey; };
+export const takePendingFactEdit = () => { const key = pendingFactEdit; pendingFactEdit = null; return key; };
+
 /** The fact cards are collapsed by default, so anything that points at a row opens them first. */
 export const openFactComparison = () => {
   const panel = document.getElementById('fact-review');
@@ -30,7 +38,7 @@ export const scrollToFactRow = (factKey: string) => {
 };
 
 export function useFactCheckActions(onFocus?: (factKey: string) => void) {
-  const { act } = useDemo();
+  const { act, navigate } = useDemo();
   const { t } = useI18n();
   const scrollToFact = useCallback((factKey: string) => scrollToFactRow(factKey), []);
   const adoptPrintedText = async (f: Fact) => {
@@ -42,6 +50,16 @@ export function useFactCheckActions(onFocus?: (factKey: string) => void) {
     onFocus?.(f.key);
     await act(`image-discard-${f.key}`, () => mockApi.discardImageCheck(asset), t('Picture {asset} is dropped from the checks and will not be read again. The other pictures still are.', { asset }));
   };
+  /**
+   * The reading disagrees because the picture itself is the wrong one: the picture leaves the checks and
+   * the person goes to where pictures are kept to put the right one in. The fact is not touched.
+   */
+  const replacePicture = async (f: Fact) => {
+    const asset = f.imageCheck?.asset ?? '';
+    onFocus?.(f.key);
+    const done = await act(`image-replace-${f.key}`, () => mockApi.discardImageCheck(asset), t('Picture {asset} is dropped from the checks so it can be replaced. Upload the corrected picture in Materials, then run the check again.', { asset }));
+    if (done) navigate('materials');
+  };
   const editDisputedFact = (f: Fact) => { onFocus?.(f.key); requestFactEdit(f.key, true); };
-  return { adoptPrintedText, discardPicture, editDisputedFact, scrollToFact };
+  return { adoptPrintedText, discardPicture, replacePicture, editDisputedFact, scrollToFact };
 }

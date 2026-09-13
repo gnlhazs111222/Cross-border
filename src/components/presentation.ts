@@ -3,7 +3,8 @@ import type { DemoState, Stage } from '../types';
 // Presentation copy only. The stored business states and transitions are unchanged.
 const stageLabels: Record<Stage, string> = {
   initial: 'Ready to start', materials_ready: 'Dataset ready', task_created: 'Choose a product',
-  sku_selected: 'Product selected', evidence_analyzed: 'Review product facts', pricing_ready: 'Pricing ready',
+  // A ready price is not an announcement: the state line names the next step, not the pricing engine.
+  sku_selected: 'Product selected', evidence_analyzed: 'Review product facts', pricing_ready: 'Review product facts',
   listing_generated: 'Review required', review_blocked: 'Publish blocked', review_passed: 'Ready to publish', published: 'Mock publish complete',
 };
 export function stageLabel(state: DemoState) {

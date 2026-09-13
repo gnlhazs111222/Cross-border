@@ -1,13 +1,12 @@
-import { SERVER_MODE } from './services/apiClient';
 import { LanguageSwitcher, useI18n } from './i18n/I18nContext';
 import { UnitSwitcher } from './components/UnitSwitcher';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Boxes, Check, CheckCircle2, ChevronRight, CircleHelp, ClipboardList, FilePenLine, LoaderCircle, RotateCcw, ShieldCheck, Sparkles, X } from 'lucide-react';
+import { Boxes, Check, CheckCircle2, ChevronRight, CircleHelp, ClipboardList, FilePenLine, LoaderCircle, RotateCcw, ShieldCheck, X } from 'lucide-react';
 import { UserMenu } from './components/SessionContext';
 import { DemoCapabilities } from './components/DemoCapabilities';
 import { stageLabel } from './components/presentation';
 import { DemoContext } from './components/DemoContext';
-import { Badge, Button } from './components/ui';
+import { Button } from './components/ui';
 import { mockApi } from './services/mockApi';
 import type { DemoState, Workspace } from './types';
 import { ignoredRefs, inspectionTargets, reportClearsNextStep } from '../shared/checks';
@@ -39,7 +38,20 @@ export default function App() {
   const act = async (label: string, action: () => Promise<DemoState>, message: string) => {
     if (lock.current) return false;
     lock.current = true; setBusy(label);
-    try { setState(await action()); if (['reset', 'load-dataset', 'import-save'].includes(label)) window.scrollTo({ top: 0 }); notify(message); return true; }
+    // Picking a product and checking what it claims are one intent: selecting a SKU reads the evidence into
+    // the task card and reads the picture text against it in the same step, so the check panel is never
+    // empty on arrival. The page lands on its own top, with the fact comparison left closed.
+    const selecting = label === 'select' || label.startsWith('select-');
+    try {
+      setState(await action());
+      if (['reset', 'load-dataset', 'import-save'].includes(label)) window.scrollTo({ top: 0 });
+      if (selecting) {
+        try { setBusy('analyze'); setState(await mockApi.analyzeEvidence()); notify(t('FactCard V2 created. Review the facts before continuing.')); }
+        catch (error) { notify(error instanceof Error ? error.message : 'Something went wrong. Please retry.', true); }
+      }
+      else notify(message);
+      return true;
+    }
     catch (error) { setState(mockApi.getState()); notify(error instanceof Error ? error.message : 'Something went wrong. Please retry.', true); return false; }
     finally { lock.current = false; setBusy(null); }
   };
@@ -58,7 +70,7 @@ export default function App() {
   const completed = [products.length > 0, !!state.selectedSku, !!state.v2, !!state.listings[state.platform], !!state.publications[state.platform]];
   const pages = { materials: Materials, tasks: LaunchTasks, evidence: EvidenceFacts, studio: ListingStudio, review: ReviewPublish };
   const Page = pages[state.workspace];
-  return <DemoContext.Provider value={{ state, products, busy, act, navigate, setState, notify }}><div className="app-shell"><a className="skip-link" href="#main">{t("Skip to workspace")}</a><aside className="sidebar"><a href="#materials" className="brand" onClick={e => { e.preventDefault(); navigate('materials'); }}><img src="/prism.svg" alt="" width="35" height="35" /><span>PrismLaunch<span>{t("PRODUCT LAUNCH WORKSPACE")}</span></span></a><div className="workspace-selector"><span className="workspace-avatar">P</span><div><strong>{t("Prism workspace")}</strong><span>{t("Demo environment")}</span></div><Badge>US</Badge></div><div className="nav-label">{t("WORKSPACE")}</div><nav aria-label={t("Workspaces")}>{workspaces.map(({ id, label, Icon }, i) => <button key={id} className={`nav-item ${state.workspace === id ? 'active' : ''}`} aria-current={state.workspace === id ? 'page' : undefined} onClick={() => navigate(id)} disabled={!!busy}><Icon size={19} /><span>{t(label)}</span>{completed[i] ? <Check size={14} className="nav-check" /> : <small aria-hidden="true">{String(i + 1).padStart(2, '0')}</small>}</button>)}</nav><div className="sidebar-bottom"><Button variant="ghost" disabled={!!busy || loading} busy={busy === 'reset'} onClick={() => void act('reset', () => mockApi.reset(), 'Demo reset. Start again from Materials.')}><RotateCcw size={16} />{t("Reset Demo")}</Button><div className="sidebar-footer"><span className="user-avatar">PL</span><div><strong>{t("PrismLaunch Demo")}</strong><span>{t("Local workspace · v1.0")}</span></div></div></div></aside>
-    <div className="main-shell"><header className="topbar"><div className="breadcrumb">{t("Workspace")}<ChevronRight size={14} /><strong>{t(workspaces[index].label)}</strong></div><div className="topbar-badges"><Badge tone="green"><span className="status-dot" />{t(state.datasetSource === 'builtin' ? 'Demo Data' : 'Imported Data')}</Badge><Badge><Sparkles size={13} />{t(SERVER_MODE ? 'Server AI configuration' : 'Mock Intelligence')}</Badge><DemoCapabilities /><UnitSwitcher /><LanguageSwitcher /><UserMenu /></div></header><div className="contextbar"><div>{state.task ? <span className="context-identity"><span>{t("Task")}</span><code>{state.task.id}</code></span> : <span>{t("No active launch task")}</span>}{state.selectedSku && <><ChevronRight size={13} /><span className="context-identity"><span>SKU</span><code>{state.selectedSku}</code></span></>}</div><span className="state-indicator"><span className="status-dot" />{t(stageLabel(state))}</span></div>
+  return <DemoContext.Provider value={{ state, products, busy, act, navigate, setState, notify }}><div className="app-shell"><a className="skip-link" href="#main">{t("Skip to workspace")}</a><aside className="sidebar"><a href="#materials" className="brand" onClick={e => { e.preventDefault(); navigate('materials'); }}><img src="/prism.svg" alt="" width="35" height="35" /><span>PrismLaunch<span>{t("PRODUCT LAUNCH WORKSPACE")}</span></span></a><div className="nav-label">{t("WORKSPACE")}</div><nav aria-label={t("Workspaces")}>{workspaces.map(({ id, label, Icon }, i) => <button key={id} className={`nav-item ${state.workspace === id ? 'active' : ''}`} aria-current={state.workspace === id ? 'page' : undefined} onClick={() => navigate(id)} disabled={!!busy}><Icon size={19} /><span>{t(label)}</span>{completed[i] ? <Check size={14} className="nav-check" /> : <small aria-hidden="true">{String(i + 1).padStart(2, '0')}</small>}</button>)}</nav><div className="sidebar-bottom"><Button variant="ghost" disabled={!!busy || loading} busy={busy === 'reset'} onClick={() => void act('reset', () => mockApi.reset(), 'Demo reset. Start again from Materials.')}><RotateCcw size={16} />{t("Reset Demo")}</Button><div className="sidebar-footer"><span className="user-avatar">PL</span><div><strong>{t("PrismLaunch Demo")}</strong><span>{t("Local workspace · v1.0")}</span></div></div></div></aside>
+    <div className="main-shell"><header className="topbar"><div className="breadcrumb">{t("Workspace")}<ChevronRight size={14} /><strong>{t(workspaces[index].label)}</strong></div><div className="topbar-badges"><DemoCapabilities /><UnitSwitcher /><LanguageSwitcher /><UserMenu /></div></header><div className="contextbar"><div>{state.task ? <span className="context-identity"><span>{t("Task")}</span><code>{state.task.id}</code></span> : <span>{t("No active launch task")}</span>}{state.selectedSku && <><ChevronRight size={13} /><span className="context-identity"><span>SKU</span><code>{state.selectedSku}</code></span></>}</div><span className="state-indicator"><span className="status-dot" />{t(stageLabel(state))}</span></div>
     <main id="main" tabIndex={-1} aria-busy={loading || !!busy}><div className="journey-group"><div className="journey" aria-label={t("Launch progress")}>{workspaces.map((w, i) => <button key={w.id} className={`journey-step ${i === index ? 'current' : ''} ${completed[i] ? 'complete' : ''}`} onClick={() => navigate(w.id)} disabled={!!busy} aria-current={i === index ? 'step' : undefined}><span className="step-number">{completed[i] ? <Check size={13} /> : i + 1}</span><span>{t(w.label)}</span>{i < 4 && <ChevronRight size={13} className="step-arrow" />}</button>)}</div></div>{!mockApi.isStorageAvailable() && <div className="notice amber">{t("Browser storage is unavailable. This session works, but refreshing will reset progress.")}</div>}{loading ? <div className="loading-screen" role="status"><LoaderCircle className="spin" />{t("Loading supplier workspace...")}</div> : <Page />}</main></div>{toast && <div className={`toast ${toast.error ? 'error' : ''}`} role={toast.error ? 'alert' : 'status'}>{toast.error ? <CircleHelp size={19} /> : <CheckCircle2 size={19} />}<span>{t(toast.message)}</span><button aria-label={t("Dismiss notification")} onClick={() => setToast(null)}><X size={16} /></button></div>}</div></DemoContext.Provider>;
 }

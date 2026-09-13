@@ -152,7 +152,7 @@ html[lang=zh-CN] .page-heading p,html[lang=zh-CN] .notice{line-height:1.9}
 .check-alerts .check-table td.red{background:#fff7f5}
 .check-alerts .check-table th.amber{background:#fff7e8;color:#8a611c}
 .check-alerts .check-table td.amber{background:#fffcf3}
-.check-alerts .col-evidence{width:22%}.check-alerts .col-action{width:16%}.check-alerts .col-report{width:22%}.check-alerts .col-transport{width:20%}.check-alerts .col-pricing{width:20%}
+.check-alerts .col-evidence{width:38%}.check-alerts .col-report{width:22%}.check-alerts .col-transport{width:20%}.check-alerts .col-pricing{width:20%}
 .check-alerts .check-name{display:flex;align-items:center;justify-content:center;gap:7px;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .check-alerts .check-table th.red .check-name{color:var(--red)}
 .check-alerts .check-table th.amber .check-name{color:#8a611c}

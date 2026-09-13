@@ -23,7 +23,7 @@
 .fact-review-table .focused-fact td,.fact-review-table .focused-fact th{background:#f3f8ee}
 .pricing-panel.compact .panel-title{padding:13px 18px}.pricing-panel.compact .pricing-layout{padding:0 18px 12px;justify-content:space-between;align-items:center}
 .pricing-panel.compact .suggested-price{border:0;padding:0;display:block;width:auto}.pricing-panel.compact .suggested-price>strong{font-size:24px}
-.pricing-panel.compact .cost-disclosure{flex:1;min-width:0}.cost-disclosure summary{font-size:14px;color:var(--green);cursor:pointer;padding:10px 0}.cost-disclosure .cost-grid{padding:9px 15px 10px 0;gap:12px}
+.pricing-panel.compact .cost-disclosure{flex:1;min-width:0}.cost-disclosure summary{font-size:14px;font-weight:650;color:var(--green);cursor:pointer;padding:0}.cost-disclosure .cost-grid{padding:9px 15px 10px 0;gap:12px}
 .pricing-panel.compact>.footnote{padding:8px 18px}.pricing-blocked .panel-title{padding-block:15px}.pricing-blocked>p{margin-bottom:6px}
 .review-grid{grid-template-columns:minmax(0,1fr) 350px}.review-stage-banner{display:flex;gap:12px;align-items:flex-start;padding:14px 18px;margin-bottom:18px;border:1px solid var(--border);border-radius:8px;line-height:1.6}
 .review-stage-banner strong{display:block;font-size:14px}.review-stage-banner p{font-size:14px;margin-top:4px}.review-stage-banner.blocked{background:#fff0ea;border-color:#dfa28e;color:#9d3029}

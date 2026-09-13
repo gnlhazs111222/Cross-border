@@ -2,13 +2,13 @@ import { eligibilityReason, type RecommendationSnapshot } from '../../shared/rec
 import { matchAssetFiles } from '../../shared/asset-match';
 import { systemForMarket, type UnitSystem } from '../../shared/units';
 import { amazonCsv } from '../../shared/csv';
-import { baseFactCard, effectiveProduct, pricingFromFacts, productEvidence, reviewFact } from '../../shared/facts';
+import { baseFactCard, effectiveProduct, pricingFromFacts, productEvidence, reviewFact, variesFromSupplier } from '../../shared/facts';
 import type { WorkflowSnapshot, FactSnapshot, FactPreview, ProductAsset, AssetRole, ImportBatchDto, ImportBatchDetail, ImportBulkResult, ImportResolution, ImportRuleDto } from '../../shared/contracts';
 import { apiClient, SERVER_MODE } from './apiClient';
 import { enrichProductEvidence, makeTemplateListing, rankProducts, reviewAgainstTemplate } from '../../shared/domain';
 import { bagDemoTask, demoTask, products as builtInProducts } from '../data/mockData';
 import { COPY_FACTS, requiredCopyFactsFor, PRICING_FACTS, editableFact, factEditor } from './factReview';
-import { SUPPLIER_COLUMNS } from '../data/supplierTemplate';
+import { QUALITY_REPORT_COLUMNS, SUPPLIER_COLUMNS } from '../data/supplierTemplate';
 import { IMAGE_CHECK_SOURCE, MULTIMODAL_PROMPT_VERSION, describeImageAssets, factImageCheck, imageCheckCounts, imageCheckFindingText, localImageCheckFindings, type ImageCheckEvidence, type ImageCheckResult } from '../../shared/multimodal';
 import { appliedFactDecision, type CheckDecisionTarget } from '../../shared/checks';
 import type { CheckDecisionRequest } from '../../server/services/checks';
@@ -130,6 +130,16 @@ async function refreshServerFacts() {
   if (!serverOwner || !current.selectedSku || !current.task) return;
   applySnapshot(await apiClient.facts.getSnapshot(current.task.recordId!, selected().recordId!)); save();
 }
+/**
+ * A product-row change is not a fact change, but the snapshot the checks read keeps its own copy of the
+ * product. Submitting or dropping a quality report has to re-read it, otherwise the check panel (which
+ * reads the freshly listed catalog) and the gate on "continue to Listing Studio" (which reads the
+ * snapshot) disagree about the same SKU: the report shows as on file and the next step still stays shut.
+ */
+async function refreshSnapshotAfterProductChange(sku: string) {
+  if (!serverOwner || current.selectedSku !== sku) return;
+  await refreshServerFacts();
+}
 async function mutateServerFact(key: string, action: 'edit' | 'confirm' | 'reject', value?: string) {
   const before = findCurrentFact(key);
   try {
@@ -184,11 +194,26 @@ function pricingFor(p: Product): Pricing {
 function synchronizeFacts() {
   if (serverOwner) return;
   if (!current.selectedSku) return;
-  current.v1 = cardV1(selected());
+  const base = baseFactCard(selected());
+  const edits = editsFor(current.selectedSku);
+  // Before the task card exists, a person's value is the only card there is, so it lands on V1. Once V2
+  // exists, V1 stays as the supplier delivered it and every change belongs to the task card — the same
+  // split the server keeps, so the comparison reads the same in both modes.
+  current.v1 = current.v2 ? base : { ...base, facts: base.facts.map(f => clone(edits[f.key] ?? f)) };
   if (current.v2) {
-    const baseKeys = new Set(current.v1.facts.map(f => f.key));
-    current.v2 = { ...current.v2, facts: [...clone(current.v1.facts), ...current.v2.facts.filter(f => !baseKeys.has(f.key)).map(f => clone(editsFor(current.selectedSku!)[f.key] ?? f))] };
+    const baseKeys = new Set(base.facts.map(f => f.key));
+    current.v2 = { ...current.v2, facts: [...base.facts.map(f => clone(edits[f.key] ?? f)), ...current.v2.facts.filter(f => !baseKeys.has(f.key)).map(f => clone(edits[f.key] ?? f))] };
   }
+  refreshChangedFactKeys();
+}
+/**
+ * Which task-card fields are the card's own work. The server decides this in `factSnapshotTx` with the
+ * same rule; offline mode has to decide it too, otherwise the comparison claims nothing ever differs.
+ */
+function refreshChangedFactKeys() {
+  if (serverOwner || !current.selectedSku || !current.v1) { current.changedFactKeys = []; return; }
+  const supplier = new Map(current.v1.facts.map(fact => [fact.key, fact]));
+  current.changedFactKeys = (current.v2?.facts ?? []).filter(fact => variesFromSupplier(fact, supplier.get(fact.key))).map(fact => fact.key);
 }
 function findCurrentFact(key: string): Fact {
   const f = (current.v2 ?? current.v1)?.facts.find(f => f.key === key);
@@ -266,6 +291,7 @@ async function checkDecision(input: CheckDecisionRequest) {
     if (input.action === 'discard_image' || input.action === 'discard_report' || input.action === 'restore_image') {
       const catalog = await apiClient.products.list();
       serverPreviews = catalog.factPreviews; current.catalog = catalog.products; current.serverRevision = catalog.revision;
+      await refreshSnapshotAfterProductChange(selected().sku);
     }
     await refreshWorkflow(); await refreshRecommendation();
     return save();
@@ -281,6 +307,7 @@ async function checkDecision(input: CheckDecisionRequest) {
     if (target === 'image_text' && input.action === 'discard_image') current.v2.facts = current.v2.facts
       .filter(fact => !(fact.imageCheck?.asset === ref && fact.sourceKind === 'image' && fact.source === IMAGE_CHECK_SOURCE))
       .map(fact => fact.imageCheck?.asset === ref ? { ...fact, imageCheck: undefined } : fact);
+    refreshChangedFactKeys();
     return save();
   }
   const fact = current.v2.facts.find(candidate => candidate.key === input.factKey);
@@ -292,6 +319,7 @@ async function checkDecision(input: CheckDecisionRequest) {
   else { current.listings = {}; current.reviews = {}; current.publications = {}; }
   current.pricing = pricingFor(selected());
   advance(current.pricing.status === 'ready' ? 'pricing_ready' : 'evidence_analyzed');
+  refreshChangedFactKeys();
   return save();
 }
 
@@ -333,12 +361,25 @@ export const mockApi = {
   async getCatalog() { await delay(180); return current.catalog.map(productView); },
   factEditor, editableFact,
   // Pricing is not part of readiness: an incomplete price leaves the suggested price pending.
-  listingReady() { return !!current.v2 && !!current.selectedSku && selected().duplicateStatus === 'unique' && selected().category === (serverOwner ? current.task?.category : demoTask.category) && requiredCopyFactsFor(selected().visual).every(key => current.v2!.facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed)); },  getTaskTemplate: () => clone(demoTask),
+  listingReady() {
+    return !!current.v2 && !!current.selectedSku && selected().duplicateStatus === 'unique'
+      && selected().category === (serverOwner ? current.task?.category : demoTask.category) && this.listingBlockedFacts().length === 0;
+  },
+  /** The copy facts still waiting for a person: the same rule the generate button reads, named out loud. */
+  listingBlockedFacts(): { key: string; label: string; missing: boolean }[] {
+    if (!current.v2) return [];
+    const facts = current.v2.facts;
+    return requiredCopyFactsFor(selected().visual)
+      .filter(key => !facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed))
+      .map(key => { const fact = facts.find(f => f.key === key); return { key, label: fact?.label ?? key, missing: !fact || fact.value === 'Missing' }; });
+  },
+  getTaskTemplate: () => clone(demoTask),
   async ready() { synchronizeFacts(); if (current.pricing && current.selectedSku) current.pricing = pricingFor(selected()); if (current.stage === 'initial') advance('materials_ready'); return save(); },
   navigate(workspace: Workspace) { current.workspace = workspace; return save(); },
   async reset() { await delay(180); const data = serverOwner ? await apiClient.reset() : null; pendingImport = null; current = initialState(); serverRecommendation = null; serverSnapshots = {}; serverWorkflow = null; serverAssets = {}; if (data) { serverPreviews = data.factPreviews; current.catalog = data.products; current.serverRevision = data.revision; } return save(); },
   async loadBuiltInDataset() { await this.reset(); advance('materials_ready'); return save(); },
-  getSupplierTemplate: () => [...SUPPLIER_COLUMNS],
+  /** The report columns are part of the template a supplier file may carry, so they are listed with the rest. */
+  getSupplierTemplate: () => [...SUPPLIER_COLUMNS, ...QUALITY_REPORT_COLUMNS],
   /** Display units: the task market decides the default, a manual choice wins until the task changes. */
   /** Records the transport paperwork for a declared-dangerous product, then refreshes the pool. */
   async releaseHazmat(sku: string, documents: string) {
@@ -355,6 +396,7 @@ export const mockApi = {
     const recorded = await apiClient.assets.qualityReport(this.assetProductId(sku), input);
     const catalog = await apiClient.products.list();
     serverPreviews = catalog.factPreviews; current.catalog = catalog.products; current.serverRevision = catalog.revision;
+    await refreshSnapshotAfterProductChange(sku);
     return recorded;
   },
   setUnits(units: UnitSystem) { current.units = units; return save(); },
@@ -545,8 +587,9 @@ export const mockApi = {
       current.listings = {}; current.reviews = {}; current.publications = {}; advance('sku_selected');
     }
     if (serverOwner) { applySnapshot(await apiClient.facts.createV1(current.task.recordId!, p.recordId!)); await refreshWorkflow(); }
-    // Preserve the selected-hero story: its pricing appears after Analyze, while Fact Review can preview it immediately.
-    if (!current.v2 && current.pricing?.status === 'ready') current.pricing = null;
+    // The price belongs to the product, not to the analysis: the facts it needs are already on V1, so
+    // offline mode shows it straight away instead of claiming there is no pricing data at all.
+    if (!serverOwner) current.pricing = pricingFor(p);
     current.workspace = 'evidence'; return save();
   },
   async openFactReview(sku: string) {
