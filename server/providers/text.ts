@@ -11,7 +11,7 @@ export interface TextModelProvider {
   generateStructured<T>(request: TextRequest & { schema: z.ZodType<T>; example: T }): Promise<TextResult & { data: T }>;
 }
 export class MockTextModelProvider implements TextModelProvider {
-  async generateText(): Promise<TextResult> { return { provider: 'mock', model: 'mock-text-v1', content: 'Mock response: PrismLaunch is ready.', latencyMs: 0 }; }
+  async generateText(): Promise<TextResult> { return { provider: 'mock', model: 'mock-text-v1', content: 'Mock response: 海淘集市 is ready.', latencyMs: 0 }; }
   async generateStructured<T>(request: TextRequest & { schema: z.ZodType<T>; example: T }) { const data = request.schema.parse(request.example); return { ...await this.generateText(), content: JSON.stringify(data), data }; }
 }
 type AuditWriter = (row: { promptVersion?: string; inputHash?: string; provider: string; model: string; purpose: string; latencyMs: number; success: boolean; errorCode?: string; promptTokens?: number; completionTokens?: number; totalTokens?: number }) => Promise<unknown>;

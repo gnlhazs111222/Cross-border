@@ -1,4 +1,4 @@
-# PrismLaunch Full Demo 交付说明
+# 海淘集市 Full Demo 交付说明
 
 更新：2026-09-08，QwenListingProvider 已实现并完成 Amazon / Shopify 真实验证。全部业务状态以 SQLite 为权威来源；文案默认模板、Qwen 显式开启，失败回退。最新说明见 [QWEN_LISTING.md](QWEN_LISTING.md)。
 
@@ -103,7 +103,7 @@ Prisma / SQLite 已迁移创建 12 个模型：
 ```text
 email: demo@prismlaunch.local
 password: Demo123456
-displayName: PrismLaunch Demo
+displayName: 海淘集市 Demo
 ```
 
 这只是公开的本地 Demo seed。可选注册 API 仅在开发 / 测试且配置允许时开放，没有注册页、验证码、OAuth、复杂 RBAC 或 refresh token 系统。

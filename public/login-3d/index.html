@@ -4,18 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#82ae8b">
-<meta name="description" content="棱镜上新，以可追溯的商品事实为基础，连接资料整理、智能选品、内容生成与审核发布。">
-<title>棱镜上新｜跨境商品上线工作台</title>
+<meta name="description" content="海淘集市，以可追溯的商品事实为基础，连接资料整理、智能选品、内容生成与审核发布。">
+<title>海淘集市｜跨境商品上线工作台</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<svg class="svg-defs" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><symbol id="brand-symbol" viewBox="0 0 44 36"><path d="M22 9C17-1 7 2 7 11c-9 4-5 17 4 17h12l7-15c5-11-9-16-13-7m5 5 7 17h4c10 0 13-12 5-16-1-9-11-10-15-3" fill="none" stroke="currentColor" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"/></symbol></defs></svg>
 <div class="app-shell" id="appShell">
 <main class="hero" id="home">
-<div class="brand-signature" id="siteBrand" aria-label="棱镜上新"><svg viewBox="0 0 44 36" aria-hidden="true"><use href="#brand-symbol"/></svg><span>棱镜上新</span></div>
+<div class="brand-signature" id="siteBrand" aria-label="海淘集市"><img src="../haitao-market-logo.png" alt="" width="36" height="36"><span>海淘集市</span></div>
 <section class="copy" aria-labelledby="heroTitle">
-<h1 id="heroTitle">从这里<br>被世界看见</h1>
-<div class="actions"><button class="start" id="start">登录<span aria-hidden="true">↗</span></button><button class="secondary" data-info="workflow">了解上新流程<span aria-hidden="true">→</span></button></div>
+<h1 id="heroTitle">让上新有据<br>让好物出海</h1>
+<p class="intro">从供应商资料出发，让选品、核验、定价和发布准备都有据可循。</p>
+<div class="actions"><button class="start" id="start">登录<span aria-hidden="true">→</span></button><button class="secondary" data-info="workflow">了解上新流程<span aria-hidden="true">→</span></button></div>
 </section>
 <section class="stage" id="stage" aria-label="水下立体商品展示：左瓶后倾、右瓶前倾，靠近右瓶自动开盖">
 <canvas id="scene" aria-hidden="true"></canvas>
@@ -27,16 +27,16 @@
 </div>
 <dialog id="loginDialog" class="dialog login-dialog" aria-labelledby="loginTitle">
 <button class="close" data-close="loginDialog" aria-label="关闭登录窗口">×</button>
-<div class="dialog-brand"><svg viewBox="0 0 44 36" aria-hidden="true"><use href="#brand-symbol"/></svg><span>棱镜上新</span></div>
+<div class="dialog-brand"><img src="../haitao-market-logo.png" alt="" width="34" height="34"><span>海淘集市</span></div>
 <h2 id="loginTitle">欢迎回来</h2>
 <form id="loginForm">
 <label for="email">工作邮箱</label><input type="email" id="email" autocomplete="email" placeholder="请输入工作邮箱" required>
 <label for="password">登录密码</label><div class="password-field"><input type="password" id="password" autocomplete="current-password" placeholder="请输入至少六位密码" minlength="6" required><button type="button" id="showPassword" aria-label="显示密码" aria-pressed="false">显示</button></div>
-<button type="submit" class="submit"><span>登录工作台</span><span aria-hidden="true">↗</span></button>
+<button type="submit" class="submit"><span>登录工作台</span><span aria-hidden="true">→</span></button>
 <p class="demo-note">本地演示账号：<br><strong>demo@prismlaunch.local</strong><br>密码：<strong>Demo123456</strong></p>
 </form>
 </dialog>
-<dialog id="infoDialog" class="dialog info-dialog" aria-labelledby="infoTitle"><button class="close" data-close="infoDialog" aria-label="关闭内容窗口">×</button><p class="overline">棱镜上新 · 产品能力</p><h2 id="infoTitle"></h2><p class="info-body" id="infoBody"></p><button class="submit" id="infoStart">登录工作台<span aria-hidden="true">↗</span></button></dialog>
+<dialog id="infoDialog" class="dialog info-dialog" aria-labelledby="infoTitle"><button class="close" data-close="infoDialog" aria-label="关闭内容窗口">×</button><p class="overline">海淘集市 · 产品能力</p><h2 id="infoTitle"></h2><p class="info-body" id="infoBody"></p><button class="submit" id="infoStart">登录工作台<span aria-hidden="true">→</span></button></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script src="vendor/three.min.js"></script>
 <script src="water.js"></script>

@@ -34,7 +34,7 @@ test('seed account is hashed; login failure and cookie login success', async () 
   const wrong = await app.inject({ method: 'POST', url: '/api/auth/login', payload: { email: user.email, password: 'wrong' } });
   assert.equal(wrong.statusCode, 401); assert.equal(wrong.json().error.code, 'invalid_credentials');
   const login = await app.inject({ method: 'POST', url: '/api/auth/login', payload: { email: user.email, password: 'Demo123456' } });
-  assert.equal(login.statusCode, 200); assert.equal(login.json().data.displayName, 'PrismLaunch Demo');
+  assert.equal(login.statusCode, 200); assert.equal(login.json().data.displayName, '海淘集市 Demo');
   const header = String(login.headers['set-cookie']); assert.match(header, /HttpOnly/i); assert.match(header, /SameSite=Lax/i);
   cookie = header.split(';')[0];
   assert.doesNotMatch(login.body, /passwordHash|tokenHash|session/);

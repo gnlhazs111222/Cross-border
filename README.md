@@ -1,4 +1,4 @@
-# PrismLaunch Full Demo
+# 海淘集市 Full Demo
 
 当前集成版本包含 A 线（可编辑任务、候选过滤、Qwen 推荐与评测）、B 线（Qwen 语义审核、版本授权与审核评测）和 C 线（多模态图片文字核对，以及随行的质检报告与物流属性报警）。集成审查与验证见 [A_B_INTEGRATION.md](docs/A_B_INTEGRATION.md)，模块说明见 [A 线](docs/A_LINE_RECOMMENDATION.md)、[B 线](docs/B_REVIEW_IMPLEMENTATION.md) 和 [C 线](docs/MULTIMODAL.md)。
 

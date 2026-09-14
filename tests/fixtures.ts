@@ -5,7 +5,7 @@ export { expect };
 
 // Isolated real accounts/cookies prevent one parallel scenario's reset affecting another.
 export const test = base.extend({ page: async ({ page }, use) => {
-  const response = await page.context().request.post('/api/auth/register', { data: { email: `test-${randomUUID()}@prismlaunch.local`, password: 'Demo123456', displayName: 'PrismLaunch Demo' } });
+  const response = await page.context().request.post('/api/auth/register', { data: { email: `test-${randomUUID()}@prismlaunch.local`, password: 'Demo123456', displayName: '海淘集市 Demo' } });
   expect(response.status()).toBe(201);
   await use(page);
   await page.context().request.post('/api/auth/logout', { data: {} });

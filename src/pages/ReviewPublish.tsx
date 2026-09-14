@@ -30,7 +30,7 @@ export function ReviewPublish() {
     try {
       const blob = new Blob([await mockApi.exportCsv()], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob); const link = document.createElement('a');
-      link.href = url; link.download = `PrismLaunch-${state.selectedSku}-Amazon.csv`; document.body.appendChild(link); link.click(); link.remove();
+      link.href = url; link.download = `HaitaoMarket-${state.selectedSku}-Amazon.csv`; document.body.appendChild(link); link.click(); link.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000); notify('Amazon CSV downloaded.');
     } catch (error) { setState(mockApi.getState()); notify(error instanceof Error ? error.message : 'Export failed.', true); }
   };

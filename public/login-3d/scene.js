@@ -112,6 +112,23 @@
     mesh.rotation.x = Math.PI / 2; mesh.position.y = y; parent.add(mesh); return mesh;
   }
 
+  // A simplified vector rendering of the shared smiling-cart mark stays sharp on the curved bottle.
+  function drawCartMark(c, ink) {
+    // Keep the wheel bottoms above the brand text's cap-height box; the previous 238px origin
+    // put them roughly 22px into “海淘集市”.
+    c.save(); c.translate(384, 190); c.fillStyle = ink; c.strokeStyle = ink;
+    c.lineCap = 'round'; c.lineJoin = 'round';
+    c.lineWidth = 27; c.beginPath(); c.moveTo(-104, -76); c.lineTo(-67, -76); c.quadraticCurveTo(-45, -74, -37, -42); c.stroke();
+    c.beginPath(); c.moveTo(-55, -35); c.quadraticCurveTo(-5, -17, 52, -31); c.lineTo(101, -44);
+    c.quadraticCurveTo(113, -47, 108, -29); c.lineTo(77, 66); c.quadraticCurveTo(70, 88, 43, 91);
+    c.lineTo(-36, 91); c.quadraticCurveTo(-63, 88, -71, 64); c.lineTo(-96, -11); c.quadraticCurveTo(-103, -34, -79, -37); c.closePath(); c.fill();
+    c.beginPath(); c.arc(-43, 125, 17, 0, Math.PI * 2); c.arc(48, 125, 17, 0, Math.PI * 2); c.fill();
+    c.globalCompositeOperation = 'destination-out';
+    c.beginPath(); c.ellipse(-31, 18, 9, 15, 0, 0, Math.PI * 2); c.ellipse(29, 18, 9, 15, 0, 0, Math.PI * 2); c.fill();
+    c.lineWidth = 10; c.beginPath(); c.arc(0, 29, 42, .25, Math.PI - .25); c.stroke();
+    c.restore();
+  }
+
   // Printing is wrapped onto a curved 3D cylinder, never a screen-facing image.
   function printTexture(ink, volumeOnly = false) {
     const image = document.createElement('canvas'); image.width = 768; image.height = 768;
@@ -120,14 +137,8 @@
     if (volumeOnly) {
       c.font = '500 58px Microsoft YaHei'; c.fillText('45毫升', 384, 490);
     } else {
-      c.save(); c.translate(384, 247); c.scale(2.1, 2.1);
-      c.lineWidth = 7; c.lineCap = 'round'; c.lineJoin = 'round';
-      c.beginPath();
-      c.moveTo(-4,-16); c.bezierCurveTo(-22,-48,-57,-32,-48,-9);
-      c.bezierCurveTo(-76,6,-56,40,-34,32); c.lineTo(-4,20); c.lineTo(18,-24);
-      c.bezierCurveTo(29,-46,64,-24,50,-4); c.bezierCurveTo(83,16,50,45,25,29);
-      c.lineTo(0,-16); c.stroke(); c.restore();
-      c.font = '600 66px Microsoft YaHei'; c.fillText('棱镜上新', 384, 424);
+      drawCartMark(c, ink);
+      c.font = '600 66px Microsoft YaHei'; c.fillText('海淘集市', 384, 424);
       c.fillRect(191, 451, 386, 2);
       c.font = '30px Microsoft YaHei'; c.fillText('证据驱动 · 智能上新', 384, 492);
       c.font = '25px Microsoft YaHei'; c.fillText('资料可追溯 · 内容可审核', 384, 539);
@@ -462,5 +473,3 @@
   resume();
   } catch(error){showSceneFailure(error);}
 })();
-
-

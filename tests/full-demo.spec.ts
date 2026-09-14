@@ -18,7 +18,7 @@ publicTest('real login UI, HttpOnly session, wrong password and logout', async (
   await login.locator('#password').fill('Demo123456');
   await login.locator('#loginForm .submit').click();
   await expect(page.locator('.product-table tbody tr')).toHaveCount(10);
-  await expect(page.locator('.account-menu')).toContainText('PrismLaunch Demo');
+  await expect(page.locator('.account-menu')).toContainText('海淘集市 Demo');
   const session = (await page.context().cookies()).find(c => c.name === 'prismlaunch_session');
   expect(session?.httpOnly).toBe(true); expect(session?.sameSite).toBe('Lax');
   expect(await page.evaluate(() => document.cookie)).not.toContain('prismlaunch_session');

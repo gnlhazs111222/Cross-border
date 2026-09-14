@@ -26,7 +26,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState(initialLanguage);
   useLayoutEffect(() => {
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
-    document.title = language === 'zh' ? 'PrismLaunch 棱镜上新 · 商品上新工作台' : 'PrismLaunch · Product launch workspace';
+    document.title = language === 'zh' ? '海淘集市 · 商品上新工作台' : '海淘集市 · Product launch workspace';
     try { localStorage.setItem(LANGUAGE_KEY, language); } catch { /* Language switching remains available in memory. */ }
   }, [language]);
   return <I18nContext.Provider value={{ language, setLanguage, t: (message, params) => translate(language, message, params) }}>{children}</I18nContext.Provider>;

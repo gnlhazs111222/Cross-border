@@ -42,7 +42,8 @@ body{background:linear-gradient(110deg,#b6cbaa 0%,#a5c095 48%,#71936b 100%)}
 
 /* Readable controls without scaling the entire copy block. */
 .copy{left:28%;top:49%;width:44%;max-width:620px;transform:translate(-50%,-50%)}
-.copy h1{font-size:clamp(40px,4.8vw,76px);line-height:1.22;margin-bottom:24px}
+.copy h1{font-size:clamp(54px,5.8vw,96px);line-height:1.16;margin-bottom:24px}
+.copy .intro{max-width:570px;margin:0 auto 28px;font-size:17px;line-height:1.8;color:#2f553d;text-wrap:pretty}
 .actions{gap:20px}
 .start{font-size:20px;min-height:52px;padding:14px 24px;gap:28px}
 .secondary{font-size:16px}
@@ -55,7 +56,8 @@ body{background:linear-gradient(110deg,#b6cbaa 0%,#a5c095 48%,#71936b 100%)}
 @media(max-width:700px){
   .brand-signature{left:6%;top:20px;font-size:20px}
   .copy{left:50%;top:13%;width:92%;transform:translateX(-50%)}
-  .copy h1{font-size:clamp(32px,8vw,44px);margin-bottom:18px}
+  .copy h1{font-size:clamp(38px,10vw,46px);margin-bottom:16px}
+  .copy .intro{max-width:335px;margin-bottom:20px;font-size:15px;line-height:1.7}
   .actions{gap:16px}
   .start{font-size:18px;padding:12px 20px;min-height:48px}
   .dialog{padding:24px}
@@ -66,3 +68,7 @@ body{background:linear-gradient(110deg,#b6cbaa 0%,#a5c095 48%,#71936b 100%)}
 @media(max-height:500px) and (min-width:701px){
   .copy h1{font-size:40px;margin-bottom:16px}
 }
+
+/* Shared 海淘集市 logo asset replaces the previous inline Prism mark. */
+.brand-signature img{width:36px;height:36px;object-fit:contain;flex-shrink:0}
+.dialog-brand img{width:34px;height:34px;object-fit:contain;flex-shrink:0}
