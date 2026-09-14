@@ -3,8 +3,15 @@ import { HERO_SKU } from '../src/data/mockData';
 import { COPY_FACTS, editableFact, factEditor, factNumber, normalizeFactValue } from '../src/services/factReview';
 import { DEMO_PRICING_RATES, priceFromRates, type PricingRates } from './pricing';
 
-/** The frozen snapshot says which market the task sells into; the rate tables are keyed by country. */
-export const marketCountry = (market?: string): string => ({ 'United States': 'US', 'United Kingdom': 'GB', Germany: 'DE', Japan: 'JP' })[market ?? ''] ?? 'US';
+/**
+ * The frozen snapshot says which market the task sells into; the rate tables are keyed by country. A brief
+ * may name the market in the interface language ("美国"), which has to resolve to the same destination the
+ * English name resolves to, so the duty lookup never depends on which language the brief was written in.
+ */
+export const marketCountry = (market?: string): string => ({
+  'United States': 'US', 'United Kingdom': 'GB', Germany: 'DE', Japan: 'JP',
+  '美国': 'US', '英国': 'GB', '德国': 'DE', '日本': 'JP',
+})[(market ?? '').trim()] ?? 'US';
 
 function fact(key: string, label: string, value: string, source: string, anchor: string, allowed = true, confirmed = true): Fact {
   return { key, label, value, source, anchor, allowed: confirmed && allowed, status: value === 'Missing' ? 'Missing' : confirmed ? 'Confirmed' : 'Requires Confirmation', sourceKind: 'mock' };

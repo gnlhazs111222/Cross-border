@@ -3,7 +3,7 @@ import { CircleAlert, ScanLine, ShieldCheck, TriangleAlert } from 'lucide-react'
 import type { Evidence, Fact, Product } from '../types';
 import { assessImageText, assessInspection, ignoredRefs, inspectionTargets, type InspectionProblem } from '../../shared/checks';
 import { assessHazmat } from '../../shared/hazmat';
-import { projectFactValue } from '../../shared/units';
+import { printedFigure, projectFactValue } from '../../shared/units';
 import { mockApi } from '../services/mockApi';
 import { useDemo } from './DemoContext';
 import { useI18n } from '../i18n/I18nContext';
@@ -53,10 +53,37 @@ export function CheckAlerts({ product, facts, evidence }: { product?: Product; f
   const report = assessInspection({ ...inspectionTargets(facts, product), report: product.qualityReport, ignored: ignoredRefs(product.checkDecisions, 'quality_report') });
   const hazmat = assessHazmat(product.transport);
   const disputes = facts.filter(fact => fact.imageCheck?.verdict === 'differ');
+  /**
+   * Both sides of a disagreement read in the unit system the screen is set to, so "260ml" against a fact
+   * of "25.4 fl oz" is judged at a glance instead of being converted in the reader's head. Only a printed
+   * figure with a unit this app knows is converted; a list of figures stays exactly as printed.
+   */
+  const printedInScreenUnits = (factKey: string, printed: string) => printedFigure(factKey, printed, mockApi.unitSystem()) ?? printed;
+  /** The printed wording is the evidence behind the decision, so it stays visible when the figure is converted. */
+  const printedNumber = (text: string) => { const found = text.match(/\d+(?:\.\d+)?/); return found ? Number.parseFloat(found[0]) : undefined; };
+  const disputeLine = (fact: Fact) => {
+    const printed = fact.imageCheck?.imageValue || '—';
+    const shown = printedInScreenUnits(fact.key, printed);
+    const says = t(projectFactValue(fact.key, fact.imageCheck?.factValue || fact.value, mockApi.unitSystem()));
+    const field = t(fact.label);
+    // The original is only worth repeating when the figure itself changed: "260ml" and "260 ml" are one
+    // reading, while "260ml" shown as "8.8 fl oz" is a conversion the reader has to be able to check.
+    const before = printedNumber(printed); const after = printedNumber(shown);
+    return before === undefined || after === undefined || before === after
+      ? t('{field}: the picture prints “{image}”, the fact says “{fact}”.', { field, image: printed, fact: says })
+      : t('{field}: the picture prints “{image}” (printed {printed}), the fact says “{fact}”.', { field, image: shown, printed, fact: says });
+  };
   // The panel reads the run itself, so "ran without a picture" never looks like "never ran".
   const run = evidence?.find(item => item.type === 'image_check')?.imageCheck;
   const imageText = assessImageText(run);
-  const droppedPicture = (run?.assets ?? []).find(asset => asset.status === 'dropped');
+  const droppedPictures = (run?.assets ?? []).filter(asset => asset.status === 'dropped');
+  /**
+   * A dropped picture is not read again, so the alarm it raised disappears — which is exactly what a
+   * person needs to be able to take back. The way back is offered wherever a picture is dropped, not only
+   * when dropping one was the whole run.
+   */
+  const restoreButtons = <div className="fact-actions">{droppedPictures.map(asset => <Button key={asset.fileName} variant="secondary" busy={busy === `image-restore-${asset.fileName}`} disabled={!!busy}
+    onClick={() => void act(`image-restore-${asset.fileName}`, () => mockApi.restoreImageCheck(asset.fileName), t('The picture takes part in the check again on the next run.'))}>{t('Restore this picture')} · {asset.fileName}</Button>)}</div>;
 
   const discardReport = async (reportNo: string) => {
     await act('report-discard', () => mockApi.discardQualityReport(reportNo), t('Quality report {report} is dropped from the checks. The decision is recorded on the product.', { report: reportNo }));
@@ -101,7 +128,7 @@ export function CheckAlerts({ product, facts, evidence }: { product?: Product; f
     : imageText.verdict === 'not_read' ? <p className="check-line" data-testid="check-alert-image_text-not-read">{t('The picture on file was not read this time.')}{imageText.fallbackReason ? ` (${imageText.fallbackReason})` : ''}</p>
     : imageText.verdict === 'not_run' ? <p className="check-line" data-testid="check-clear-image_text">{t('Not run yet.')}</p>
     : <p className="check-line" data-testid="check-clear-image_text">{t('The picture agrees with the stored facts.')}</p>;
-  const imageStateActions = imageText.verdict === 'dropped' && droppedPicture ? <div className="fact-actions"><Button variant="secondary" busy={busy === 'image-restore'} disabled={!!busy} onClick={() => void act('image-restore', () => mockApi.restoreImageCheck(droppedPicture.fileName), t('The picture takes part in the check again on the next run.'))}>{t('Restore this picture')}</Button></div>
+  const imageStateActions = imageText.verdict === 'dropped' && droppedPictures.length ? restoreButtons
     : imageText.verdict === 'no_pictures' ? <div className="fact-actions"><Button variant="secondary" disabled={!!busy} onClick={() => navigate('materials')}>{t('Upload pictures in Materials')}</Button></div>
     // The picture text check is part of building the task card, so before V2 exists the way to run it is
     // the analysis itself — offering "re-check" here only produced an error nobody could act on.
@@ -110,8 +137,10 @@ export function CheckAlerts({ product, facts, evidence }: { product?: Product; f
         : <Button variant="secondary" busy={busy === 'analyze'} disabled={!!busy} onClick={() => void act('analyze', () => mockApi.analyzeEvidence(), 'FactCard V2 created. Review the facts before continuing.')}><ScanLine size={16} />{t('Analyze Evidence')}</Button>}</div>
     : null;
   const imageRows = disputes.length
-    ? disputes.map(fact => ({ evidence: <p className="check-line" key={fact.key} data-testid={`check-dispute-${fact.key}`}>{t('{field}: the picture prints “{image}”, the fact says “{fact}”.', { field: t(fact.label), image: fact.imageCheck?.imageValue || '—', fact: t(projectFactValue(fact.key, fact.imageCheck?.factValue || fact.value, mockApi.unitSystem())) })}</p>, action: imageDecision(fact) }))
+    ? disputes.map(fact => ({ evidence: <p className="check-line" key={fact.key} data-testid={`check-dispute-${fact.key}`}>{disputeLine(fact)}</p>, action: imageDecision(fact) }))
     : [{ evidence: imageStateEvidence, action: imageStateActions }];
+  if (droppedPictures.length && imageText.verdict !== 'dropped') imageRows.push({ evidence: <p className="check-line" data-testid="check-alert-image_text-dropped">
+    {t('{count} picture(s) on file were dropped from the checks.', { count: droppedPictures.length })}</p>, action: restoreButtons });
 
   // A report on file is required: without one the task cannot move on, so its absence is raised and
   // the column carries the way to produce one.
@@ -189,7 +218,7 @@ export function CheckAlerts({ product, facts, evidence }: { product?: Product; f
         {index === 0 && <td rowSpan={imageRows.length} className={pricingTone} data-label={t('Pricing facts')} data-testid="check-row-pricing">{pricingCell}</td>}
       </tr>)}</tbody>
     </table></div>
-    <Modal open={reportOpen} onOpenChange={value => !value && !busy && setReportOpen(false)} title={t('Submit a quality report')} description={t('The report is the laboratory statement, not our own reading: nothing in it changes the product facts.')}>
+    <Modal open={reportOpen} onOpenChange={value => !value && !busy && setReportOpen(false)} title={t('Submit a quality report')} description={t('The report is the laboratory statement, not our own reading: it is filed as report fields on the task card and never overwrites a product fact.')}>
       <form noValidate onSubmit={event => { event.preventDefault(); void submitReport(); }}>
         <label className="form-field">{t('Report number')}<input autoFocus maxLength={120} value={reportNo} disabled={!!busy} onChange={event => setReportNo(event.target.value)} placeholder={t('For example: QC-2026-1001')} /></label>
         <label className="form-field">{t('Report picture')}<input ref={reportFileRef} type="file" accept=".png,.jpg,.jpeg,.webp" disabled={!!busy} onChange={event => setReportFile(event.target.files?.[0] ?? null)} /></label>

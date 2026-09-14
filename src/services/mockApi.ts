@@ -1,4 +1,5 @@
 import { eligibilityReason, type RecommendationSnapshot } from '../../shared/recommendation';
+import { sameCategory } from '../../shared/categories';
 import { matchAssetFiles } from '../../shared/asset-match';
 import { systemForMarket, type UnitSystem } from '../../shared/units';
 import { amazonCsv } from '../../shared/csv';
@@ -6,7 +7,7 @@ import { baseFactCard, effectiveProduct, pricingFromFacts, productEvidence, revi
 import type { WorkflowSnapshot, FactSnapshot, FactPreview, ProductAsset, AssetRole, ImportBatchDto, ImportBatchDetail, ImportBulkResult, ImportResolution, ImportRuleDto } from '../../shared/contracts';
 import { apiClient, SERVER_MODE } from './apiClient';
 import { enrichProductEvidence, makeTemplateListing, rankProducts, reviewAgainstTemplate } from '../../shared/domain';
-import { bagDemoTask, demoTask, products as builtInProducts } from '../data/mockData';
+import { bagDemoTask, demoTask, newTaskTemplate, products as builtInProducts } from '../data/mockData';
 import { COPY_FACTS, requiredCopyFactsFor, PRICING_FACTS, editableFact, factEditor } from './factReview';
 import { QUALITY_REPORT_COLUMNS, SUPPLIER_COLUMNS } from '../data/supplierTemplate';
 import { IMAGE_CHECK_SOURCE, MULTIMODAL_PROMPT_VERSION, describeImageAssets, factImageCheck, imageCheckCounts, imageCheckFindingText, localImageCheckFindings, type ImageCheckEvidence, type ImageCheckResult } from '../../shared/multimodal';
@@ -172,7 +173,7 @@ function selected(): Product {
 }
 function eligible(p: Product) {
   if (serverOwner) return !eligibilityReason(p, current.task ?? demoTask);
-  return p.status === 'search_ready' && p.duplicateStatus === 'unique' && p.category === demoTask.category;
+  return p.status === 'search_ready' && p.duplicateStatus === 'unique' && sameCategory(p.category, demoTask.category);
 }
 function cardV1(p: Product): FactCard {
   if (serverOwner) return clone(serverSnapshots[p.sku]?.v1 ?? serverPreviews[p.sku].v1);
@@ -241,7 +242,7 @@ function safeListing(platform: Platform, revision = 1): Listing {
   // Pricing, including the tariff estimate, only ever produces a reminder: an incomplete price
   // leaves the suggested price pending and never stops a draft from being generated.
   if (!current.v2) throw new Error('Analyze evidence before generating a listing.');
-  if (selected().duplicateStatus !== 'unique' || selected().category !== (serverOwner ? current.task?.category : demoTask.category)) throw new Error('Duplicate or out-of-category products cannot generate listings for this task.');
+  if (selected().duplicateStatus !== 'unique' || !sameCategory(selected().category, serverOwner ? current.task?.category : demoTask.category)) throw new Error('Duplicate or out-of-category products cannot generate listings for this task.');
   // The marketplace decides the copy language and its unit system, so the generator is told which one it
   // writes for instead of guessing from the platform code.
   const task = serverOwner ? current.task : demoTask;
@@ -369,7 +370,7 @@ export const mockApi = {
   // Pricing is not part of readiness: an incomplete price leaves the suggested price pending.
   listingReady() {
     return !!current.v2 && !!current.selectedSku && selected().duplicateStatus === 'unique'
-      && selected().category === (serverOwner ? current.task?.category : demoTask.category) && this.listingBlockedFacts().length === 0;
+      && sameCategory(selected().category, serverOwner ? current.task?.category : demoTask.category) && this.listingBlockedFacts().length === 0;
   },
   /** The copy facts still waiting for a person: the same rule the generate button reads, named out loud. */
   listingBlockedFacts(): { key: string; label: string; missing: boolean }[] {
@@ -379,7 +380,7 @@ export const mockApi = {
       .filter(key => !facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed))
       .map(key => { const fact = facts.find(f => f.key === key); return { key, label: fact?.label ?? key, missing: !fact || fact.value === 'Missing' }; });
   },
-  getTaskTemplate: () => clone(demoTask),
+  getTaskTemplate: () => clone(newTaskTemplate),
   async ready() { synchronizeFacts(); if (current.pricing && current.selectedSku) current.pricing = pricingFor(selected()); if (current.stage === 'initial') advance('materials_ready'); return save(); },
   navigate(workspace: Workspace) { current.workspace = workspace; return save(); },
   async reset() { await delay(180); const data = serverOwner ? await apiClient.reset() : null; pendingImport = null; current = initialState(); serverRecommendation = null; serverSnapshots = {}; serverWorkflow = null; serverAssets = {}; if (data) { serverPreviews = data.factPreviews; current.catalog = data.products; current.serverRevision = data.revision; } return save(); },
@@ -532,7 +533,17 @@ export const mockApi = {
   async createTask() {
     await delay();
     if (current.stage === 'initial') advance('materials_ready');
-    if (!current.task) { current.task = serverOwner ? await apiClient.tasks.create(demoTask) : clone(demoTask); advance('task_created'); }
+    if (!current.task) {
+      if (!serverOwner) { current.task = clone(newTaskTemplate); advance('task_created'); }
+      else {
+        // A row may already exist under this code, and creating only returns what the database holds, so the
+        // fields are written explicitly: the task the demo starts from has to be the brief the page showed.
+        const created = await apiClient.tasks.create(newTaskTemplate);
+        const task = await apiClient.tasks.update(created.recordId, newTaskTemplate, created.revision!);
+        await useServerTask(task);
+        serverRecommendation = await apiClient.recommendations.run(task.recordId!, task.revision!, 'rule');
+      }
+    }
     if (serverOwner && current.task && !serverRecommendation) serverRecommendation = await apiClient.recommendations.run(current.task.recordId!, current.task.revision!, 'rule');
     current.workspace = 'tasks'; return save();
   },
@@ -576,7 +587,7 @@ export const mockApi = {
     if (p.duplicateStatus === 'duplicate') return 'Exact duplicate · excluded from recommendations';
     if (p.duplicateStatus === 'possible_duplicate') return 'Possible duplicate · human verification required';
     if (p.status === 'missing_data') return `Missing ${p.missing.join(', ')} · excluded from recommendations`;
-    if (p.category !== demoTask.category) return 'Category mismatch · outside Home & Kitchen';
+    if (!sameCategory(p.category, demoTask.category)) return 'Category mismatch · outside Home & Kitchen';
     return 'Eligible for the candidate pool';
   },
   isEligible: (p: Product) => eligible(productView(p)),
@@ -602,7 +613,7 @@ export const mockApi = {
     await delay(180);
     const p = current.catalog.find(p => p.sku === sku);
     if (!p) throw new Error('Unknown SKU');
-    if (!current.task) current.task = serverOwner ? await apiClient.tasks.create(demoTask) : clone(demoTask);
+    if (!current.task) current.task = serverOwner ? await apiClient.tasks.create(newTaskTemplate) : clone(newTaskTemplate);
     if (serverOwner) current.task = await apiClient.tasks.select(current.task.recordId ?? current.task.id, sku, 'fact_review');
     if (current.selectedSku !== sku) {
       current.selectedSku = sku; current.v1 = cardV1(p); current.v2 = null;

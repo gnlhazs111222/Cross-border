@@ -1,4 +1,5 @@
 import type { Fact } from '../types';
+import { canonicalFigure } from '../../shared/units';
 
 export const PRICING_FACTS = ['packagingWeight', 'packageLength', 'packageWidth', 'packageHeight', 'supplierCost', 'declaredValue'];
 export const COPY_FACTS = ['color', 'capacity', 'material', 'straw', 'countryOfOrigin', 'packageIncludes', 'finish', 'lidType', 'bagType', 'closureType', 'strapType'];
@@ -25,8 +26,17 @@ export function normalizeFactValue(key: string, input: string): string {
   if (!value) throw new Error('A value is required before confirmation.');
   if (value.length > 220 || /^[=+@]/.test(value)) throw new Error('Use a plain value of at most 220 characters.');
   if (Object.hasOwn(UNITS, key)) {
-    const number = /^\d+(?:\.\d+)?$/.test(value) ? Number(value) : NaN;
     const allowZero = ['supplierCost', 'declaredValue'].includes(key);
+    /**
+     * A typed value is a bare number in the field's canonical unit. A value read off a label or a document
+     * carries its own unit ("420 g", "25.4 fl oz", "80 mm"), so the unit travels with the number and the
+     * stored value is the canonical one — a 420 g reading is 0.42 kg, never 420 kg. Only a converted
+     * reading is rounded (capacities to whole millilitres, weights and lengths to four decimals), because
+     * those figures came from another system to begin with.
+     */
+    const bare = /^(?:USD\s*)?\d+(?:\.\d+)?$/.test(value);
+    const stated = bare ? Number(value.replace(/^USD\s*/, '')) : canonicalFigure(key, value);
+    const number = stated === undefined ? NaN : bare ? stated : key === 'capacity' ? Math.round(stated) : Number(stated.toFixed(4));
     if (!Number.isFinite(number) || number > 1_000_000 || (allowZero ? number < 0 : number <= 0) || (key === 'capacity' && !Number.isInteger(number))) {
       throw new Error(allowZero ? 'Enter a non-negative number up to 1000000.' : key === 'capacity' ? 'Enter a positive whole number up to 1000000.' : 'Enter a number greater than 0 and at most 1000000.');
     }

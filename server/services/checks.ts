@@ -82,7 +82,10 @@ async function readSubmittedReport(db: PrismaClient, config: ServerConfig, userI
   }
   // The date is never typed in, so it comes from the document; the number stays what the operator filed,
   // with the printed one as the fallback for a number they did not type.
-  return { reportNo: submittedNo || reading.reportNo || product.sku, result: reading.result ?? submittedResult ?? 'pass', validUntil: reading.validUntil };
+  // The printed name and the picture travel with the report so the task card can show which document was
+  // read and what it called the product.
+  return { reportNo: submittedNo || reading.reportNo || product.sku, result: reading.result ?? submittedResult ?? 'pass', validUntil: reading.validUntil,
+    ...(reading.productName ? { productName: reading.productName } : {}), file: asset.fileName };
 }
 
 export async function decideCheck(db: PrismaClient, userId: string, taskId: string, productId: string, input: CheckDecisionInput): Promise<FactSnapshot> {

@@ -29,3 +29,17 @@ export const bagDemoTask: Task = {
   id: 'PL-DEMO-BAG-001', platform: 'Amazon US', market: 'United States', category: 'Bags & Accessories',
   requirements: ['Black canvas tote bag', 'Simple everyday carry', 'Prefer visible shoulder straps and an open top'], minProfit: 5,
 };
+/**
+ * What the New Task form opens with, and what the page shows before a task exists: one brief written the
+ * way a person would say it, with the market and the category named in the interface language. The pool
+ * keeps its canonical English names, so both sides are folded before they are compared (shared/categories).
+ * The requirements are the brief that ranks ET.ELF/外星精灵 咖啡杯 (PL-BTL-003-BLK) first: the colour and the
+ * capacity are its own confirmed values and it has no straw, so nothing is deducted from its 94. The brief
+ * names no material on purpose — this row is 纯钛, which no material wording matches, so naming one would
+ * deduct 24 from the very row the brief is written for while leaving the others untouched.
+ */
+export const newTaskTemplate: Task = {
+  id: 'PL-DEMO-001', platform: 'Amazon US', market: '美国', category: '家居与厨房',
+  requirements: ['帮我找一款黑色（Black）的咖啡杯，容量 750ml 左右，无吸管，材质不限。'],
+  minProfit: 5,
+};

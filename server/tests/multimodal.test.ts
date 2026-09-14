@@ -9,7 +9,7 @@ import { createDb } from '../db';
 import { buildApp } from '../app';
 import { seedDemo } from '../seed';
 import { demoTask, HERO_SKU, products } from '../../src/data/mockData';
-import { IMAGE_CHECK_BATCH_MODE } from '../../shared/multimodal';
+import { IMAGE_CHECK_BATCH_MODE, printedFigureAbsentFromFact } from '../../shared/multimodal';
 import { createMultimodalRuntime, looksLikePictureGenerator } from '../providers/multimodalRuntime';
 import type { FactSnapshot, ImportBatchDto, ProductAsset } from '../../shared/contracts';
 
@@ -166,7 +166,7 @@ test('a live check drops out-of-scope and uncited findings, annotates the task c
   const decided = await qwenApi.call<FactSnapshot>(`${base}/check-decisions`, { action: 'adopt_printed_text', factKey: 'color', expectedRevision: snap.factsRevision });
   const color = decided.v2!.facts.find(f => f.key === 'color')!;
   assert.equal(color.value, 'matte black');
-  assert.equal(color.status, 'Requires Confirmation', 'a picture value still needs a person to confirm it');
+  assert.equal(color.status, 'Confirmed', 'the person who decided the value does not confirm it again in the studio');
   assert.equal(color.imageCheck!.verdict, 'agree', 'the disagreement closes once the value matches what the picture prints');
   assert.equal(decided.v1!.facts.find(f => f.key === 'color')!.value, 'Black', 'V1 keeps what the supplier delivered');
 });
@@ -177,7 +177,7 @@ test('printed wording agrees on material and origin, and a claim without a quote
   const v1 = await qwenApi.call<FactSnapshot>(`${base}/fact-snapshot`);
   reply = JSON.stringify({ findings: [
     // Words printed on the product may be compared with the material and the country facts.
-    { factKey: 'material', attribute: 'materialMark', imageValue: 'SUS304', verdict: 'agree', confidence: 0.9, asset: 'front.png', region: 'base' },
+    { factKey: 'material', attribute: 'materialMark', imageValue: 'Stainless Steel', verdict: 'agree', confidence: 0.9, asset: 'front.png', region: 'base' },
     { factKey: 'countryOfOrigin', attribute: 'originMark', imageValue: 'Made in China', verdict: 'agree', confidence: 0.9, asset: 'front.png', region: 'base' },
     // An agreement without the printed words behind it is a guess, not a comparison.
     { factKey: 'capacity', attribute: 'capacityMark', imageValue: '', verdict: 'agree', confidence: 0.9, asset: 'front.png', region: 'label' },
@@ -193,7 +193,7 @@ test('printed wording agrees on material and origin, and a claim without a quote
   const material = snap.v2!.facts.find(f => f.key === 'material')!;
   assert.equal(material.value, v1.facts.find(f => f.key === 'material')!.value, 'an agreement annotates, it never rewrites the value');
   assert.equal(material.imageCheck!.verdict, 'agree');
-  assert.equal(material.imageCheck!.imageValue, 'SUS304');
+  assert.equal(material.imageCheck!.imageValue, 'Stainless Steel');
   assert.equal(snap.v2!.facts.find(f => f.key === 'countryOfOrigin')!.imageCheck!.imageValue, 'Made in China');
   // Nothing read in a picture may enter copy: the candidate stays pending and never listing-allowed.
   const candidate = snap.v2!.facts.find(f => f.key === 'imageVisibleText')!;
@@ -203,7 +203,55 @@ test('printed wording agrees on material and origin, and a claim without a quote
   assert.equal(candidate.sourceKind, 'image');
 });
 
-test('adopting what the picture shows stays unconfirmed and never touches V1', async () => {
+test('a figure printed on the product that the fact does not state is raised, never filed as agreement', async () => {
+  const { base, snap } = await select(qwenApi);
+  // The material a person stands behind: a word, with no figure in it.
+  const materialFact = snap.facts.find(f => f.key === 'material')!;
+  const edited = await qwenApi.call<FactSnapshot>(`/api/facts/${materialFact.recordId}`, { value: '纯钛', expectedRevision: snap.factsRevision }, 'PATCH');
+  await qwenApi.call<FactSnapshot>(`/api/facts/${materialFact.recordId}/confirm`, { expectedRevision: edited.factsRevision });
+  await upload(qwenApi, HERO_SKU, PNG, 'front.png', 'main');
+  const v1 = await qwenApi.call<FactSnapshot>(`${base}/fact-snapshot`);
+  reply = JSON.stringify({ findings: [
+    // The picture states how much titanium the product contains; the fact says only that it is titanium.
+    { factKey: 'material', attribute: 'materialMark', imageValue: '钛含量 >99.8%', verdict: 'agree', confidence: 0.95, asset: 'front.png', region: 'overlay' },
+    // The same reading on a fact that does carry the figure stays an agreement.
+    { factKey: 'capacity', attribute: 'capacityMark', imageValue: '500 ml', verdict: 'agree', confidence: 0.9, asset: 'front.png', region: 'label' },
+  ] });
+  const analyzed = await qwenApi.call<FactSnapshot>(`${base}/analyze`, { expectedRevision: v1.factsRevision });
+  const material = analyzed.v2!.facts.find(f => f.key === 'material')!;
+  assert.equal(material.value, '纯钛', 'the printed figure never rewrites the fact');
+  assert.equal(material.imageCheck!.verdict, 'differ', 'an over-generous reading may not file a stronger printed claim as agreement');
+  assert.equal(material.imageCheck!.imageValue, '钛含量 >99.8%');
+  assert.equal(analyzed.v2!.facts.find(f => f.key === 'capacity')!.imageCheck!.verdict, 'agree');
+  assert.equal(imageCheckEvidence(analyzed).imageCheck!.counts.differ, 1);
+  assert.ok(analyzed.facts.filter(f => f.imageCheck?.verdict === 'differ').some(f => f.key === 'material'), 'the check panel reads the dispute off the facts');
+
+  // The same content stated as the whole is what the fact says: "钛含量 =100%" and 纯钛 are one claim.
+  reply = JSON.stringify({ findings: [
+    { factKey: 'material', attribute: 'materialMark', imageValue: '钛含量 =100%', verdict: 'agree', confidence: 0.9, asset: 'front.png', region: 'overlay' },
+  ] });
+  const whole = await qwenApi.call<FactSnapshot>(`${base}/image-check`, { expectedRevision: analyzed.factsRevision });
+  assert.equal(whole.v2!.facts.find(f => f.key === 'material')!.imageCheck!.verdict, 'agree', 'whole equals whole');
+  assert.equal(whole.v2!.facts.find(f => f.key === 'material')!.imageCheck!.previousVerdict, 'differ', 'the run stays auditable');
+});
+
+test('the printed figure rule reads wholes and parts apart, and leaves unit forms alone', () => {
+  // A fact that states the whole: the picture has to say the whole too.
+  assert.equal(printedFigureAbsentFromFact('钛含量 >99.8%', '纯钛'), true);
+  assert.equal(printedFigureAbsentFromFact('钛含量 =100%', '纯钛'), false);
+  assert.equal(printedFigureAbsentFromFact('100% 纯钛', '纯钛'), false);
+  assert.equal(printedFigureAbsentFromFact('99.8% titanium', 'Pure Titanium'), true);
+  assert.equal(printedFigureAbsentFromFact('Titanium 100%', 'Pure Titanium'), false);
+  assert.equal(printedFigureAbsentFromFact('纯钛', '纯钛'), false, 'no figure printed is the model reading, not this rule');
+  // A fact that states no figure at all cannot match a picture that states one.
+  assert.equal(printedFigureAbsentFromFact('SUS304', 'Stainless Steel'), true);
+  assert.equal(printedFigureAbsentFromFact('Made in China', '中国大陆'), false);
+  // Both sides carrying figures stays with the model, which is what reconciles unit forms.
+  assert.equal(printedFigureAbsentFromFact('500 ml', '500ml / 16.9 fl oz'), false);
+  assert.equal(printedFigureAbsentFromFact('16.9 fl oz', '500ml / 16.9 fl oz'), false);
+});
+
+test('adopting what the picture shows is the confirmation and never touches V1', async () => {
   const { base } = await select(qwenApi);
   await upload(qwenApi, HERO_SKU, PNG, 'front.png', 'main');
   reply = JSON.stringify({ findings: [
@@ -217,8 +265,8 @@ test('adopting what the picture shows stays unconfirmed and never touches V1', a
   assert.deepEqual(after.v1, snap.v1);
   const color = after.v2!.facts.find(f => f.key === 'color')!;
   assert.equal(color.value, 'matte black');
-  assert.equal(color.status, 'Requires Confirmation');
-  assert.equal(color.allowed, false);
+  assert.equal(color.status, 'Confirmed');
+  assert.equal(color.allowed, true, 'the decided value is what the copy is written from');
   assert.equal(color.sourceKind, 'image');
   assert.equal(color.previousValue, 'Black');
   assert.ok(color.anchor.includes('front.png'));

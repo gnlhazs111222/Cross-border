@@ -44,6 +44,8 @@
 | `unreadable` | 有字但糊／被裁切／反光，读不出来 |
 | `not_checked` | 离线模式没读图上文字，需要人或视觉模型看一眼 |
 
+`agree` 有一条确定性底线，管的是**事实里没有数字、图上却印了数字**这一种情况：事实说「整体」（纯钛、全铜、Pure Titanium），图上写同样的整体（`钛含量 =100%`、`100% 纯钛`）算相符；图上只写出一部分或一个下限（`钛含量 >99.8%`、`99.8% titanium`）就不算相符——那是图上多出来的含量宣称，必须报到人面前（判定为 `differ`），不能因为模型说“意思差不多”就归档成相符。事实里本来就没有「整体」含义时（`Stainless Steel` 遇上 `SUS304`），图上多出来的型号/等级同样报 `differ`。两边都带数字（或都不带）时仍按模型的语义阅读——`500 ml` 与 `500ml / 16.9 fl oz`、材质清单换个顺序书写，都仍然算相符。
+
 写回规则：
 
 - 判定作为 `imageCheck` 标注挂在 **v2** 对应事实上（Fact Review 表格新增「Picture text check」列 + 汇总行，并显示图中原文）。同一字段多条结论时，`differ` 优先于 `agree`，高置信优先。
@@ -59,12 +61,12 @@
 
 `differ` 不是模块自己能决定的事。**问题就在核对处直说，只给三个答案**：
 
-Fact Review 表格「Picture text check」列里，`differ` 那一行直接写出不一致——引号里是图中印字，紧跟着是我们手上的值，例如「图中印 “750 ML”，我方事实为 “500ml / 16.9 fl oz”。」——下面跟三个按钮：
+核对面板里，`differ` 那一行直接写出不一致：**两边换算到同一套单位**再显示，例如「容量：图中 “8.8 fl oz”（原印 260ml），事实 “25.4 fl oz”。」——单位按界面上的单位切换（美制／英制／公制）走，图和事实永远在同一套单位里比较；换算后会变数的地方用括号补上图上原文，数字没变的（例如 “260ml” 显示成 “260 ml”）就不重复。数字无法换算的一列（例如 `400ML/600ML/1000ML/1500ML/2000ML` 这种一串尺寸）按图上原文显示，不硬取第一个数。下面跟三个按钮：
 
 | 选项 | 做什么 |
 | --- | --- |
-| **直接保存图中印字** | 把图上文字写进 v2：状态 `Requires Confirmation`、不允许进入文案、原值存为 `previousValue`、来源记为 `Product Picture`，并使下游 Listing／审核／发布失效 |
-| **修改后保存** | 打开事实编辑弹窗（标题变成「修改有争议的取值」），由人改成第三个值再保存；服务端校验取值合法，非法值返回 409 `invalid_fact` |
+| **直接保存图中印字** | 把图上文字写进 v2：**这个处置本身就是确认**——状态 `Confirmed`（文案字段同时允许进入文案）、原值存为 `previousValue`、来源记为图片，并使下游 Listing／审核／发布失效。文案工作室不会再为它要第二次确认 |
+| **修改后保存** | 打开事实编辑弹窗（标题变成「修改有争议的取值」），由人改成第三个值再保存；同样直接记为 `Confirmed`；服务端校验取值合法，非法值返回 409 `invalid_fact` |
 | **放弃该图** | 这张图从本 SKU 的核对里剔除：记一条 `CheckDecision{target:image_text, ref:文件名}`（含处置人与时间）在**商品**上；清掉它贡献的 `imageCheck` 标注，并且**它凭空带来的候选字段**（`imageVisibleText`／`imagePackagingMark` 这类，`sourceKind=image` 的机器观测）**随图一起删除**——卡上原有的字段只清标注、不删行。之后**重跑不再读取也不再发送**这张图，证据 notes 里写明 `Dropped from the check by a recorded human decision` |
 
 三个动作共用一条路由 `POST /api/tasks/:taskId/products/:productId/check-decisions`（`server/services/checks.ts`；前端 `src/services/apiClient.ts` 的 `facts.checkDecision`），请求带 `expectedRevision` 做乐观锁，陈旧版本返回 409 `facts_changed`。决定记在**商品**上（`checkDecisions`）与事实卡上，换图、重跑都带不走它。

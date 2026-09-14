@@ -198,3 +198,15 @@ svg{display:inline-block;vertical-align:middle}
 .pricing-panel .panel-title>.button,.pricing-blocked .panel-title>.button{margin-left:auto}
 @media(max-width:1000px){.pricing-snapshot-details dl{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.pricing-snapshot-details{padding-inline:18px}.pricing-snapshot-details dl{grid-template-columns:1fr}.pricing-panel .panel-title>.button,.pricing-blocked .panel-title>.button{width:100%;margin-left:0}}
+.product-page .panel-title{border-bottom:1px solid var(--border)}
+.product-page-body{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:26px;padding:24px}
+.product-page-media{background:#f6f8f4;border:1px solid var(--border);border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.product-page-media img{width:100%;max-height:340px;object-fit:contain;border-radius:6px;background:#fff}
+.product-page-media .product-visual{width:100%}
+.product-page-media .footnote{font-size:14px;color:var(--muted);text-align:center;word-break:break-all}
+.product-page-copy h2{font-size:20px;line-height:1.5;font-weight:550}
+.product-page-price{font-size:19px;font-weight:600;color:var(--green);margin-top:10px}
+.product-page-description{font-size:14px;line-height:1.85;color:#4c5e52;margin-top:18px}
+.product-page-copy .listing-bullets{margin-top:18px}
+.product-page-copy .attribute-grid{margin-top:22px}
+@media(max-width:700px){.product-page-body{grid-template-columns:1fr;padding:18px}.product-page-media img{max-height:260px}}

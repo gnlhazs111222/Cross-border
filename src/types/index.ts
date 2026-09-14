@@ -34,7 +34,9 @@ export type FactCard = { recordId?: string; revision?: number; productRevision?:
 export type Evidence = { recordId?: string; sourceKind?: 'supplier' | 'mock' | 'manual' | 'image'; id: string; name: string; type: 'sheet' | 'pdf' | 'image' | 'image_check'; file: string; anchor: string; extracted: string[];
   /** Present on the image-check evidence row: what was compared, what was sent, and who decided. */
   imageCheck?: import('../../shared/multimodal').ImageCheckEvidence };
-export type Recommendation = { productId?: string; summary?: string; generation?: import('../../shared/recommendation').RecommendationGeneration; sku: string; score: number; reasons: string[]; deductions: string[] };
+export type Recommendation = { productId?: string; summary?: string; generation?: import('../../shared/recommendation').RecommendationGeneration; sku: string; score: number; reasons: string[]; deductions: string[];
+  /** The values the brief asked for, so a reason template can be translated whole instead of value by value. */
+  requested?: { color?: string; material?: string } };
 export type Task = { recordId?: string; revision?: number; id: string; platform: string; market: string; category: string; requirements: string[]; minProfit: number; pricingSnapshot?: PricingContextSnapshot };
 export type PricingContextSnapshot = {
   recordId?: string; taskId?: string; code: string; version: number; platform: string; market: string; settlementCurrency: 'USD'; policyVersion: string; createdAt: string;

@@ -84,15 +84,24 @@ const annotated = (value: string, printed: string): Fact => ({ key: 'capacity', 
   imageCheck: { factKey: 'capacity', attribute: 'capacityMark', imageValue: printed, factValue: value, verdict: 'differ', confidence: 0.9, asset: 'front.png', region: 'label',
     mode: 'qwen', model: 'qwen3.7-plus', promptVersion: 'multimodal-v2', checkedAt: '2026-09-12T00:00:00.000Z' } });
 
-test('adopting the printed wording stores it in our own format and stays unconfirmed', () => {
+test('adopting the printed wording stores it in our own format and is that decision alone', () => {
   const adopted = appliedFactDecision(annotated('500ml / 16.9 fl oz', '750 ML'), { action: 'adopt_printed_text' });
   assert.equal(adopted.value, '750ml / 25.4 fl oz');
-  assert.equal(adopted.status, 'Requires Confirmation');
-  assert.equal(adopted.allowed, false);
+  // The person who picked the value does not have to confirm it a second time in the listing studio.
+  assert.equal(adopted.status, 'Confirmed');
+  assert.equal(adopted.allowed, true, 'capacity is copy material, so the decided value may be written into the listing');
+  assert.ok(adopted.confirmedAt);
   assert.equal(adopted.imageCheck!.verdict, 'agree');
   assert.equal(adopted.imageCheck!.previousVerdict, 'differ');
   assert.equal(adopted.previousValue, '500ml / 16.9 fl oz');
   assert.equal(adoptedFactValue('capacity', 'Not readable'), 'Not readable', 'an unreadable value is kept as printed instead of being invented');
+  // The unit written beside the number travels with it: a label printing grams or ounces is not a fact in
+  // kilograms or millilitres, and the stored value is the canonical one.
+  assert.equal(adoptedFactValue('capacity', '25.4 fl oz'), '751ml / 25.4 fl oz');
+  assert.equal(adoptedFactValue('capacity', '1.2L'), '1200ml / 40.6 fl oz');
+  assert.equal(adoptedFactValue('packagingWeight', '420 g'), '0.42 kg');
+  assert.equal(adoptedFactValue('packageHeight', '3.15 in'), '8.001 cm');
+  assert.equal(adoptedFactValue('packageHeight', '80 mm'), '8 cm');
 });
 
 test('a hand correction clears the alarm only when it agrees with the picture', () => {
@@ -168,9 +177,10 @@ test('a live disagreement is raised on the card and adopting the printed text cl
   const decided = await call<FactSnapshot>(`${base}/check-decisions`, { action: 'adopt_printed_text', factKey: 'capacity', expectedRevision: snap.factsRevision });
   const capacity = decided.facts.find(f => f.key === 'capacity')!;
   assert.equal(capacity.value, '750ml / 25.4 fl oz');
-  assert.equal(capacity.status, 'Requires Confirmation');
-  assert.equal(capacity.allowed, false);
+  assert.equal(capacity.status, 'Confirmed');
+  assert.equal(capacity.allowed, true);
   assert.equal(capacity.imageCheck!.verdict, 'agree');
+  assert.equal(decided.listingReadiness.ready, true, 'the listing stage is open once the dispute is decided');
   assert.equal(decided.v1!.facts.find(f => f.key === 'capacity')!.value, snap.v1!.facts.find(f => f.key === 'capacity')!.value, 'V1 is never rewritten by a check decision');
   assert.equal((await pendingDisputes()).length, 0, 'the queue row is closed by the same action');
 });

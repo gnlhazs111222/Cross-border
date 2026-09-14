@@ -76,6 +76,37 @@ export const imageCheckCounts = (findings: ImageCheckFinding[]): Record<ImageVer
   not_checked: findings.filter(f => f.verdict === 'not_checked').length,
 });
 
+/** The figures a value states. "750ml / 25.4 fl oz" states two; "纯钛" states none. */
+const figuresIn = (value: string): number[] => (value.match(/\d+(?:\.\d+)?/g) ?? []).map(Number);
+/** Wording that states the whole of the material: 纯钛 and Pure Titanium both mean all of it. */
+const statesTheWhole = (value: string): boolean => /纯|全|整|100\s*%|\b(?:pure|full|whole|solid)\b/i.test(value);
+
+/**
+ * A picture that prints a *part* of something the fact states as a whole is not saying the same thing, so
+ * it may not be reported as an agreement: "钛含量 >99.8%" claims a titanium content, while the fact
+ * "纯钛" says the material is (all) titanium. "钛含量 =100%" does say exactly that, so it stays an
+ * agreement — whole equals whole.
+ *
+ * The figure is left to a person either way — the module never writes it into a fact — but a claim that
+ * says more than we hold has to reach that person instead of being filed as a match.
+ *
+ * Facts and readings that both carry figures (or neither) are left to the model's reading, which is what
+ * reconciles "500 ml" with "500ml / 16.9 fl oz" and a material list quoted in another order.
+ */
+export function printedFigureAbsentFromFact(printed: string, factValue: string): boolean {
+  const printedFigures = figuresIn(printed);
+  if (!printedFigures.length || figuresIn(factValue).length) return false;
+  // The fact says "all of it"; a reading that says the same all of it agrees, and a reading that stops
+  // short of it does not.
+  return !(statesTheWhole(factValue) && printedFigures.every(figure => figure >= 100));
+}
+
+/** The reading stands as read, except that a stronger printed claim never counts as agreement. */
+export function reconcileImageFinding<T extends { factKey: string | null; imageValue: string; verdict: ImageVerdict }>(finding: T, factValue: string | undefined): T {
+  if (finding.verdict !== 'agree' || !finding.factKey || !finding.imageValue || factValue === undefined) return finding;
+  return printedFigureAbsentFromFact(finding.imageValue, factValue) ? { ...finding, verdict: 'differ' as ImageVerdict } : finding;
+}
+
 /** Consumer facts only: claims a picture must not corroborate, plus cost and declared value. */
 export const imageCheckFactPayload = (facts: { key: string; label: string; value: string; status: string; allowed: boolean; sourceKind?: string }[]) =>
   facts.filter(f => !IMAGE_EXCLUDED_KEYS.includes(f.key as (typeof IMAGE_EXCLUDED_KEYS)[number]))

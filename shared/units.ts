@@ -30,11 +30,14 @@ export const UNIT_CHOICES: { system: UnitSystem; label: string }[] = [
   { system: 'metric', label: 'Metric · ml / kg / cm' },
 ];
 
-/** Defaults the selector from the task market so an Amazon US task opens in US units. */
+/**
+ * Defaults the selector from the task market so an Amazon US task opens in US units. A brief may name its
+ * market in the interface language ("美国"), which is the same market as "United States".
+ */
 export function systemForMarket(market: string | undefined): UnitSystem {
   const value = (market ?? '').trim().toLowerCase();
-  if (/(united states|usa|^us$|amazon us|shopify us)/.test(value)) return 'us';
-  if (/(united kingdom|uk|britain|england)/.test(value)) return 'uk';
+  if (/(united states|usa|^us$|amazon us|shopify us|美国)/.test(value)) return 'us';
+  if (/(united kingdom|uk|britain|england|英国)/.test(value)) return 'uk';
   return 'metric';
 }
 
@@ -90,4 +93,55 @@ export function projectFactValue(key: string, value: string, system: UnitSystem)
   if (key === 'packagingWeight') return formatWeight(first, system);
   if (key === 'packageLength' || key === 'packageWidth' || key === 'packageHeight') return formatLength(first, system);
   return value;
+}
+
+/**
+ * The unit a printed figure is written in, read from the words beside it, and what one of it is worth in
+ * the canonical unit (ml, kg, cm). A label prints "420 g" or "25.4 fl oz" where the fact stores kg and ml,
+ * so the unit has to travel with the number before any conversion happens.
+ */
+const PRINTED_FIGURE_UNITS: Record<string, { pattern: RegExp; per: number }[]> = {
+  capacity: [{ pattern: /(\d+(?:\.\d+)?)\s*(?:fl\.?\s*oz|ounces?|盎司)/i, per: ML_PER_US_FLOZ },
+    { pattern: /(\d+(?:\.\d+)?)\s*(?:ml|毫升|millilit)/i, per: 1 },
+    { pattern: /(\d+(?:\.\d+)?)\s*(?:l\b|litre|liter|升)/i, per: 1000 }],
+  packagingWeight: [{ pattern: /(\d+(?:\.\d+)?)\s*(?:kg|公斤|千克|kilo)/i, per: 1 },
+    { pattern: /(\d+(?:\.\d+)?)\s*(?:mg|毫克)/i, per: 1e-6 },
+    { pattern: /(\d+(?:\.\d+)?)\s*(?:g\b|克|gram)/i, per: 0.001 },
+    { pattern: /(\d+(?:\.\d+)?)\s*(?:lb|pounds?|磅)/i, per: KG_PER_LB },
+    { pattern: /(\d+(?:\.\d+)?)\s*(?:oz|ounces?|盎司)/i, per: 0.028349523125 }],
+  packageLength: [{ pattern: /(\d+(?:\.\d+)?)\s*(?:mm|毫米)/i, per: 0.1 },
+    { pattern: /(\d+(?:\.\d+)?)\s*(?:cm|厘米)/i, per: 1 },
+    { pattern: /(\d+(?:\.\d+)?)\s*(?:in\b|inch(?:es)?|英寸|″|")/i, per: CM_PER_INCH }],
+};
+const LENGTH_KEYS = ['packageLength', 'packageWidth', 'packageHeight'];
+
+/**
+ * The one figure a written value states, in that field's canonical unit: "420 g" is 0.42 kg, "25.4 fl oz"
+ * is 751 ml, "80 mm" is 8 cm. A bare number is read in the canonical unit, and a value that lists several
+ * figures ("400ML/600ML/…") is not one figure at all, so it has no single meaning to store.
+ */
+export function canonicalFigure(key: string, written: string): number | undefined {
+  // A negative reading is not a measurement of anything we store, and the digits alone would hide the sign.
+  if (/-\s*\d/.test(written)) return undefined;
+  const figures = written.match(/\d+(?:\.\d+)?/g) ?? [];
+  if (figures.length !== 1) return undefined;
+  const rules = key === 'capacity' ? PRINTED_FIGURE_UNITS.capacity : key === 'packagingWeight' ? PRINTED_FIGURE_UNITS.packagingWeight : LENGTH_KEYS.includes(key) ? PRINTED_FIGURE_UNITS.packageLength : undefined;
+  if (!rules) return undefined;
+  const text = written.toLowerCase();
+  // A unit we do not recognise is read in that field's canonical unit, which is what the fact stores.
+  const rule = rules.find(candidate => candidate.pattern.test(text));
+  const value = Number((text.match(rule?.pattern ?? /(\d+(?:\.\d+)?)/) ?? [])[1]) * (rule?.per ?? 1);
+  return Number.isFinite(value) && value > 0 ? value : undefined;
+}
+
+/**
+ * That same figure shown in the screen's unit system: "260ml" reads as "8.8 fl oz" beside a fact of
+ * "25.4 fl oz", so the two sides of a comparison are judged at a glance.
+ */
+export function printedFigure(key: string, printed: string, system: UnitSystem): string | undefined {
+  const value = canonicalFigure(key, printed);
+  if (value === undefined) return undefined;
+  if (key === 'capacity') return formatCapacity(value, system);
+  if (key === 'packagingWeight') return formatWeight(value, system);
+  return formatLength(value, system);
 }

@@ -8,7 +8,10 @@ export function TaskEditor({ task, editing, close }: { task: Task; editing: bool
   const { t } = useI18n(); const { busy, act } = useDemo();
   const [draft, setDraft] = useState(task); const [requirements, setRequirements] = useState(task.requirements.join('\n'));
   return <Modal open onOpenChange={open => !open && !busy && close()} title={t(editing ? 'Edit Current Task' : 'Create Launch Task')} description={t('Save your requirements, then explicitly run recommendation. Typing does not call AI.')} wide>
-    <form onSubmit={async event => { event.preventDefault(); const rows = requirements.split('\n').map(r => r.trim()).filter(Boolean); if (await act('save-task', () => mockApi.saveTask({ ...draft, requirements: rows }, editing), 'Task saved. Run recommendation for the current requirements.')) close(); }}>
+    {/* A new brief is created to be ranked: the run follows the save, so the shortlist is on screen the
+        moment the task exists instead of waiting for a second click. An edit keeps the explicit run, because
+        its saved requirements still have to be reviewed before the products are re-ranked. */}
+    <form onSubmit={async event => { event.preventDefault(); const rows = requirements.split('\n').map(r => r.trim()).filter(Boolean); if (!await act('save-task', () => mockApi.saveTask({ ...draft, requirements: rows }, editing), editing ? 'Task saved. Run recommendation for the current requirements.' : 'Task created. Ranking the candidate pool now.')) return; if (!editing) await act('recommend', () => mockApi.runRecommendation(), 'Task created. Recommendations are ready.'); close(); }}>
       <div className="task-form-grid">
         <label className="form-field">{t('Platform')}<select aria-label={t('Platform')} value={draft.platform} onChange={e => setDraft({ ...draft, platform: e.target.value })}><option>Amazon US</option><option>Shopify US</option></select></label>
         <label className="form-field">{t('Market')}<input aria-label={t('Market')} required maxLength={220} value={draft.market} onChange={e => setDraft({ ...draft, market: e.target.value })} /></label>

@@ -2,6 +2,8 @@ import type { Prisma, PrismaClient, Fact as StoredFact } from '@prisma/client';
 import type { Fact, FactCard, Evidence, Platform } from '../../src/types';
 import type { FactSnapshot } from '../../shared/contracts';
 import { baseFactCard, effectiveProduct, pricingFromFacts, productEvidence, reviewFact, variesFromSupplier } from '../../shared/facts';
+import { sameCategory } from '../../shared/categories';
+import { qualityReportFacts } from '../../shared/checks';
 import { COPY_FACTS, PRICING_FACTS, requiredCopyFactsFor } from '../../src/services/factReview';
 import { AppError } from '../errors';
 import { domainProviders } from '../providers/domain';
@@ -33,8 +35,14 @@ export async function factSnapshotTx(db: DB, userId: string, taskId: string, pro
   const base = cards.find(c => c.version === 1); const enhanced = cards.find(c => c.version === 2);
   if (!base) throw new AppError('facts_not_found', 'Select the product to create its facts.', 404);
   const card = (row: typeof base): FactCard => ({ recordId: row.id, revision: row.revision, productRevision: row.productRevision, version: row.version as 1 | 2, sku: product.sku, ...(row.version === 2 ? { taskId: task.code } : {}), facts: row.facts.map(readFact) });
-  const v1 = card(base); const v2 = enhanced ? card(enhanced) : null; const facts = (v2 ?? v1).facts;
-  const p = toProduct(product); const view = effectiveProduct(p, facts); const pricingContext = pricingSnapshotDto(await latestPricingSnapshotTx(db, task));
+  const v1 = card(base);
+  const p = toProduct(product);
+  // A report on file belongs to the task card's own work, so its rows sit on the enhanced card — V1 stays
+  // byte-for-byte what the supplier delivered — and reading a report is not a write: the rows follow
+  // whatever report the product currently carries, including one submitted after the analysis ran.
+  const v2 = enhanced ? { ...card(enhanced), facts: [...card(enhanced).facts, ...qualityReportFacts(p.qualityReport)] } : null;
+  const facts = (v2 ?? v1).facts;
+  const view = effectiveProduct(p, facts); const pricingContext = pricingSnapshotDto(await latestPricingSnapshotTx(db, task));
   const pricing = pricingFromFacts(p, facts, facts.filter(f => PRICING_FACTS.includes(f.key)).reduce((sum, f) => sum + Math.max(0, (f.revision ?? 1) - 1), 0), task.minimumProfit, pricingContext);
   const blockedFacts = requiredCopyFactsFor(p.visual).filter(key => !facts.some(f => f.key === key && f.status === 'Confirmed' && f.allowed));
   const listingFactsRevision = facts.filter(f => COPY_FACTS.includes(f.key)).reduce((sum, f) => sum + (f.revision ?? 1), 0);
@@ -45,7 +53,7 @@ export async function factSnapshotTx(db: DB, userId: string, taskId: string, pro
   return { productId: product.id, taskId: task.id, product: view, v1, v2, facts, changedFactKeys, factsRevision: Math.max(base.revision, enhanced?.revision ?? 0), listingFactsRevision, downstreamInvalidated: invalidated, pricing,
     evidence: [...base.evidence, ...(enhanced?.evidence ?? [])].map(e => ({ ...(e.data as unknown as Evidence), recordId: e.id })), assets: await assetsForProduct(db, userId, product.id),
     pricingReadiness: { ready: pricing.status === 'ready', missing: pricing.missing },
-    listingReadiness: { ready: !!v2 && !blockedFacts.length && p.duplicateStatus === 'unique' && p.category === task.category, blockedFacts } };
+    listingReadiness: { ready: !!v2 && !blockedFacts.length && p.duplicateStatus === 'unique' && sameCategory(p.category, task.category), blockedFacts } };
 }
 export function factSnapshot(db: PrismaClient, userId: string, taskId: string, productId: string) {
   return db.$transaction(tx => factSnapshotTx(tx, userId, taskId, productId));

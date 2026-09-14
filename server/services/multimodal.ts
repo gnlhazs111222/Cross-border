@@ -1,6 +1,6 @@
 import type { Prisma } from '@prisma/client';
 import { IMAGE_CHECK_BATCH_MODE, IMAGE_CHECK_MAX_ASSETS, IMAGE_CHECK_MAX_BYTES, IMAGE_CHECK_SOURCE, IMAGE_ONLY_FACTS, MULTIMODAL_PROMPT_VERSION,
-  describeImageAssets, factImageCheck, imageCheckCounts, imageCheckFindingText, type ImageCheckAsset, type ImageCheckFinding, type ImageCheckMode, type ImageCheckResult } from '../../shared/multimodal';
+  describeImageAssets, factImageCheck, imageCheckCounts, imageCheckFindingText, reconcileImageFinding, type ImageCheckAsset, type ImageCheckFinding, type ImageCheckMode, type ImageCheckResult } from '../../shared/multimodal';
 import { ignoredRefs } from '../../shared/checks';
 import type { FactSnapshot } from '../../shared/contracts';
 import type { Fact, Task } from '../../src/types';
@@ -69,15 +69,18 @@ export async function runImageCheck(reader: Writer, config: ServerConfig, userId
   }
 
   const outcome = await provider.analyze({ product: snapshot.product, task, facts, images, assets, notes: described.notes });
+  // The words are the model's reading; whether a printed figure the fact does not state counts as an
+  // agreement is not — that comparison is deterministic, so an over-generous reading cannot file it away.
+  const findings = outcome.findings.map(finding => reconcileImageFinding(finding, facts.find(fact => fact.key === finding.factKey)?.value));
   // A degraded run reports itself as local, so the stored evidence never claims a vision model looked at the pictures.
   const mode: ImageCheckMode = provider.name === 'qwen' && !outcome.fallbackReason ? 'qwen' : 'local';
   return { sku: snapshot.product.sku, mode, provider: provider.name, model: mode === 'qwen' ? provider.model : 'local-resource-check',
     fallbackReason: outcome.fallbackReason,
     // Attached pictures count even offline: the files were checked, only their content was not read.
     status: !pictures.length ? 'no_images' : mode === 'qwen' ? 'enhanced' : 'needs_review',
-    promptVersion: MULTIMODAL_PROMPT_VERSION, baseVersion: input.baseVersion ?? (snapshot.v2 ? 2 : 1), findings: outcome.findings, assets, notes: outcome.notes,
+    promptVersion: MULTIMODAL_PROMPT_VERSION, baseVersion: input.baseVersion ?? (snapshot.v2 ? 2 : 1), findings, assets, notes: outcome.notes,
     transmitted: mode === 'qwen' ? images.map(image => ({ fileName: image.asset.fileName, byteSize: image.asset.byteSize, sha256: image.asset.sha256 })) : [],
-    counts: imageCheckCounts(outcome.findings), aiCallId: outcome.aiCallId, latencyMs: outcome.latencyMs, checkedAt: new Date().toISOString() };
+    counts: imageCheckCounts(findings), aiCallId: outcome.aiCallId, latencyMs: outcome.latencyMs, checkedAt: new Date().toISOString() };
 }
 
 const findingText = imageCheckFindingText;

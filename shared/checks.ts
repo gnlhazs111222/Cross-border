@@ -10,14 +10,15 @@
 
 import { IMAGE_CHECK_SOURCE } from './multimodal';
 import { reviewFact } from './facts';
-import { normalizeFactValue } from '../src/services/factReview';
+import { COPY_FACTS, normalizeFactValue } from '../src/services/factReview';
 import type { Fact } from '../src/types';
 
 /**
- * The two ways a picture disagreement can be settled on the fact itself: take what the picture
- * prints, or correct the value by hand. Both leave the fact unconfirmed and not listing-allowed,
- * because a person still has to authorize it, and both re-read the verdict against the new value, so
- * the alarm clears exactly when the picture and the fact start to agree.
+ * The two ways a picture disagreement can be settled on the fact itself: take what the picture prints,
+ * or correct the value by hand. The decision *is* the authorization — a person looked at the picture and
+ * the fact and picked the value that stands — so the task card keeps that value as confirmed and the
+ * listing studio never asks for the same confirmation a second time. Both re-read the verdict against the
+ * new value, so the alarm clears exactly when the picture and the fact start to agree.
  */
 export type FactDecision = { action: 'adopt_printed_text' | 'edited'; value?: string };
 /**
@@ -49,15 +50,18 @@ export function appliedFactDecision(fact: Fact, decision: FactDecision): Fact {
   if (decision.action === 'adopt_printed_text') {
     if (!annotation.imageValue) throw new Error('The check read no printed text for that field.');
     const value = adoptedFactValue(fact.key, annotation.imageValue);
-    updated = { ...fact, value, status: 'Requires Confirmation', allowed: false, source: IMAGE_CHECK_SOURCE, sourceKind: 'image',
+    updated = { ...fact, value, allowed: false, source: IMAGE_CHECK_SOURCE, sourceKind: 'image',
       anchor: [annotation.asset, annotation.region].filter(Boolean).join(' · ') || IMAGE_CHECK_SOURCE,
       previousValue: fact.value, previousSource: fact.sourceKind === 'image' ? fact.previousSource : `${fact.source} · ${fact.anchor}`,
       updatedAt: now, revision: (fact.revision ?? 0) + 1 };
   } else {
     updated = reviewFact(fact, 'edit', decision.value ?? '');
   }
+  // What the person decided is what the task card holds: confirmed, and allowed into copy when the field
+  // is copy material. V1 keeps the supplier's value either way.
+  const decided: Fact = { ...updated, status: 'Confirmed', allowed: COPY_FACTS.includes(fact.key), confirmedAt: now };
   const agreed = sameWording(updated.value, annotation.imageValue);
-  return { ...updated, imageCheck: { ...annotation, verdict: agreed ? 'agree' : 'differ', factValue: updated.value,
+  return { ...decided, imageCheck: { ...annotation, verdict: agreed ? 'agree' : 'differ', factValue: decided.value,
     ...(agreed ? { previousVerdict: annotation.previousVerdict ?? 'differ' } : {}) } };
 }
 /**
@@ -89,6 +93,9 @@ export type QualityReport = {
   result: 'pass' | 'fail';
   issuedAt?: string;
   validUntil?: string;
+  /** What the document printed about the product, and the picture it was read from. */
+  productName?: string;
+  file?: string;
   stated?: QualityReportStatement;
 };
 
@@ -118,6 +125,27 @@ export const ignoredRefs = (decisions: readonly CheckDecision[] | undefined, tar
 
 /** YYYY-MM-DD only: an unreadable date is reported as missing rather than guessed at. */
 export const isoDate = (value?: string): string | undefined => value && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : undefined;
+
+/** The label a report row carries; the picture it was read from is the anchor. */
+export const QUALITY_REPORT_FACT_SOURCE = 'Quality report';
+/**
+ * What the report on file states, written as task-card fields: the number it was filed under, the name
+ * the document prints, the date it runs to and its verdict. Reading a report is evidence about the
+ * product rather than a value somebody typed, so these rows carry no controls, and they are internal —
+ * a certificate number and a laboratory verdict are not consumer copy. V1 keeps what the supplier
+ * delivered, so they belong to the task card and appear once it exists.
+ */
+export function qualityReportFacts(report: QualityReport | undefined): Fact[] {
+  if (!report) return [];
+  const fact = (key: string, label: string, value: string): Fact => ({ key, label, value, source: QUALITY_REPORT_FACT_SOURCE,
+    anchor: report.file ? `${report.file} · ${report.reportNo}` : report.reportNo, sourceKind: 'image', status: 'Confirmed', allowed: false });
+  return [
+    fact('qualityReportNo', 'Report number', report.reportNo),
+    ...(report.productName ? [fact('qualityReportProduct', 'Report product name', report.productName)] : []),
+    ...(isoDate(report.validUntil) ? [fact('qualityReportValidUntil', 'Report valid until', report.validUntil!)] : []),
+    fact('qualityReportVerdict', 'Report verdict', report.result === 'pass' ? 'Qualified' : 'Unqualified'),
+  ];
+}
 
 /**
  * An absent report is a data gap and stays quiet, exactly like an undeclared transport attribute.

@@ -1,9 +1,29 @@
 import type { Fact, FactCard, Issue, Listing, Platform, Pricing, Product, Recommendation, Task } from '../src/types';
 import { HERO_SKU } from '../src/data/mockData';
+import { sameCategory } from './categories';
 import { formatCapacity, formatLength, formatWeight, systemForMarket, type UnitSystem } from './units';
 
+/**
+ * The name the pool shows: brand plus product type, the way a marketplace title leads. A supplier row
+ * often carries a marketing claim in front of the brand and the size and colour behind the type
+ * ("100% leakproof ET.ELF/外星精灵 咖啡杯 260ml Black"), and none of that is what the product is.
+ */
+const PRODUCT_TYPE_WORDS = ['保温杯', '咖啡杯', '马克杯', '陶瓷杯', '水杯', '托特包', '台灯', '喷雾套装', '随行杯', 'Travel Bottle', 'Tote Bag'];
+export function productDisplayName(product: { name: string; color?: string }): string {
+  const colour = (product.color ?? '').trim();
+  let name = product.name.trim()
+    .replace(/^\s*\d+(?:\.\d+)?\s*%\s*\S+\s+/, '')
+    .replace(/[\s,，]*\d+(?:\.\d+)?\s*(?:ml|l|oz|fl\s*oz|g|kg|cm|in)\b.*$/i, '');
+  if (colour && colour.toLowerCase() !== 'unspecified') {
+    name = name.replace(new RegExp(`[\\s,，]*${colour.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'i'), '');
+  }
+  name = name.replace(/[\s,，;；-]+$/, '').replace(/\s+/g, ' ').trim();
+  const type = PRODUCT_TYPE_WORDS.map(word => ({ word, at: name.toLowerCase().indexOf(word.toLowerCase()) }))
+    .filter(hit => hit.at >= 0).sort((left, right) => left.at - right.at)[0];
+  return type ? name.slice(0, type.at + type.word.length).trim() : name;
+}
 export function rankProducts(products: Product[], task: Task): Recommendation[] {
-  return products.filter(p => ['search_ready', 'missing_data'].includes(p.status) && p.duplicateStatus === 'unique' && p.category === task.category && ['bottle', 'bag'].includes(p.visual) && !!p.color && !!p.material && (p.visual !== 'bottle' || p.capacity > 0)).map(p => {
+  return products.filter(p => ['search_ready', 'missing_data'].includes(p.status) && p.duplicateStatus === 'unique' && sameCategory(p.category, task.category) && ['bottle', 'bag'].includes(p.visual) && !!p.color && !!p.material && (p.visual !== 'bottle' || p.capacity > 0)).map(p => {
     const reasons: string[] = []; const deductions: string[] = []; let score = 94;
     if (p.color === 'Black') reasons.push('Black matches requested color'); else { score -= 23; deductions.push('Color does not match requested black'); }
     if (p.visual === 'bottle') {
