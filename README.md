@@ -16,8 +16,9 @@
 
 | 想看什么 | 去哪里 |
 | --- | --- |
-| **业务流程图** | [`01_业务流程图(3)_命名统一.html`](<01_业务流程图(3)_命名统一.html>)（浏览器直接打开） |
-| **系统架构图 / 技术路线图** | [`02_系统架构图.html`](02_系统架构图.html)、[`02_系统架构图.png`](02_系统架构图.png)、[`02_技术路线图.html`](02_技术路线图.html) |
+| **业务流程图** | [`docs/图表/01_业务流程图.html`](docs/图表/01_业务流程图.html)（浏览器直接打开） |
+| **系统架构图 / 技术路线图** | [`docs/图表/02_系统架构图.png`](docs/图表/02_系统架构图.png)、[`docs/图表/03_技术路线图.html`](docs/图表/03_技术路线图.html) |
+| **复赛作品提交文档** | [`海淘集市_Baseline_复赛作品提交.md`](海淘集市_Baseline_复赛作品提交.md) |
 | **实际运行截图**（11 步完整流程） | [`docs/截图/`](docs/截图/README.md) |
 | **完整 Demo 代码** | [`src/`](src)（前端）、[`server/`](server)（API/服务）、[`shared/`](shared)（共享领域逻辑）、[`prisma/`](prisma)（数据模型） |
 | **数据文件** | [`evaluation/asset-import-sample/`](evaluation/asset-import-sample)：`商品参数信息表(上传).csv`、`危险品运输属性样本.csv`、`可选材料/`（故意做错的样张图）、`hazmat-images/`（质检报告样张）、`质检报告样本.csv` 等 |
@@ -118,7 +119,7 @@ AI_LIVE_ENABLED=true NODE_TLS_REJECT_UNAUTHORIZED=1 npm run ai:smoke -- --live
 - [托特包完整演示说明](docs/BAG_DEMO.md)
 - [人工事实核对](docs/FACT_REVIEW.md)
 - [任务级税价快照](docs/PRICING_SNAPSHOT.md)
-- [比赛版 3 / 5 分钟讲稿](docs/DEMO_SCRIPT.md)
+- [比赛版 5 分钟讲稿](docs/DEMO讲稿_5分钟版.md)
 - [比赛版截图](docs/截图/README.md)
 
 比赛讲稿和旧截图描述的是冻结的离线比赛版；默认 Full Demo 需要先登录，产品 / 任务 / 事实存储边界以本文件和 Full Demo 文档为准。

@@ -71,8 +71,8 @@ Amazon US / United States / Home & Kitchen；黑色、约16oz、无吸管、通�
 
 实际截图：
 
-- [Qwen 带吸管任务排序](recommendation/qwen-straw-zh.png)
-- [中文任务表单](recommendation/task-editor-zh.png)
-- [手机排序页面](recommendation/qwen-straw-mobile.png)
+- （截图已归档）
+- （截图已归档）
+- （截图已归档）
 
 本轮没有重新真实调用 Qwen Listing，也没有开发 B / C 线。

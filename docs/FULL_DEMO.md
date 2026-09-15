@@ -285,7 +285,7 @@ npm run preview:local
 
 独立离线模式默认 5174，完全不请求 API。`competition-demo-v1` 标签仍精确指向旧比赛版 `4a2920f`。
 
-后端基础轮验收见 `docs/验证记录/VERIFICATION.md`；事实迁移验收见 `docs/FACT_SERVER_MIGRATION.md`；最新文案 / 审核 / 发布验收见 `docs/LISTING_SERVER_MIGRATION.md`。E2E 为隔离测试账户，不共用 Demo 用户；原比赛断言保留。
+后端基础轮验收见 `docs/验证记录/VERIFICATION.md`。E2E 为隔离测试账户，不共用 Demo 用户；原比赛断言保留。
 
 ## 11. 下一轮最适合 AI 化的三个模块
 

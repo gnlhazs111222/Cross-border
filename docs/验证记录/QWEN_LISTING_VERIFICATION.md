@@ -27,9 +27,9 @@ Shopify 标题：
 
 保存结果随后通过实际 5173 页面加载，检查中文桌面及英文手机界面；这一过程没有点击生成、没有新增模型请求：
 
-- [Amazon 中文文案](qwen-listing/amazon-zh.png)
-- [Shopify 中文文案](qwen-listing/shopify-zh.png)
-- [Shopify 手机界面](qwen-listing/shopify-mobile.png)
+- （截图已归档）
+- （截图已归档）
+- （截图已归档）
 
 Mock 验收额外覆盖非法 JSON、Zod 失败、超时、HTTP 错误、未授权字段、错误数值、矛盾规格、无依据绝对宣称、输出 token 上限和调用预算；这些情况均返回可继续工作的模板草稿。缓存命中、生成期间事实变更以及显式风险注入后的 R001 也有自动测试。
 

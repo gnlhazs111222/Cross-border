@@ -29,8 +29,6 @@
     "ai:vision-smoke": "tsx server/scripts/vision-smoke.ts",
     "eval:recommendation": "tsx evaluation/recommendation/run.ts",
     "eval:review": "tsx evaluation/review/run.ts",
-    "align:report": "tsx scripts/align-report.ts",
-    "align:catalog": "tsx scripts/align-catalog.ts",
     "split:variants": "tsx scripts/split-variants.ts",
     "make:test-images": "tsx scripts/make-test-images.ts",
     "make:hazmat-images": "tsx scripts/make-hazmat-images.ts",
