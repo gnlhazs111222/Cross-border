@@ -62,7 +62,7 @@ for (const locale of ['en-US', 'zh-CN']) for (const viewport of profiles) {
       await button('Load Demo Dataset', '载入内置数据').click();
       await expect(page.locator('.product-table tbody tr')).toHaveCount(10);
       await button('Import Supplier File', '导入供应商文件').click();
-      await page.getByLabel(choose('Supplier file', '供应商文件'), { exact: true }).setInputFiles(resolve('public/demo/prismlaunch-supplier-demo.xlsx'));
+      await page.getByLabel(choose('Supplier file', '供应商文件'), { exact: true }).setInputFiles(resolve('public/demo/haitao-supplier-demo.xlsx'));
       await button('Import 7 products', '导入 7 个商品').click();
       await expect(page.locator('.product-table tbody tr')).toHaveCount(7);
       await shot('01-materials-import.png', '.supplier-import-panel');

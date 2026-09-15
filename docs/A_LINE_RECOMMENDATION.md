@@ -103,7 +103,7 @@ Prisma 仅给 LaunchTask 增加一个 nullable JSON `recommendationSnapshot`，�
 
 Rule：Top1 9/11（81.8%），Hit@3 11/11（100%），NDCG@3 0.9491，Invalid Candidate Rate=0，有限 Unsupported Reason 检查=0；另一个无候选案例正确返回空。指标定义、配对比较与输出说明见 `evaluation/recommendation/README.md`。
 
-真实验收用了 5 次请求（3 次被校验拦下并回退，2 次成功），共 7935 tokens；最终成功的两例 Top1 / Hit@3 都为 100%，NDCG@3 为 0.9062，同例 rule 为 1.0，不证明 Qwen 整体优于规则。真实小样本验证和完整调用统计见 `artifacts/full-demo/QWEN_RECOMMENDATION_VERIFICATION.md`。仅比较少量真实任务，不把它写成统计结论。
+真实验收用了 5 次请求（3 次被校验拦下并回退，2 次成功），共 7935 tokens；最终成功的两例 Top1 / Hit@3 都为 100%，NDCG@3 为 0.9062，同例 rule 为 1.0，不证明 Qwen 整体优于规则。真实小样本验证和完整调用统计见 `docs/验证记录/QWEN_RECOMMENDATION_VERIFICATION.md`。仅比较少量真实任务，不把它写成统计结论。
 
 ## 7. 验证与演示
 

@@ -1,10 +1,32 @@
-# 海淘集市 Full Demo
+# 海淘集市 · 跨境商品上新工作台
 
-当前集成版本包含 A 线（可编辑任务、候选过滤、Qwen 推荐与评测）、B 线（Qwen 语义审核、版本授权与审核评测）和 C 线（多模态图片文字核对，以及随行的质检报告与物流属性报警）。集成审查与验证见 [A_B_INTEGRATION.md](docs/A_B_INTEGRATION.md)，模块说明见 [A 线](docs/A_LINE_RECOMMENDATION.md)、[B 线](docs/B_REVIEW_IMPLEMENTATION.md) 和 [C 线](docs/MULTIMODAL.md)。
+**团队：Baseline** ｜ 完整可运行 Demo（React + Fastify + Prisma / SQLite）
 
-当前默认是完整演示模式：**React → Fastify → Prisma / SQLite → Cookie 登录**。商品、任务、事实、文案、审核和模拟发布均由服务端持久化。浏览器保留界面偏好与非权威快照。
+## 这个项目是什么
 
-QwenListingProvider 已真实生成 Amazon / Shopify 文案并通过校验、审核与模拟发布。默认仍使用模板，不自动花费模型 API；Qwen 需后端显式开启，失败时回退模板。
+面向跨境电商运营团队的商品上新工作台：把国内供应商的中文资料，变成可以直接上架海外平台的英文商品页，**并且每一句话都能指回它的证据**。
+
+- **目标用户**：没有专职数据整理团队的中小品牌方、工贸商家与跨境运营团队。协作角色三类：供应链人员（提供资料、对缺项负责）、选品与 Listing 运营（选 SKU、写英文页面）、审核人员／店铺负责人（发布前把关）。
+- **输入**：中文 Excel / CSV（固定模板）、商品白底图与包装图、规格 PDF、质检报告图片。
+- **输出**：Amazon 可直接导出的 CSV、Shopify 商品草稿（演示为模拟发布）。
+- **核心链条**：资料导入与清洗 → 选品推荐 → 证据与事实（事实卡 V1 供应商基准 + V2 任务补充，三项核对：图片文字／质检报告／物流属性）+ 定价计算 → 文案生成（只用已确认事实）→ 审核与发布准备。
+- **关键差异**：事实卡分层（V1 基准不被覆盖，V2 只叠加并标注来源）· 核对结论才允许进文案 · 每一次人工处置都留痕（谁、何时、依据哪张图）。
+
+## 仓库导览（评委从这里看）
+
+| 想看什么 | 去哪里 |
+| --- | --- |
+| **业务流程图** | [`01_业务流程图(3)_命名统一.html`](<01_业务流程图(3)_命名统一.html>)（浏览器直接打开） |
+| **系统架构图 / 技术路线图** | [`02_系统架构图.html`](02_系统架构图.html)、[`02_系统架构图.png`](02_系统架构图.png)、[`02_技术路线图.html`](02_技术路线图.html) |
+| **实际运行截图**（11 步完整流程） | [`docs/截图/`](docs/截图/README.md) |
+| **完整 Demo 代码** | [`src/`](src)（前端）、[`server/`](server)（API/服务）、[`shared/`](shared)（共享领域逻辑）、[`prisma/`](prisma)（数据模型） |
+| **数据文件** | [`evaluation/asset-import-sample/`](evaluation/asset-import-sample)：`商品参数信息表(上传).csv`、`危险品运输属性样本.csv`、`可选材料/`（故意做错的样张图）、`hazmat-images/`（质检报告样张）、`质检报告样本.csv` 等 |
+| **模块说明** | [A 线 推荐](docs/A_LINE_RECOMMENDATION.md)、[B 线 语义审核](docs/B_REVIEW_IMPLEMENTATION.md)、[C 线 图片文字核对](docs/MULTIMODAL.md)、[供应商导入](docs/SUPPLIER_IMPORT.md)、[人工事实核对](docs/FACT_REVIEW.md)、[税价快照](docs/PRICING_SNAPSHOT.md) |
+| **验证记录**（真实调用与验收数据） | [`docs/验证记录/`](docs/验证记录) 与 [集成验证](docs/A_B_INTEGRATION.md) |
+| **测试** | [`tests/`](tests)（端到端）、[`server/tests/`](server/tests)（229 条服务端测试） |
+
+## 启动
+
 
 ## 启动
 
@@ -89,19 +111,16 @@ AI_LIVE_ENABLED=true NODE_TLS_REJECT_UNAUTHORIZED=1 npm run ai:smoke -- --live
 - [Qwen Listing 本轮实现与使用说明](docs/QWEN_LISTING.md)
 - [多模态模块：图片文字与事实核对](docs/MULTIMODAL.md)
 - [危险品样本图片与质检报告样本（含手动测试步骤）](evaluation/asset-import-sample/质检报告样本说明.md)
-- [Qwen 真实调用验收与截图](artifacts/full-demo/QWEN_LISTING_VERIFICATION.md)
+- [Qwen 真实调用验收与截图](docs/验证记录/QWEN_LISTING_VERIFICATION.md)
 - [Full Demo 架构、API、持久化、Provider 与真实调用报告](docs/FULL_DEMO.md)
-- [文案 / 审核 / 发布迁移与本轮验收](docs/LISTING_SERVER_MIGRATION.md)
-- [上一轮事实迁移验收](docs/FACT_SERVER_MIGRATION.md)
-- [上一轮后端基础验收](artifacts/full-demo/VERIFICATION.md)
-- [供应商导入说明](SUPPLIER_IMPORT.md)
+- [上一轮后端基础验收](docs/验证记录/VERIFICATION.md)
+- [供应商导入说明](docs/SUPPLIER_IMPORT.md)
 - [托特包完整演示说明](docs/BAG_DEMO.md)
-- [人工事实核对](FACT_REVIEW.md)
+- [人工事实核对](docs/FACT_REVIEW.md)
 - [任务级税价快照](docs/PRICING_SNAPSHOT.md)
 - [比赛版 3 / 5 分钟讲稿](docs/DEMO_SCRIPT.md)
-- [比赛版问答](docs/DEMO_QA.md)
-- [比赛版截图](artifacts/presentation/README.md)
+- [比赛版截图](docs/截图/README.md)
 
 比赛讲稿和旧截图描述的是冻结的离线比赛版；默认 Full Demo 需要先登录，产品 / 任务 / 事实存储边界以本文件和 Full Demo 文档为准。
 
-示例文件仍位于 `public/demo/prismlaunch-supplier-demo.xlsx`、`public/demo/prismlaunch-supplier-demo.csv`，页面可以下载。
+示例文件仍位于 `public/demo/haitao-supplier-demo.xlsx`、`public/demo/haitao-supplier-demo.csv`，页面可以下载。

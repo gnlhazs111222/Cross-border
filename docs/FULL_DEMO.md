@@ -243,7 +243,7 @@ CLI 通过本地 Fastify 登录和 smoke 路由进行验证，每次运行最多
 | 文本连接，输入“你好” | 成功返回简短中文回复 | 515ms | 21 / 8 / 29 |
 | 短 JSON | 成功并验证 `{"ok":true,"service":"prismlaunch"}` | 228ms | 61 / 11 / 72 |
 
-该连接轮共 **101 tokens**。最新 Qwen Listing 轮又成功调用 Amazon / Shopify 各一次，新增 **2311 tokens**；SQLite 当前累计 **4 次 / 2412 tokens**。记录详情见 `artifacts/full-demo/QWEN_LISTING_VERIFICATION.md`。该连接验证轮无真实调用失败或自动重试。这是两次 smoke 的观测，不是性能基准。
+该连接轮共 **101 tokens**。最新 Qwen Listing 轮又成功调用 Amazon / Shopify 各一次，新增 **2311 tokens**；SQLite 当前累计 **4 次 / 2412 tokens**。记录详情见 `docs/验证记录/QWEN_LISTING_VERIFICATION.md`。该连接验证轮无真实调用失败或自动重试。这是两次 smoke 的观测，不是性能基准。
 
 ## 10. 启动和验证
 
@@ -285,7 +285,7 @@ npm run preview:local
 
 独立离线模式默认 5174，完全不请求 API。`competition-demo-v1` 标签仍精确指向旧比赛版 `4a2920f`。
 
-后端基础轮验收见 `artifacts/full-demo/VERIFICATION.md`；事实迁移验收见 `docs/FACT_SERVER_MIGRATION.md`；最新文案 / 审核 / 发布验收见 `docs/LISTING_SERVER_MIGRATION.md`。E2E 为隔离测试账户，不共用 Demo 用户；原比赛断言保留。
+后端基础轮验收见 `docs/验证记录/VERIFICATION.md`；事实迁移验收见 `docs/FACT_SERVER_MIGRATION.md`；最新文案 / 审核 / 发布验收见 `docs/LISTING_SERVER_MIGRATION.md`。E2E 为隔离测试账户，不共用 Demo 用户；原比赛断言保留。
 
 ## 11. 下一轮最适合 AI 化的三个模块
 

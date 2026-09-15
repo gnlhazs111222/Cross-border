@@ -6,7 +6,7 @@
 
 1. 登录 Full Demo，进入“上新任务”。
 2. 点击“载入包类演示”。系统只推荐 `Bags & Accessories` 中的托特包，台灯仍被排除。
-3. 选择 `LM-BG-TOT-009-BLK`；若先导入 `public/demo/prismlaunch-bag-demo.csv`，则选择 `LM-BG-TOT-101-BLK`。
+3. 选择 `LM-BG-TOT-009-BLK`；若先导入 `public/demo/haitao-bag-demo.csv`，则选择 `LM-BG-TOT-101-BLK`。
 4. 进入证据与事实。V1 包含颜色、材质、包袋类型、产地及内部定价字段，不出现水杯容量或吸管。
 5. 点击“分析证据”。V2 增加包装内含、可见纹理、包口和肩带；这些图片衍生字段默认待人工确认。确认包口和肩带后，它们才会进入文案。
 6. 进入文案工作室，生成 Amazon 文案，确认已出现 `Open top closure` 和 `Dual shoulder straps`。首稿还会故意加入 `Guaranteed to carry up to 50 kg.`，用于演示无证据承重宣称拦截。

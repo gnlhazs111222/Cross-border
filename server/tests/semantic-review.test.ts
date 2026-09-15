@@ -23,8 +23,12 @@ class ResponseModel extends MockTextModelProvider {
 }
 const options = { model: 'qwen-test', liveEnabled: true, configured: true };
 
+/**
+ * The captured model responses these tests replay live beside them in `tests/fixtures/captured/`, not in a
+ * build-output folder: they are inputs to the suite, so they ship with it and never get cleaned away.
+ */
 test('captured description index zero preserves its actual issue and references', async () => {
-  const capture = JSON.parse(readFileSync('artifacts/b-review/location-diagnostic/diagnostic-1788954665509.json', 'utf8'));
+  const capture = JSON.parse(readFileSync('tests/fixtures/captured/review-location-diagnostic.json', 'utf8'));
   const i = input(); i.listing = { ...capture.modelInput.COPY, platform: 'shopify' };
   i.facts.push({ key: 'lidType', label: 'Lid type', value: 'Screw-top lid', status: 'Confirmed', allowed: true, source: 'supplier', anchor: '' });
   const model = new ResponseModel(); model.output = capture.captures[0].parsed;
@@ -56,7 +60,7 @@ test('singleton copy fields tolerate only a redundant zero index and still valid
 
 test('captured containment explanation must cite the lid fact it explicitly discusses', async () => {
   const cases = JSON.parse(readFileSync('evaluation/review/round2/cases.json', 'utf8'));
-  const report = JSON.parse(readFileSync('artifacts/evaluation/review-round2/2026-09-09T10-32-11-607Z-remaining-a78d4217/report.json', 'utf8'));
+  const report = JSON.parse(readFileSync('tests/fixtures/captured/review-round2-remaining-a78d4217.json', 'utf8'));
   const i = cases.cases.find((c: { id: string }) => c.id === 'R2-09').input;
   const outcome = report.rows.find((r: { id: string }) => r.id === 'R2-09').outcome;
   const model = new ResponseModel();
@@ -102,7 +106,7 @@ test('blank suggestions and revision-marker reasoning cannot become final findin
 });
 
 test('captured empty-fix response fails as a whole; only the complete true conflict is valid', async () => {
-  const captured = JSON.parse(readFileSync('artifacts/b-review/empty-fix-diagnostic/diagnostic-1788949692387.json', 'utf8'));
+  const captured = JSON.parse(readFileSync('tests/fixtures/captured/review-empty-fix-diagnostic.json', 'utf8'));
   const i = input(); i.listing.title = 'Black stainless steel bottle, 750ml';
   i.listing.attributes.Capacity = '500ml / 16.9 fl oz';
   const model = new ResponseModel(); model.output = captured.captures[0].parsed;
@@ -116,7 +120,7 @@ test('captured empty-fix response fails as a whole; only the complete true confl
 
 test('rejects the captured self-correcting false title accusation instead of presenting it or silently approving', async () => {
   const cases = JSON.parse(readFileSync('evaluation/review/round2/cases.json', 'utf8'));
-  const report = JSON.parse(readFileSync('artifacts/evaluation/review-round2/2026-09-09T08-30-23-715Z-remaining-1cad93f7/report.json', 'utf8'));
+  const report = JSON.parse(readFileSync('tests/fixtures/captured/review-round2-remaining-1cad93f7.json', 'utf8'));
   const model = new ResponseModel();
   const captured = report.rows.find((r: { id: string }) => r.id === 'R2-07').outcome;
   model.output = { status: captured.status, issues: captured.issues.map(({ id, severity, title, origin, ...issue }: Record<string, unknown>) => issue) };

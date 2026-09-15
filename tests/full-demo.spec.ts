@@ -32,7 +32,7 @@ publicTest('real login UI, HttpOnly session, wrong password and logout', async (
 test('products and tasks survive clearing all browser storage; forged catalog cache is ignored', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Import Supplier File', exact: true }).click();
-  await page.getByLabel('Supplier file', { exact: true }).setInputFiles(resolve('public/demo/prismlaunch-supplier-demo.csv'));
+  await page.getByLabel('Supplier file', { exact: true }).setInputFiles(resolve('public/demo/haitao-supplier-demo.csv'));
   await page.getByRole('button', { name: 'Import 7 products' }).click();
   await expect(page.locator('.product-table tbody tr')).toHaveCount(7);
   await page.getByRole('button', { name: 'Create Demo Task', exact: true }).click();

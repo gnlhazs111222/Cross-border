@@ -54,7 +54,7 @@ test('V1 is idempotent, source-backed, owner-scoped and stored with evidence in 
 });
 for (const ext of ['xlsx', 'csv']) test(`${ext} actual parser imports retain file/sheet/row/field provenance and numeric values`, async () => {
   await call('/api/demo/reset', 'POST', {});
-  const fileName = `prismlaunch-supplier-demo.${ext}`;
+  const fileName = `haitao-supplier-demo.${ext}`;
   const preview = await parseSupplierFile(new File([readFileSync(`public/demo/${fileName}`)], fileName), 'replace', []);
   const { products, ...report } = preview;
   const catalog = await call('/api/products');

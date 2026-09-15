@@ -127,7 +127,7 @@ SHA-256 key 包括平台、市场、类目、任务需求、商品身份、规�
 
 UI 中 Qwen / fallback 显示的专门自动测试使用明确标注的响应 fixture；Provider 与 SQLite 全链路使用 mock transport。真实输出另外通过下面的手动验收检查，不能把 UI fixture 当成真实 API 结果。
 
-实际真实验收及完整统计见 [QWEN_LISTING_VERIFICATION.md](../artifacts/full-demo/QWEN_LISTING_VERIFICATION.md)：本轮仅 **2 次 qwen3.6-flash、2311 tokens**，两平台均成功、无 fallback；累计为 4 次 / 2412 tokens。
+实际真实验收及完整统计见 [QWEN_LISTING_VERIFICATION.md](../docs/验证记录/QWEN_LISTING_VERIFICATION.md)：本轮仅 **2 次 qwen3.6-flash、2311 tokens**，两平台均成功、无 fallback；累计为 4 次 / 2412 tokens。
 
 ## 10. 使用方式
 

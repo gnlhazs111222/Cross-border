@@ -7,7 +7,7 @@ import { parseSupplierFile } from '../src/services/supplierImport';
 const HERO = 'LM-KT-BTL-001-BLK-500';
 const MISSING = 'LM-KT-IMP-005-BLK-500';
 const STATE_KEY = 'prismlaunch.demo.v1';
-const csvSample = readFileSync(resolve('public/demo/prismlaunch-supplier-demo.csv'), 'utf8');
+const csvSample = readFileSync(resolve('public/demo/haitao-supplier-demo.csv'), 'utf8');
 const header = csvSample.split('\n')[0].trim();
 const hero = csvSample.split('\n')[1].trim().split(',');
 const snapshot = (page: Page) => page.evaluate(key => JSON.parse(localStorage.getItem(key)!), STATE_KEY);
@@ -16,7 +16,7 @@ const csvBytes = (rows: string[][]) => Buffer.from('\uFEFF' + [header, ...rows.m
 async function previewSample(page: Page, extension: string, mode = 'replace') {
   await page.getByRole('button', { name: 'Import Supplier File', exact: true }).click();
   if (mode !== 'replace') await page.getByRole('combobox', { name: 'Import mode' }).selectOption(mode);
-  await page.getByLabel('Supplier file', { exact: true }).setInputFiles(resolve(`public/demo/prismlaunch-supplier-demo.${extension}`));
+  await page.getByLabel('Supplier file', { exact: true }).setInputFiles(resolve(`public/demo/haitao-supplier-demo.${extension}`));
   await expect(page.getByRole('dialog').getByLabel('Import summary')).toBeVisible();
 }
 
@@ -58,7 +58,7 @@ for (const extension of ['xlsx', 'csv']) {
     await expect(page.getByRole('heading', { name: 'FactCard V1', exact: true })).toBeVisible();
     const v1 = (await snapshot(page)).v1;
     expect(v1.facts.find((f: { key: string }) => f.key === 'capacity').source).toBe('Imported Supplier File');
-    expect(v1.facts.find((f: { key: string }) => f.key === 'capacity').anchor).toContain(`prismlaunch-supplier-demo.${extension}`);
+    expect(v1.facts.find((f: { key: string }) => f.key === 'capacity').anchor).toContain(`haitao-supplier-demo.${extension}`);
     await page.getByRole('button', { name: /Imported Supplier File.*View extracted result/ }).click();
     await expect(page.getByRole('dialog')).toContainText('row 2');
     await expect(page.getByRole('dialog')).toContainText('These values were parsed from your supplier file.');
@@ -182,7 +182,7 @@ test('unsupported headers, empty and corrupt files leave the current dataset and
     await expect(page.getByRole('button', { name: 'Import 0 products' })).toBeDisabled();
     expect(await snapshot(page)).toEqual(before);
   }
-  await input.setInputFiles(resolve('public/demo/prismlaunch-supplier-demo.xlsx'));
+  await input.setInputFiles(resolve('public/demo/haitao-supplier-demo.xlsx'));
   await expect(page.getByRole('button', { name: 'Import 7 products' })).toBeEnabled();
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
   expect(await snapshot(page)).toEqual(before);
@@ -254,7 +254,7 @@ test('Chinese mobile import and language switch preserve the preview and importe
   await page.goto('/');
   await page.getByRole('button', { name: '中文', exact: true }).click();
   await page.getByRole('button', { name: '导入供应商文件', exact: true }).click();
-  await page.getByLabel('供应商文件', { exact: true }).setInputFiles(resolve('public/demo/prismlaunch-supplier-demo.xlsx'));
+  await page.getByLabel('供应商文件', { exact: true }).setInputFiles(resolve('public/demo/haitao-supplier-demo.xlsx'));
   await expect(page.getByRole('button', { name: '导入 7 个商品' })).toBeEnabled();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.getByRole('button', { name: '导入 7 个商品' }).click();

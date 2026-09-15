@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>棱镜上新 PrismLaunch｜业务流程图</title>
+<style>
+:root{--navy:#102a43;--blue:#1677ff;--violet:#7c3aed;--green:#059669;--amber:#d97706;--ink:#1f2937;--muted:#667085;--line:#d9e6f2}*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#edf5ff,#fbfdff 58%,#f1fbf7);font:15px/1.6 "Microsoft YaHei","PingFang SC",Arial,sans-serif;color:var(--ink)}.wrap{max-width:1240px;margin:auto;padding:28px 20px 48px}.hero{padding:27px 30px;border-radius:21px;background:linear-gradient(125deg,#102a43,#174b88 58%,#1677ff);color:#fff;box-shadow:0 17px 42px #163a6735}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.11em;color:#c5e1ff}.hero h1{margin:4px 0 7px;font-size:30px}.hero p{margin:0;max-width:900px;color:#e2efff}.tip{margin:18px 0;padding:12px 15px;border:1px solid #cfe4fd;border-radius:12px;background:#fff;color:#315a83}.board{position:relative;padding:24px;border:1px solid var(--line);border-radius:20px;background:#fff;box-shadow:0 12px 31px #163a6714}.board-title{display:flex;justify-content:space-between;align-items:end;gap:14px;margin:0 0 18px}.board-title h2{margin:0;color:var(--navy);font-size:20px}.board-title p{margin:0;color:var(--muted);font-size:13px}.lanes{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:108px;align-items:start}.lane{position:relative;padding:18px 17px 13px;border-radius:17px;border:1px solid #dce9f6;background:linear-gradient(180deg,#f9fcff,#fff)}.lane.import{background:linear-gradient(180deg,#f4faff,#fff)}.lane.main{background:linear-gradient(180deg,#f8f7ff,#fff)}.lane-head{position:relative;z-index:2;min-height:58px;margin:0 0 16px;padding:10px 12px;border-radius:12px;background:#fff;box-shadow:0 6px 16px #163a6710}.lane.import .lane-head{border-left:4px solid var(--blue)}.lane.main .lane-head{border-left:4px solid var(--violet)}.lane-head .kicker{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted)}.lane-head h3{margin:2px 0 0;color:var(--navy);font-size:17px}.lane-head p{margin:2px 0 0;font-size:12px;color:var(--muted)}.steps{position:relative;padding-left:5px}.steps:before{content:"";position:absolute;z-index:0;left:34px;top:40px;bottom:39px;width:2px;background:linear-gradient(var(--blue),#9bc9fb 70%,#6baaf0)}.main .steps{padding-right:5px}.main .steps:before{background:linear-gradient(var(--violet),#c4b5fd 58%,var(--green))}.node{position:relative;z-index:1;display:flex;gap:13px;align-items:flex-start;width:100%;min-height:82px;margin:0 0 13px;padding:14px;border:1px solid #d9e5f1;border-radius:15px;background:#fff;color:var(--ink);text-align:left;cursor:pointer;transition:.18s}.node:hover{border-color:var(--blue);transform:translateX(3px);box-shadow:0 9px 22px #1677ff20}.node:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}.main .node:hover{border-color:var(--violet);box-shadow:0 9px 22px #7c3aed20}.dot{display:grid;place-items:center;flex:0 0 31px;height:31px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:800;box-shadow:0 0 0 5px #fff}.main .dot{background:var(--violet)}.n-green .dot{background:var(--green)}.n-amber .dot{background:var(--amber)}.node h4{margin:0;font-size:15px;line-height:1.35}.node p{margin:3px 0 0;font-size:12px;line-height:1.45;color:var(--muted)}.node .open{display:inline-block;margin-top:6px;color:#1762ae;font-size:11px;font-weight:800}.main .node .open{color:#6d28d9}.side-snapshot{position:absolute;z-index:3;right:0;top:108px;width:198px;min-height:128px;margin:0;padding:13px 12px;border-color:#f7cf93;background:#fffaf1;box-shadow:0 7px 18px #d9770614}.side-snapshot:before{content:"";position:absolute;left:-29px;top:44px;width:29px;height:2px;background:#d97706}.side-snapshot:after{content:"";position:absolute;left:-6px;top:40px;width:8px;height:8px;border-top:2px solid #d97706;border-right:2px solid #d97706;transform:rotate(45deg)}.side-snapshot .dot{background:var(--amber)}.side-snapshot h4{font-size:13px}.side-snapshot p{font-size:11px}.bridge{position:absolute;z-index:5;top:306px;left:calc(50% - 54px);width:108px;height:42px;pointer-events:none;overflow:visible}.bridge path{fill:none;stroke:#1681e8;stroke-width:2.3;stroke-linecap:round}.bridge-label{position:absolute;z-index:6;top:281px;left:50%;transform:translateX(-50%);padding:3px 7px;border:1px solid #b9d9fa;border-radius:12px;background:#fff;color:#1762ae;font-size:11px;font-weight:800;white-space:nowrap}.legend{display:flex;flex-wrap:wrap;gap:11px;margin:18px 0 0;color:var(--muted);font-size:12px}.legend i{display:inline-block;width:9px;height:9px;margin-right:5px;border-radius:50%;background:var(--blue)}.legend .m{background:var(--violet)}.legend .a{background:var(--amber)}.legend .g{background:var(--green)}.foot{margin:17px 3px 0;color:#667085;font-size:12px}@media(max-width:900px){.lanes{grid-template-columns:1fr;gap:20px}.main .steps{padding-right:0}.side-snapshot{position:relative;top:auto;right:auto;width:100%;margin:0 0 13px}.side-snapshot:before,.side-snapshot:after,.bridge,.bridge-label{display:none}.main .steps:before{bottom:180px}}@media(max-width:620px){.wrap{padding:16px 12px 32px}.hero{padding:22px 20px}.hero h1{font-size:25px}.board{padding:14px}.board-title{display:block}.board-title p{margin-top:4px}}
+.detail-dialog{width:min(940px,calc(100% - 28px));max-height:min(88vh,800px);padding:0;border:0;border-radius:18px;background:#f3f8fe;color:var(--ink);box-shadow:0 22px 58px #102a4366}.detail-dialog::backdrop{background:#102a4380}.detail-wrap{padding:24px}.detail-hero{padding:22px 24px;border-radius:14px;background:linear-gradient(125deg,#102a43,#174b88,#1677ff);color:#fff}.detail-hero .eyebrow{font-size:12px;font-weight:800;letter-spacing:.1em;color:#c4e1ff}.detail-hero h2{margin:4px 0;font-size:25px}.detail-hero p{margin:0;color:#e1efff}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}.detail-card{padding:16px 17px;border:1px solid #dce7f3;border-radius:14px;background:#fff;box-shadow:0 7px 20px #163a6710}.detail-card.full{grid-column:1/-1}.detail-card h3{margin:0 0 8px;font-size:15px;color:#164b82}.detail-card p,.detail-card ul{margin:0}.detail-card ul{padding-left:18px}.detail-code{margin:0;padding:14px;border-radius:11px;background:#102a43;color:#d9f0ff;overflow:auto;font:12px/1.65 ui-monospace,Consolas,monospace;white-space:pre-wrap}.detail-guard{border-left:4px solid #059669;background:#effcf5}.detail-close{position:sticky;float:right;top:0;border:0;border-radius:9px;background:#1677ff;color:#fff;padding:9px 14px;font-weight:700;cursor:pointer;z-index:2}@media(max-width:620px){.detail-wrap{padding:14px}.detail-grid{grid-template-columns:1fr}.detail-card.full{grid-column:auto}.detail-hero{padding:20px 18px}.detail-hero h2{font-size:21px}}
+.node p,.node .open,.lane-head p,.foot,.board-title p{font-size:14px}.node{font:inherit}.bridge-label,.bridge{display:none}.lanes{gap:28px}.detail-code{font-size:14px}.detail-card p{overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <section class="hero">
+    <div class="eyebrow">PRISMLAUNCH · 国内商品上架海外平台</div>
+    <h1>棱镜上新 PrismLaunch｜业务流程图</h1>
+  </section>
+  <section class="board">
+    <div class="board-title"><h2>端到端流程</h2></div>
+    <div id="lanes" class="lanes"></div>
+    <div class="legend"><span><i></i>资料库流程</span><span><i class="m"></i>上新任务主线</span><span><i class="a"></i>任务级费用／汇率快照</span><span><i class="g"></i>审核或发布结果</span></div>
+  </section>
+</main>
+<dialog id="detailDialog" class="detail-dialog" aria-labelledby="detailTitle"></dialog>
+<script>
+const modules={
+  "import": {
+    "id": "import",
+    "n": "1",
+    "name": "资料输入",
+    "small": "XLSX / CSV → 预览 → 确认导入",
+    "role": "C · 资料输入",
+    "summary": "通过当前模板解析供应商表格，保留导入批次和行级来源。",
+    "input": "商品表 .xlsx 或 UTF-8 .csv。",
+    "output": "导入预览、逐行问题、批次与商品记录。",
+    "identity": "C · 资料输入",
+    "skills": [
+      "解析表格",
+      "预览确认",
+      "保留批次"
+    ],
+    "guard": "表格数据需经过校验和事实确认后，才可用于商品文案。",
+    "handoff": "src/components/SupplierImport.tsx；server/services/imports.ts",
+    "tone": "",
+    "json": "{\n  \"module\": \"import\",\n  \"inputSummary\": \"商品表 .xlsx 或 UTF-8 .csv。\",\n  \"outputSummary\": \"导入预览、逐行问题、批次与商品记录。\"\n}"
+  },
+  "validate": {
+    "id": "validate",
+    "n": "2",
+    "name": "导入校验与去重",
+    "small": "缺失、重复、灰区与人工处理",
+    "role": "C · 资料质量",
+    "summary": "比较导入行和已有商品，提供合并、新增和冲突处理。",
+    "input": "表格行、已有商品、编码与属性。",
+    "output": "资料状态、导入结果、待处理冲突及决策记录。",
+    "identity": "C · 资料质量",
+    "skills": [
+      "字段校验",
+      "商品对齐",
+      "人工合并",
+      "保存规则"
+    ],
+    "guard": "资料可保存不代表可推荐；任务侧另行判断候选资格，不应把所有缺失资料都描述为不能入库。",
+    "handoff": "server/services/imports.ts；server/services/alignment.ts",
+    "tone": "",
+    "json": "{\n  \"module\": \"validate\",\n  \"inputSummary\": \"表格行、已有商品、编码与属性。\",\n  \"outputSummary\": \"资料状态、导入结果、待处理冲突及决策记录。\"\n}"
+  },
+  "pool": {
+    "id": "pool",
+    "n": "3",
+    "name": "私有候选商品池",
+    "small": "图片上传、关联与查看",
+    "role": "C · 持久化资料",
+    "summary": "按用户与 SKU 保存商品、表格来源和图片资料。",
+    "input": "导入商品及 PNG / JPEG / WebP 商品图片。",
+    "output": "商品记录、图片附件、来源及 SKU 关联。",
+    "identity": "C · 持久化资料",
+    "skills": [
+      "商品图片上传与查看",
+      "按 SKU 关联图片",
+      "文件哈希与来源记录"
+    ],
+    "guard": "图片作为商品资料保存；上传成功不代表图片信息已经核验。",
+    "handoff": "src/components/SourceAssets.tsx；server/services/assets.ts",
+    "tone": "n-green",
+    "json": "{\n  \"module\": \"pool\",\n  \"inputSummary\": \"导入商品及 PNG / JPEG / WebP 商品图片。\",\n  \"outputSummary\": \"商品记录、图片附件、来源及 SKU 关联。\"\n}"
+  },
+  "task": {
+    "id": "task",
+    "n": "1",
+    "name": "创建上新任务",
+    "small": "平台、市场、品类、要求与版本",
+    "role": "A · 任务输入",
+    "summary": "创建可编辑任务，同时建立定价上下文快照；任务平台沿用于生成和审核发布。",
+    "input": "Amazon US / Shopify US、市场、品类、补充要求和利润目标等任务字段。",
+    "output": "任务记录、版本及费用／汇率快照。",
+    "identity": "A · 任务输入",
+    "skills": [
+      "创建任务",
+      "编辑要求",
+      "版本失效处理"
+    ],
+    "guard": "任务偏好不是商品事实。生成、审核发布页不再重复选择平台。",
+    "handoff": "server/services/tasks.ts；src/pages/LaunchTasks.tsx",
+    "tone": "",
+    "json": "{\n  \"module\": \"task\",\n  \"inputSummary\": \"Amazon US / Shopify US、市场、品类、补充要求和利润目标等任务字段。\",\n  \"outputSummary\": \"任务记录、版本及费用／汇率快照。\"\n}"
+  },
+  "fee": {
+    "id": "fee",
+    "n": "2",
+    "name": "任务级费用费率与汇率快照",
+    "small": "冻结配置与来源，非实时查询",
+    "role": "A · 定价基础",
+    "summary": "保存任务级汇率与费用配置上下文，提供版本追溯。",
+    "input": "任务平台、市场和项目配置。",
+    "output": "快照编号、版本、汇率及费用来源。",
+    "identity": "A · 定价基础",
+    "skills": [
+      "保存快照",
+      "关联任务",
+      "版本追踪"
+    ],
+    "guard": "未接实时汇率、物流或税费报价服务。相关计算仍采用项目配置／演示费率，不等于实际交易报价。",
+    "handoff": "server/services/pricing-snapshots.ts；shared/pricing.ts",
+    "tone": "n-amber",
+    "json": "{\n  \"module\": \"fee\",\n  \"inputSummary\": \"任务平台、市场和项目配置。\",\n  \"outputSummary\": \"快照编号、版本、汇率及费用来源。\"\n}"
+  },
+  "select": {
+    "id": "select",
+    "n": "3",
+    "name": "智能检索与上新推荐",
+    "small": "筛选合格候选，展示推荐理由",
+    "role": "A · 选品",
+    "summary": "按任务条件筛选商品，使用规则排序展示候选与推荐理由。",
+    "input": "任务要求、商品资料和合格候选。",
+    "output": "推荐列表、匹配理由、排除原因、生成来源及版本。",
+    "identity": "A · 选品",
+    "skills": [
+      "规则资格筛选",
+      "排序和推荐理由",
+      "选择 SKU"
+    ],
+    "guard": "当前展示已验证的规则推荐路径，不将价格目标作为商品已具备的事实。",
+    "handoff": "shared/recommendation.ts；server/services/recommendations.ts",
+    "tone": "",
+    "json": "{\n  \"module\": \"select\",\n  \"inputSummary\": \"任务要求、商品资料和合格候选。\",\n  \"outputSummary\": \"推荐列表、匹配理由、排除原因、生成来源及版本。\"\n}"
+  },
+  "truth": {
+    "id": "truth",
+    "n": "4",
+    "name": "多模态解析与事实卡更新",
+    "small": "查看事实 → 补充修改 → 确认",
+    "role": "C · 证据与事实",
+    "summary": "选中商品后核对资料与事实卡，补充缺失字段，并确认允许用于文案的信息。",
+    "input": "所选商品、来源资料、图片和任务事实卡。",
+    "output": "已确认或待处理事实、允许公开状态及事实版本。",
+    "identity": "C · 证据与事实",
+    "skills": [
+      "查看事实和来源",
+      "补充或修改字段",
+      "确认或拒绝事实",
+      "保留版本与修改记录"
+    ],
+    "guard": "只把已确认且允许公开的事实交给文案生成。本图不将未完成联调的自动图片核对、报告读图作为已跑通步骤。",
+    "handoff": "server/services/facts.ts；server/services/multimodal.ts；server/providers/domain.ts",
+    "tone": "",
+    "json": "{\n  \"module\": \"truth\",\n  \"inputSummary\": \"所选商品、来源资料、图片和任务事实卡。\",\n  \"outputSummary\": \"已确认或待处理事实、允许公开状态及事实版本。\"\n}"
+  },
+  "price": {
+    "id": "price",
+    "n": "5",
+    "name": "售价计算",
+    "small": "建议价、计费重与费用明细",
+    "role": "A · 确定性计算",
+    "summary": "在证据与事实页展示基于已确认商品资料和配置费率的计算结果。",
+    "input": "成本、重量／尺寸等资料、任务上下文及利润目标。",
+    "output": "建议售价、运费、税费、平台费用、计算来源或缺失项。",
+    "identity": "A · 确定性计算",
+    "skills": [
+      "实际重／体积重",
+      "物流税费计算",
+      "利润反算"
+    ],
+    "guard": "没有独立主动启用测算步骤。定价待补不阻止仅文案生成和审核，但后端发布要求定价就绪；费率含演示和待补配置。",
+    "handoff": "shared/pricing.ts；shared/facts.ts；src/components/PricingPanel.tsx",
+    "tone": "n-amber",
+    "json": "{\n  \"module\": \"price\",\n  \"inputSummary\": \"成本、重量／尺寸等资料、任务上下文及利润目标。\",\n  \"outputSummary\": \"建议售价、运费、税费、平台费用、计算来源或缺失项。\"\n}"
+  },
+  "generate": {
+    "id": "generate",
+    "n": "6",
+    "name": "受控 Listing 生成",
+    "small": "模板 / Qwen；沿用任务平台",
+    "role": "A · 文案生成",
+    "summary": "从已确认且允许公开的事实生成英文商品文案，保存来源、版本和生成模式。",
+    "input": "授权事实、任务平台、市场、品类及要求。",
+    "output": "title、bullets、description、attributes、事实来源与生成元数据。",
+    "identity": "A · 文案生成",
+    "skills": [
+      "Qwen 结构化文案生成",
+      "事实授权校验",
+      "缓存与来源记录",
+      "编辑或重新生成"
+    ],
+    "guard": "生成失败可返回标明来源的模板；内部成本和税费不进入消费者文案，编辑后需重新审核。",
+    "handoff": "server/providers/qwenListing.ts；server/prompts/listing-v1.ts",
+    "tone": "",
+    "json": "{\n  \"module\": \"generate\",\n  \"inputSummary\": \"授权事实、任务平台、市场、品类及要求。\",\n  \"outputSummary\": \"title、bullets、description、attributes、事实来源与生成元数据。\"\n}"
+  },
+  "review": {
+    "id": "review",
+    "n": "7",
+    "name": "规则审核与人工确认",
+    "small": "全文风险定位、引用与修订重审",
+    "role": "B · 审核与安全",
+    "summary": "显式运行审核，比较文案与授权事实，区分明确问题、歧义和调用失败。",
+    "input": "当前文案、事实、任务版本及审核配置。",
+    "output": "passed / blocked / needs_human_review / failed；原句、位置、引用、建议及调用记录。",
+    "identity": "B · 审核与安全",
+    "skills": [
+      "规格矛盾",
+      "无依据宣称",
+      "未授权事实",
+      "内部信息泄露",
+      "独立评测"
+    ],
+    "guard": "模型需配置开启且主动运行。失败或待复核不代表通过；没有人工强行批准按钮。不重新读图，也不保证完整平台合规或全品类准确率。",
+    "handoff": "server/providers/qwenReview.ts；shared/review.ts；evaluation/review",
+    "tone": "",
+    "json": "{\n  \"module\": \"review\",\n  \"inputSummary\": \"当前文案、事实、任务版本及审核配置。\",\n  \"outputSummary\": \"passed / blocked / needs_human_review / failed；原句、位置、引用、建议及调用记录。\"\n}"
+  },
+  "publish": {
+    "id": "publish",
+    "n": "8",
+    "name": "发布与结果反馈",
+    "small": "后端校验当前版本及发布资格",
+    "role": "B / 整体 · 输出",
+    "summary": "服务端检查归属、有效审核和版本，结合定价、运输及报告状态后记录模拟发布。",
+    "input": "当前有效文案、审核、事实版本、定价状态及服务端发布资格。",
+    "output": "Amazon 模拟记录及实际 CSV 下载；Shopify 本地模拟草稿记录。",
+    "identity": "B / 整体 · 输出",
+    "skills": [
+      "版本检查",
+      "拒绝旧批准",
+      "记录模拟结果",
+      "CSV 导出"
+    ],
+    "guard": "输出为模拟发布记录和 CSV，不代表已在真实电商平台上架。",
+    "handoff": "server/services/listings.ts",
+    "tone": "n-green",
+    "json": "{\n  \"module\": \"publish\",\n  \"inputSummary\": \"当前有效文案、审核、事实版本、定价状态及服务端发布资格。\",\n  \"outputSummary\": \"Amazon 模拟记录及实际 CSV 下载；Shopify 本地模拟草稿记录。\"\n}"
+  }
+};
+const importIds=["import","validate","pool"],mainIds=["task","fee","select","truth","price","generate","review","publish"];
+function nodeHtml(m,extra=''){return `<button class="node ${m.tone} ${extra}" data-id="${m.id}" type="button"><span class="dot">${m.n}</span><span><h4>${m.name}</h4><p>${m.small}</p><span class="open">点击查看模块详情 ↗</span></span></button>`}
+function importLane(){return `<section class="lane import"><div class="lane-head"><span class="kicker">INDEPENDENT DATA FLOW</span><h3>信息导入流程</h3><p>独立运行，可随时维护候选商品池</p></div><div class="steps">${importIds.map(id=>nodeHtml(modules[id])).join('')}</div></section>`}
+function mainLane(){return `<section class="lane main"><div class="lane-head"><span class="kicker">MAIN BUSINESS FLOW</span><h3>上新任务主线</h3><p>任务 → 推荐 → 事实确认 → 文案 → 审核 → 模拟发布</p></div><div class="steps">${mainIds.map(id=>nodeHtml(modules[id])).join('')}</div></section>`}
+const lanes=document.getElementById('lanes');
+lanes.innerHTML=importLane()+mainLane()+`<span class="bridge-label">只读候选商品池</span><svg class="bridge" viewBox="0 0 108 42" aria-hidden="true"><defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#1681e8"></path></marker></defs><path d="M4 22 C33 22,72 22,103 22" marker-end="url(#arrow)"></path></svg>`;
+function esc(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+const detailDialog=document.getElementById('detailDialog');
+function openDetail(id){
+  const m=modules[id];
+  detailDialog.innerHTML=`<div class="detail-wrap"><button class="detail-close" type="button" data-close-detail>关闭</button><section class="detail-hero"><div class="eyebrow">${esc(m.role)}</div><h2 id="detailTitle">${esc(m.name)}</h2><p>${esc(m.summary)}</p></section><section class="detail-grid"><article class="detail-card"><h3>模块身份</h3><p>${esc(m.identity)}</p></article><article class="detail-card"><h3>关键技能</h3><ul>${m.skills.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></article><article class="detail-card"><h3>输入</h3><p>${esc(m.input)}</p></article><article class="detail-card"><h3>输出</h3><p>${esc(m.output)}</p></article><article class="detail-card full"><h3>实现位置</h3><p>${esc(m.handoff)}</p></article><article class="detail-card full detail-guard"><h3>安全边界</h3><p>${esc(m.guard)}</p></article><article class="detail-card full"><h3>模块摘要 JSON（非 API 合同）</h3><pre class="detail-code">${esc(m.json)}</pre></article></section></div>`;
+  detailDialog.showModal();
+  detailDialog.querySelector('[data-close-detail]').focus();
+}
+detailDialog.addEventListener('click',e=>{if(e.target===detailDialog||e.target.closest('[data-close-detail]'))detailDialog.close();});
+document.querySelectorAll('.node').forEach(b=>b.addEventListener('click',()=>openDetail(b.dataset.id)));
+</script>
+</body>
+</html>
+

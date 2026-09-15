@@ -34,7 +34,7 @@ async function confirmFact(page: Page, key: string, zh = false) {
 }
 async function importSample(page: Page) {
   await page.getByRole('button', { name: 'Import Supplier File', exact: true }).click();
-  await page.getByLabel('Supplier file', { exact: true }).setInputFiles(resolve('public/demo/prismlaunch-supplier-demo.xlsx'));
+  await page.getByLabel('Supplier file', { exact: true }).setInputFiles(resolve('public/demo/haitao-supplier-demo.xlsx'));
   await page.getByRole('button', { name: 'Import 7 products' }).click();
   await expect(page.locator('.product-table tbody tr')).toHaveCount(7);
 }
@@ -89,7 +89,7 @@ for (const imported of [false, true]) {
     const fact = saved.v1.facts.find((f: { key: string }) => f.key === 'packagingWeight');
     expect(fact).toMatchObject({ value: '0.42 kg', status: 'Confirmed', source: 'Manual confirmation', sourceKind: 'manual', allowed: false, previousValue: 'Missing' });
     expect(Number.isNaN(Date.parse(fact.confirmedAt))).toBe(false);
-    expect(fact.previousSource).toContain(imported ? 'prismlaunch-supplier-demo.xlsx' : 'Supplier Spreadsheet');
+    expect(fact.previousSource).toContain(imported ? 'haitao-supplier-demo.xlsx' : 'Supplier Spreadsheet');
     expect(saved.catalog).toEqual(original.catalog); // supplier evidence is not silently rewritten
     expect(saved.pricing.status).toBe('ready'); expect(saved.pricing.suggestedPrice).not.toBe(19.99);
     const v1 = saved.v1;

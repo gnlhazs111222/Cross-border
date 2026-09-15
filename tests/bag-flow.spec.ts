@@ -7,7 +7,7 @@ const BUILTIN_BAG = 'LM-BG-TOT-009-BLK';
 test('tote bag completes recommendation, facts, listing, review, publish and CSV', async ({ page }, testInfo) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Import Supplier File', exact: true }).click();
-  await page.getByLabel('Supplier file', { exact: true }).setInputFiles(resolve('public/demo/prismlaunch-bag-demo.csv'));
+  await page.getByLabel('Supplier file', { exact: true }).setInputFiles(resolve('public/demo/haitao-bag-demo.csv'));
   await page.getByRole('button', { name: 'Import 1 products', exact: true }).click();
   await expect(page.getByTestId(`product-${BAG}`)).toContainText('Tote bag');
   await page.getByRole('navigation').getByRole('button', { name: 'Launch Tasks', exact: true }).click();
