@@ -5,10 +5,10 @@ import { read, utils, write } from 'xlsx';
  * Splits a supplier sheet whose 颜色分类 cell lists many variants into one row per variant.
  * Source rows keep a single 型号/颜色 each afterwards, which is what the pool and ranking expect.
  *
- * Usage: npm run split:variants -- "evaluation/asset-import-sample/商品参数信息表.xlsx"
+ * Usage: npm run split:variants -- "public/demo/商品参数信息表.xlsx"
  */
 
-const source = process.argv[2] ?? 'evaluation/asset-import-sample/商品参数信息表.xlsx';
+const source = process.argv[2] ?? 'public/demo/商品参数信息表.xlsx';
 const workbook = read(readFileSync(source), { type: 'buffer' });
 const rows = utils.sheet_to_json<Record<string, string>>(workbook.Sheets[workbook.SheetNames[0]], { defval: '' });
 

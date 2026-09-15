@@ -4,7 +4,7 @@ import { deflateSync } from 'node:zlib';
 
 /**
  * Product pictures for the dangerous-goods sample rows in
- * `evaluation/asset-import-sample/危险品运输属性样本.csv`.
+ * `public/demo/危险品运输属性样本.csv`.
  *
  * The picture is the same illustration the product pool shows: the bottle from `ProductVisual`
  * (src/components/ui.tsx) is rasterised here from its own path data, on the same card background,
@@ -21,7 +21,7 @@ import { deflateSync } from 'node:zlib';
  *
  * Usage:
  *   npm run make:hazmat-images
- *   npm run make:hazmat-images -- [--out evaluation/asset-import-sample/hazmat-images] [--size 1024]
+ *   npm run make:hazmat-images -- [--out public/demo/hazmat-images] [--size 1024]
  */
 
 const args = process.argv.slice(2);
@@ -29,7 +29,7 @@ const optionValue = (name: string): string | undefined => {
   const index = args.indexOf(`--${name}`);
   return index >= 0 ? args[index + 1] : undefined;
 };
-const out = resolve(optionValue('out') ?? 'evaluation/asset-import-sample/hazmat-images');
+const out = resolve(optionValue('out') ?? 'public/demo/hazmat-images');
 const size = Math.max(320, Math.min(1600, Number(optionValue('size') ?? 1024) || 1024));
 
 /** The product-pool drawing, copied from src/components/ui.tsx · ProductVisual (viewBox 0 0 100 140). */

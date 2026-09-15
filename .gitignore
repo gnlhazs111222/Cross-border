@@ -16,3 +16,5 @@ dist-server/
 *.db-shm
 *.db-wal
 dist-competition/
+# The packaged demo for judges is built from the repository, not committed into it.
+海淘集市_Demo.zip
