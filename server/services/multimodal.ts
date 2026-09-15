@@ -74,11 +74,17 @@ export async function runImageCheck(reader: Writer, config: ServerConfig, userId
   const findings = outcome.findings.map(finding => reconcileImageFinding(finding, facts.find(fact => fact.key === finding.factKey)?.value));
   // A degraded run reports itself as local, so the stored evidence never claims a vision model looked at the pictures.
   const mode: ImageCheckMode = provider.name === 'qwen' && !outcome.fallbackReason ? 'qwen' : 'local';
+  /**
+   * A picture that came back with no finding at all is worth saying out loud: silence looks exactly like
+   * agreement on the panel, and a person has to know which picture produced nothing.
+   */
+  const silent = mode === 'qwen' ? images.map(image => image.asset.fileName).filter(fileName => !findings.some(finding => finding.asset === fileName)) : [];
+  const notes = [...outcome.notes, ...silent.map(fileName => `${fileName}: the reading returned no finding for any fact.`)];
   return { sku: snapshot.product.sku, mode, provider: provider.name, model: mode === 'qwen' ? provider.model : 'local-resource-check',
     fallbackReason: outcome.fallbackReason,
     // Attached pictures count even offline: the files were checked, only their content was not read.
     status: !pictures.length ? 'no_images' : mode === 'qwen' ? 'enhanced' : 'needs_review',
-    promptVersion: MULTIMODAL_PROMPT_VERSION, baseVersion: input.baseVersion ?? (snapshot.v2 ? 2 : 1), findings, assets, notes: outcome.notes,
+    promptVersion: MULTIMODAL_PROMPT_VERSION, baseVersion: input.baseVersion ?? (snapshot.v2 ? 2 : 1), findings, assets, notes,
     transmitted: mode === 'qwen' ? images.map(image => ({ fileName: image.asset.fileName, byteSize: image.asset.byteSize, sha256: image.asset.sha256 })) : [],
     counts: imageCheckCounts(findings), aiCallId: outcome.aiCallId, latencyMs: outcome.latencyMs, checkedAt: new Date().toISOString() };
 }

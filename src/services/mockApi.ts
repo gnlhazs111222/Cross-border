@@ -530,6 +530,11 @@ export const mockApi = {
     serverPreviews = catalog.factPreviews; current.catalog = catalog.products; current.serverRevision = catalog.revision;
     return { attached, missing: [...new Set(match.missing)], unreferenced: match.unreferenced, grouped: match.grouped };
   },
+  /**
+   * Creates the starting task without ranking it: selecting a SKU from Materials, or pressing the page's
+   * own button, should not spend a recommendation run nobody asked for. The New Task form is the place
+   * that creates *and* ranks — its save is followed by an explicit run (see components/TaskEditor).
+   */
   async createTask() {
     await delay();
     if (current.stage === 'initial') advance('materials_ready');
@@ -541,10 +546,11 @@ export const mockApi = {
         const created = await apiClient.tasks.create(newTaskTemplate);
         const task = await apiClient.tasks.update(created.recordId, newTaskTemplate, created.revision!);
         await useServerTask(task);
-        serverRecommendation = await apiClient.recommendations.run(task.recordId!, task.revision!, 'rule');
       }
     }
-    if (serverOwner && current.task && !serverRecommendation) serverRecommendation = await apiClient.recommendations.run(current.task.recordId!, current.task.revision!, 'rule');
+    // A task that was already there can still be missing its snapshot in memory: that one is read, never
+    // recomputed. Ranking happens where a person asks for it — the New Task form, or 运行推荐.
+    if (serverOwner && current.task && !serverRecommendation) serverRecommendation = await apiClient.recommendations.get(current.task.recordId!);
     current.workspace = 'tasks'; return save();
   },
   async saveTask(task: Task, editing: boolean) {

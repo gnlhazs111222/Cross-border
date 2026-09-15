@@ -211,5 +211,8 @@ svg{display:inline-block;vertical-align:middle}
 .product-page-copy .attribute-grid{margin-top:22px}
 @media(max-width:700px){.product-page-body{grid-template-columns:1fr;padding:18px}.product-page-media img{max-height:260px}}
 
+/* The sidebar reads as a brand line, then the workspace tabs with room to breathe. */
+.brand{margin-bottom:28px}
+
 /* Keep the five workspace labels readable after the global type-size increase. */
 @media(max-width:700px){.sidebar nav{overflow-x:visible}.nav-item{min-width:0;min-height:72px;font-size:12px;line-height:1.25;white-space:normal}.nav-item span{flex:none;display:block;max-width:100%}}

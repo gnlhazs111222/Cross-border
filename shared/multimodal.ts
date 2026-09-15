@@ -9,7 +9,8 @@ import type { ProductAsset } from './contracts';
  * rewrites V1 facts, never turns appearance into a material/performance/safety conclusion, and never
  * certifies anything (see the module guard in 01_业务流程图.html).
  */
-export const MULTIMODAL_PROMPT_VERSION = 'multimodal-v2';
+/** v3: the reading must cover the wording it can see — a printed composition figure is a material mark. */
+export const MULTIMODAL_PROMPT_VERSION = 'multimodal-v3';
 /** Import batches of this mode hold picture-text disagreements, so one adjudication queue serves both. */
 export const IMAGE_CHECK_BATCH_MODE = 'image_check';
 export const IMAGE_CHECK_SOURCE = 'Picture text (multimodal check)';
@@ -82,6 +83,16 @@ const figuresIn = (value: string): number[] => (value.match(/\d+(?:\.\d+)?/g) ??
 const statesTheWhole = (value: string): boolean => /纯|全|整|100\s*%|\b(?:pure|full|whole|solid)\b/i.test(value);
 
 /**
+ * Does the reading state the same whole the fact states? A fact that says the material is *all* titanium
+ * and a picture printing "钛含量 =100%" (or "100% 纯钛", "Titanium 100%") are one claim, whichever way the
+ * model happened to read it, so this comparison is deterministic in both directions.
+ */
+export function printedStatesTheWhole(printed: string, factValue: string): boolean {
+  const printedFigures = figuresIn(printed);
+  return printedFigures.length > 0 && statesTheWhole(factValue) && printedFigures.every(figure => figure >= 100);
+}
+
+/**
  * A picture that prints a *part* of something the fact states as a whole is not saying the same thing, so
  * it may not be reported as an agreement: "钛含量 >99.8%" claims a titanium content, while the fact
  * "纯钛" says the material is (all) titanium. "钛含量 =100%" does say exactly that, so it stays an
@@ -98,13 +109,19 @@ export function printedFigureAbsentFromFact(printed: string, factValue: string):
   if (!printedFigures.length || figuresIn(factValue).length) return false;
   // The fact says "all of it"; a reading that says the same all of it agrees, and a reading that stops
   // short of it does not.
-  return !(statesTheWhole(factValue) && printedFigures.every(figure => figure >= 100));
+  return !printedStatesTheWhole(printed, factValue);
 }
 
-/** The reading stands as read, except that a stronger printed claim never counts as agreement. */
+/**
+ * The reading stands as read, except for the one comparison the module decides itself: a whole stated on
+ * both sides is an agreement, and a printed part of a fact that states a whole is a disagreement — no
+ * matter which verdict the model returned.
+ */
 export function reconcileImageFinding<T extends { factKey: string | null; imageValue: string; verdict: ImageVerdict }>(finding: T, factValue: string | undefined): T {
-  if (finding.verdict !== 'agree' || !finding.factKey || !finding.imageValue || factValue === undefined) return finding;
-  return printedFigureAbsentFromFact(finding.imageValue, factValue) ? { ...finding, verdict: 'differ' as ImageVerdict } : finding;
+  if (!finding.factKey || !finding.imageValue || factValue === undefined) return finding;
+  if (finding.verdict === 'agree' && printedFigureAbsentFromFact(finding.imageValue, factValue)) return { ...finding, verdict: 'differ' as ImageVerdict };
+  if (finding.verdict === 'differ' && printedStatesTheWhole(finding.imageValue, factValue)) return { ...finding, verdict: 'agree' as ImageVerdict };
+  return finding;
 }
 
 /** Consumer facts only: claims a picture must not corroborate, plus cost and declared value. */

@@ -88,6 +88,7 @@ export function SupplierImport({ onDatasetChange }: { onDatasetChange: () => voi
       <label className="form-field">{t('Supplier file')}<input type="file" accept=".xlsx,.csv" aria-label={t('Supplier file')} disabled={!!busy} onChange={e => { const chosen = e.currentTarget.files?.[0]; e.currentTarget.value = ''; if (chosen) void inspectFile(chosen, mode); }} /></label>
       <label className="form-field">{t('Material folder (optional)')}<input type="file" multiple aria-label={t('Material folder (optional)')} disabled={!!busy} onChange={e => { setFolder(Array.from(e.currentTarget.files ?? [])); e.currentTarget.value = ''; }}
         {...({ webkitdirectory: '' } as Record<string, string>)} /></label>
+      <p className="footnote" data-testid="material-folder-hint">{t('Name each picture after its SKU: files are matched by file name.')}</p>
       {preview && <p className="footnote" data-testid="reference-summary">{t('References listed in the sheet: {count}. Files chosen: {files}.', { count: preview.products.reduce((sum, product) => sum + (product.assetReferences?.length ?? 0), 0), files: folder.length })}{folder.length > 0 && <>{' '}{t('They will be matched by file name when you import.')}</>}</p>}
       {preview && folder.length > 0 && (() => {
         // Alignment is shown before anything is written, so a wrong folder is caught here rather

@@ -9,7 +9,8 @@ import { createDb } from '../db';
 import { buildApp } from '../app';
 import { seedDemo } from '../seed';
 import { demoTask, HERO_SKU, products } from '../../src/data/mockData';
-import { IMAGE_CHECK_BATCH_MODE, printedFigureAbsentFromFact } from '../../shared/multimodal';
+import { IMAGE_CHECK_BATCH_MODE, printedFigureAbsentFromFact, printedStatesTheWhole, reconcileImageFinding } from '../../shared/multimodal';
+import { MULTIMODAL_SYSTEM_PROMPT } from '../prompts/multimodal-v2';
 import { createMultimodalRuntime, looksLikePictureGenerator } from '../providers/multimodalRuntime';
 import type { FactSnapshot, ImportBatchDto, ProductAsset } from '../../shared/contracts';
 
@@ -175,6 +176,10 @@ test('printed wording agrees on material and origin, and a claim without a quote
   const { base } = await select(qwenApi);
   await upload(qwenApi, HERO_SKU, PNG, 'front.png', 'main');
   const v1 = await qwenApi.call<FactSnapshot>(`${base}/fact-snapshot`);
+  // The reading is asked to cover the wording it can see: a printed composition figure is a material mark,
+  // and a field whose wording is on the label may not be passed over in silence.
+  assert.match(MULTIMODAL_SYSTEM_PROMPT, /A composition mark is a material mark/);
+  assert.match(MULTIMODAL_SYSTEM_PROMPT, /Never pass over wording you can read/);
   reply = JSON.stringify({ findings: [
     // Words printed on the product may be compared with the material and the country facts.
     { factKey: 'material', attribute: 'materialMark', imageValue: 'Stainless Steel', verdict: 'agree', confidence: 0.9, asset: 'front.png', region: 'base' },
@@ -201,6 +206,21 @@ test('printed wording agrees on material and origin, and a claim without a quote
   assert.equal(candidate.status, 'Requires Confirmation');
   assert.equal(candidate.allowed, false);
   assert.equal(candidate.sourceKind, 'image');
+});
+
+test('a picture that comes back with no finding is named in the evidence instead of looking like agreement', async () => {
+  const { base } = await select(qwenApi);
+  await upload(qwenApi, HERO_SKU, PNG, 'front.png', 'main');
+  await upload(qwenApi, HERO_SKU, OTHER_PNG, 'back.png', 'detail');
+  const v1 = await qwenApi.call<FactSnapshot>(`${base}/fact-snapshot`);
+  // The reading answers about the main picture only; the second picture is silent.
+  reply = JSON.stringify({ findings: [
+    { factKey: 'material', attribute: 'materialMark', imageValue: 'Stainless Steel', verdict: 'agree', confidence: 0.9, asset: 'front.png', region: 'base' },
+  ] });
+  const analyzed = await qwenApi.call<FactSnapshot>(`${base}/analyze`, { expectedRevision: v1.factsRevision });
+  const check = imageCheckEvidence(analyzed).imageCheck!;
+  assert.equal(check.transmitted.length, 2, 'both pictures were sent');
+  assert.ok(check.notes.some(note => note.includes('back.png') && note.includes('no finding')), `the silent picture is named: ${JSON.stringify(check.notes)}`);
 });
 
 test('a figure printed on the product that the fact does not state is raised, never filed as agreement', async () => {
@@ -249,6 +269,14 @@ test('the printed figure rule reads wholes and parts apart, and leaves unit form
   // Both sides carrying figures stays with the model, which is what reconciles unit forms.
   assert.equal(printedFigureAbsentFromFact('500 ml', '500ml / 16.9 fl oz'), false);
   assert.equal(printedFigureAbsentFromFact('16.9 fl oz', '500ml / 16.9 fl oz'), false);
+  // The same whole is the same claim whichever verdict the model returned: the alarm does not fire for
+  // "100% titanium" against 纯钛, and the rule puts it right even when the reading says "differ".
+  assert.equal(printedStatesTheWhole('钛含量 =100%', '纯钛'), true);
+  assert.equal(printedStatesTheWhole('钛含量 >99.8%', '纯钛'), false);
+  assert.deepEqual(reconcileImageFinding({ factKey: 'material', imageValue: '钛含量 =100%', verdict: 'differ' }, '纯钛'),
+    { factKey: 'material', imageValue: '钛含量 =100%', verdict: 'agree' });
+  assert.deepEqual(reconcileImageFinding({ factKey: 'material', imageValue: '钛含量 =100%', verdict: 'agree' }, '纯钛'),
+    { factKey: 'material', imageValue: '钛含量 =100%', verdict: 'agree' });
 });
 
 test('adopting what the picture shows is the confirmation and never touches V1', async () => {
